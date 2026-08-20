@@ -1,0 +1,249 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+
+body {
+  /* background-color: #1e3090; */
+  filter: blur(0.5px) contrast(1.2);
+  
+  background-image:
+  radial-gradient(at 15% 85%, #5157E9 0px, transparent 55%),
+  radial-gradient(at 45% 10%, #979AF2 0px, transparent 50%),
+  radial-gradient(at 95% 15%, #1236C2 0px, transparent 55%),
+  radial-gradient(at 85% 85%, #A2B4FA 0px, transparent 50%),
+  radial-gradient(at 20% 35%, #4146BA 0px, transparent 45%),
+  radial-gradient(at 70% 55%, #7479ED 0px, transparent 48%);
+  
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  height: 100vh;
+
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji",
+    "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+
+  /* Faster animation */
+  animation: gradientShift 5s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  25% {
+    background-position: 50% 0%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  75% {
+    background-position: 50% 100%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* =========================================
+   MINDLY CALENDAR
+========================================= */
+
+.mindly-calendar {
+  --rdp-accent-color: #575cf2;
+  --rdp-background-color: #575cf2;
+
+  color: white;
+  font-size: 12px;
+}
+
+.mindly-calendar .rdp-month_caption {
+  color: white;
+  font-weight: 600;
+}
+
+.mindly-calendar .rdp-caption_label {
+  color: white;
+}
+
+.mindly-calendar .rdp-chevron {
+  fill: #aeb2ff;
+}
+
+.mindly-calendar .rdp-weekday {
+  color: #8589a8;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.mindly-calendar .rdp-day {
+  color: #e5e7eb;
+}
+
+.mindly-calendar .rdp-day_button {
+  border-radius: 9px;
+  transition: all 0.2s ease;
+}
+
+.mindly-calendar .rdp-day_button:hover {
+  background: #454674;
+  color: white;
+}
+
+.mindly-calendar .rdp-selected .rdp-day_button {
+  background: #575cf2;
+  color: white;
+  border-color: #777cff;
+  box-shadow: 0 4px 12px rgba(87, 92, 242, 0.35);
+}
+
+.mindly-calendar .rdp-today .rdp-day_button {
+  color: #aeb2ff;
+  font-weight: 600;
+}
+
+.mindly-calendar .rdp-outside {
+  color: #555977;
+}
+
+
+/* =========================================
+   MINDLY TIME PICKER
+========================================= */
+
+.mindly-time-picker {
+  width: 100%;
+}
+
+.mindly-time-picker .react-time-picker {
+  width: 100%;
+}
+
+.mindly-time-picker
+  .react-time-picker__wrapper {
+  width: 100%;
+  min-height: 46px;
+
+  background: #3f416c;
+
+  border: 1px solid #5d6090;
+
+  border-radius: 12px;
+
+  padding: 0 12px;
+
+  transition: all 0.2s ease;
+}
+
+.mindly-time-picker
+  .react-time-picker__wrapper:hover {
+  border-color: #7276b5;
+}
+
+.mindly-time-picker
+  .react-time-picker__inputGroup {
+  color: white;
+}
+
+.mindly-time-picker
+  .react-time-picker__inputGroup__input {
+  color: white;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.mindly-time-picker
+  .react-time-picker__inputGroup__input:focus {
+  outline: none;
+}
+
+.mindly-time-picker
+  .react-time-picker__inputGroup__leadingZero {
+  color: white;
+}
+
+.mindly-time-picker
+  .react-time-picker__clear-button {
+  display: none;
+}
+
+.mindly-time-picker
+  .react-time-picker__clock-button {
+  color: #aeb2ff;
+}
+
+.mindly-time-picker
+  .react-time-picker__clock-button:hover {
+  color: white;
+}
+
+
+/* =========================================
+   CLOCK POPUP
+========================================= */
+
+.mindly-time-picker
+  .react-time-picker__clock {
+  background: #242752;
+
+  border: 1px solid #5c6090;
+
+  border-radius: 16px;
+
+  padding: 8px;
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+.mindly-time-picker
+  .react-clock {
+  width: 210px !important;
+  height: 210px !important;
+}
+
+.mindly-time-picker
+  .react-clock__face {
+  background: #30335d;
+
+  border-color: #5d6090;
+}
+
+.mindly-time-picker
+  .react-clock__hand__body {
+  background: #575cf2;
+}
+
+.mindly-time-picker
+  .react-clock__mark__body {
+  background: #aeb2ff;
+}
+
+.mindly-time-picker
+  .react-clock__second-hand__body {
+  background: #777cff;
+}
