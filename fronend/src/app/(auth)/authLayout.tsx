@@ -1,4 +1,6 @@
 import React, { Children } from "react";
+import MindlyBackground from "@/components/MindlyBackground";
+
 
 interface AuthLayoutProps{
     children: React.ReactNode;
@@ -7,9 +9,13 @@ interface AuthLayoutProps{
 
 const AuthLayout = ({children, imageUrl} : AuthLayoutProps ) => {
     return (
-        <div>
-            {children}
-        </div>
+       <div className="relative min-h-screen overflow-hidden">
+             <MindlyBackground />
+       
+             <div className="relative z-10">
+               {children}
+             </div>
+           </div>
     )
 }
 

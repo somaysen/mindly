@@ -1,16 +1,24 @@
-import React, { Children } from "react";
+import React from "react";
+import MindlyBackground from "@/components/MindlyBackground";
 
-interface onboardingProps{
-    children: React.ReactNode;
-    imageUrl:string;
+interface OnboardingProps {
+  children: React.ReactNode;
+  imageUrl: string;
 }
 
-const onboardingLayout = ({children, imageUrl} : onboardingProps ) => {
-    return (
-        <div>
-            {children}
-        </div>
-    )
-}
+const OnboardingLayout = ({
+  children,
+  imageUrl,
+}: OnboardingProps) => {
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      <MindlyBackground />
 
-export default onboardingLayout;
+      <div className="relative z-10">
+        {children}
+      </div>
+    </div>
+  );
+};
+
+export default OnboardingLayout;

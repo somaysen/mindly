@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle, Sparkles, Sun } from "lucide-react";
+import Link from "next/link";
 
 const planningOptions = [
   {
@@ -197,16 +198,7 @@ export default function PlanningPage() {
                       `}
                     >
                       {/* Icon */}
-                      <div
-                        className={`
-                          mb-4
-                          ${
-                            isSelected
-                              ? "text-white"
-                              : "text-white"
-                          }
-                        `}
-                      >
+                      <div className="mb-4 text-white">
                         <Icon
                           size={23}
                           strokeWidth={1.8}
@@ -229,44 +221,59 @@ export default function PlanningPage() {
             </div>
 
             {/* Continue Button */}
-            <motion.button
-              type="button"
-              disabled={!selectedPlanning}
-              whileHover={
+            <Link
+              href={
                 selectedPlanning
-                  ? {
-                      scale: 1.01,
-                    }
-                  : {}
+                  ? "/onboarding/notes"
+                  : "#"
               }
-              whileTap={
-                selectedPlanning
-                  ? {
-                      scale: 0.98,
-                    }
-                  : {}
-              }
+              aria-disabled={!selectedPlanning}
               className={`
                 w-full
-                py-3.5
-                rounded-full
-                font-medium
-                flex
-                items-center
-                justify-center
-                gap-2
-                transition-all
-                duration-200
                 ${
-                  selectedPlanning
-                    ? "bg-[#575CF2] hover:bg-[#6569F5]"
-                    : "bg-[#575CF2] opacity-60 cursor-not-allowed"
+                  !selectedPlanning
+                    ? "pointer-events-none"
+                    : ""
                 }
               `}
             >
-              Continue
-              <ArrowRight size={20} />
-            </motion.button>
+              <motion.div
+                whileHover={
+                  selectedPlanning
+                    ? {
+                        scale: 1.01,
+                      }
+                    : {}
+                }
+                whileTap={
+                  selectedPlanning
+                    ? {
+                        scale: 0.98,
+                      }
+                    : {}
+                }
+                className={`
+                  w-full
+                  py-3.5
+                  rounded-full
+                  font-medium
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  transition-all
+                  duration-200
+                  ${
+                    selectedPlanning
+                      ? "bg-[#575CF2] hover:bg-[#6569F5]"
+                      : "bg-[#575CF2] opacity-60 cursor-not-allowed"
+                  }
+                `}
+              >
+                Continue
+                <ArrowRight size={20} />
+              </motion.div>
+            </Link>
           </motion.div>
         </div>
       </div>

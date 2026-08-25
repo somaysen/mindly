@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { bricolageGrotesque } from "@/lib/fonts";
+import MindlyBackground from "@/components/MindlyBackground";
 
 
 const geistSans = Geist({
@@ -28,7 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${bricolageGrotesque.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-soft-gradient ">{children}</body>
+      <body className="min-h-full flex flex-col">
+        
+        <div className="relative z-10 flex min-h-full flex-1 flex-col">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

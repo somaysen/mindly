@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   ArrowRight,
   Atom,
@@ -34,13 +35,15 @@ export default function IntentionPage() {
   const [selectedIntention, setSelectedIntention] = useState("");
 
   return (
-    <main className="min-h-screen   overflow-hidden text-white">
+    <main className="min-h-screen overflow-hidden text-white">
       {/* Background */}
       <div
         className="
-          relative min-h-screen
-          
-          flex items-center justify-center
+          relative
+          min-h-screen
+          flex
+          items-center
+          justify-center
           p-4
         "
       >
@@ -52,7 +55,7 @@ export default function IntentionPage() {
             max-w-[1400px]
             h-[640px]
             items-center
-            flex  justify-center 
+            justify-center
             rounded-2xl
             overflow-hidden
           "
@@ -63,8 +66,14 @@ export default function IntentionPage() {
               src="/images/Questions 1.png"
               alt="Questions"
               className="w-[500px] object-contain"
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{
+                opacity: 0,
+                x: -40,
+              }}
+              animate={{
+                opacity: 1,
+                x: 0,
+              }}
               transition={{
                 duration: 0.6,
                 ease: "easeOut",
@@ -85,8 +94,14 @@ export default function IntentionPage() {
               md:p-8
               text-white
             "
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{
+              opacity: 0,
+              x: 40,
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+            }}
             transition={{
               duration: 0.6,
               ease: "easeOut",
@@ -105,8 +120,12 @@ export default function IntentionPage() {
                     bg-[#575cf2]
                     rounded-full
                   "
-                  initial={{ width: 0 }}
-                  animate={{ width: "33.33%" }}
+                  initial={{
+                    width: 0,
+                  }}
+                  animate={{
+                    width: "33.33%",
+                  }}
                   transition={{
                     duration: 0.7,
                     ease: "easeOut",
@@ -119,16 +138,21 @@ export default function IntentionPage() {
             <div className="flex-1 flex flex-col">
               {/* Heading */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{
+                  opacity: 0,
+                  y: 15,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
                 transition={{
                   duration: 0.45,
                   delay: 0.15,
                 }}
               >
                 <h1 className="text-[25px] leading-[1.2] font-semibold tracking-tight max-w-[440px]">
-                  What do you want Mindly to help
-                  you with?
+                  What do you want Mindly to help you with?
                 </h1>
               </motion.div>
 
@@ -136,6 +160,7 @@ export default function IntentionPage() {
               <div className="mt-8 space-y-4">
                 {intentions.map((item, index) => {
                   const Icon = item.icon;
+
                   const isSelected =
                     selectedIntention === item.id;
 
@@ -186,7 +211,7 @@ export default function IntentionPage() {
                     >
                       {/* Icon */}
                       <div
-                        className={`
+                        className="
                           w-8
                           h-8
                           flex
@@ -194,12 +219,8 @@ export default function IntentionPage() {
                           justify-center
                           mr-4
                           shrink-0
-                          ${
-                            isSelected
-                              ? "text-white"
-                              : "text-white"
-                          }
-                        `}
+                          text-white
+                        "
                       >
                         <Icon
                           size={23}
@@ -224,44 +245,59 @@ export default function IntentionPage() {
             </div>
 
             {/* Continue Button */}
-            <motion.button
-              type="button"
-              disabled={!selectedIntention}
-              whileHover={
+            <Link
+              href={
                 selectedIntention
-                  ? {
-                      scale: 1.01,
-                    }
-                  : {}
+                  ? "/onboarding/planning"
+                  : "#"
               }
-              whileTap={
-                selectedIntention
-                  ? {
-                      scale: 0.98,
-                    }
-                  : {}
-              }
+              aria-disabled={!selectedIntention}
               className={`
                 w-full
-                py-3.5
-                rounded-full
-                font-medium
-                flex
-                items-center
-                justify-center
-                gap-2
-                transition-all
-                duration-200
                 ${
-                  selectedIntention
-                    ? "bg-[#575cf2] hover:bg-[#6569f5]"
-                    : "bg-[#575cf2] opacity-60 cursor-not-allowed"
+                  !selectedIntention
+                    ? "pointer-events-none"
+                    : ""
                 }
               `}
             >
-              Continue
-              <ArrowRight size={20} />
-            </motion.button>
+              <motion.div
+                whileHover={
+                  selectedIntention
+                    ? {
+                        scale: 1.01,
+                      }
+                    : {}
+                }
+                whileTap={
+                  selectedIntention
+                    ? {
+                        scale: 0.98,
+                      }
+                    : {}
+                }
+                className={`
+                  w-full
+                  py-3.5
+                  rounded-full
+                  font-medium
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  transition-all
+                  duration-200
+                  ${
+                    selectedIntention
+                      ? "bg-[#575cf2] hover:bg-[#6569f5]"
+                      : "bg-[#575cf2] opacity-60 cursor-not-allowed"
+                  }
+                `}
+              >
+                Continue
+                <ArrowRight size={20} />
+              </motion.div>
+            </Link>
           </motion.div>
         </div>
       </div>

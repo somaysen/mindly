@@ -21,28 +21,31 @@
 
 
 body {
-  /* background-color: #1e3090; */
-  filter: blur(0.5px) contrast(1.2);
-  
-  background-image:
-  radial-gradient(at 15% 85%, #5157E9 0px, transparent 55%),
-  radial-gradient(at 45% 10%, #979AF2 0px, transparent 50%),
-  radial-gradient(at 95% 15%, #1236C2 0px, transparent 55%),
-  radial-gradient(at 85% 85%, #A2B4FA 0px, transparent 50%),
-  radial-gradient(at 20% 35%, #4146BA 0px, transparent 45%),
-  radial-gradient(at 70% 55%, #7479ED 0px, transparent 48%);
-  
-  background-repeat: no-repeat;
-  background-size: 200% 200%;
-  height: 100vh;
-
+  min-height: 100vh;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji",
     "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
     "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
 
-  /* Faster animation */
+}
+
+.mindly-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: #1e3090;
+  background-image:
+    radial-gradient(at 15% 85%, #5157e9 0px, transparent 55%),
+    radial-gradient(at 45% 10%, #979af2 0px, transparent 50%),
+    radial-gradient(at 95% 15%, #1236c2 0px, transparent 55%),
+    radial-gradient(at 85% 85%, #a2b4fa 0px, transparent 50%),
+    radial-gradient(at 20% 35%, #4146ba 0px, transparent 45%),
+    radial-gradient(at 70% 55%, #7479ed 0px, transparent 48%);
+  background-repeat: no-repeat;
+  background-size: 200% 200%;
+  filter: blur(0.5px) contrast(1.2);
   animation: gradientShift 5s ease-in-out infinite;
 }
 
