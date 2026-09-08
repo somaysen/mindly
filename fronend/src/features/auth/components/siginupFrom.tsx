@@ -1,11 +1,71 @@
-import { Eye } from "lucide-react";
+
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Eye, EyeOff } from "lucide-react";
 import LoginAnimation from "../../../components/auth/LoginAnimation";
 import { FaGoogle } from "react-icons/fa";
 import { IoLogoApple } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
 
-function siginupFrom() {
+// Change this import path if your hook is stored somewhere else.
+import { useRegister } from "../hooks/useAuthApi";
+
+type SignupFormData = {
+  email: string;
+  password: string;
+};
+
+function SignupForm() {
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormData>();
+
+  const {
+    mutate: registerUser,
+    isPending,
+  } = useRegister();
+
+  const onSubmit = (data: SignupFormData) => {
+    setServerError(null);
+
+    const formData = new FormData();
+
+    formData.append("email", data.email.trim());
+    formData.append("password", data.password);
+
+    registerUser(formData, {
+      onSuccess: (res) => {
+        console.log("Registration successful:", res);
+
+        // If your backend returns a token and you need to store it:
+        // localStorage.setItem("token", res.data.token);
+
+        // Redirect after successful registration.
+        window.location.href = "/verify-email";
+      },
+
+      onError: (error: any) => {
+        console.error("Registration failed:", error);
+
+        const message =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Unable to create account. Please try again.";
+
+        setServerError(message);
+      },
+    });
+  };
+
   return (
     <main className="min-h-screen overflow-hidden text-white">
       <div
@@ -43,7 +103,10 @@ function siginupFrom() {
                 <div className="space-y-3">
                   {/* LOGO */}
                   <div className="text-[1rem] font-semibold leading-none tracking-[-0.02em] text-[#aaaaff]">
-                    <img src="/images/Group 10.png" alt="Logo-img" />
+                    <img
+                      src="/images/Group 10.png"
+                      alt="Mindly Logo"
+                    />
                   </div>
 
                   {/* TITLE + DESCRIPTION */}
@@ -77,35 +140,32 @@ function siginupFrom() {
                   <div className="h-[2px] w-full rounded-full bg-[#4144a7]" />
                 </div>
 
-                {/* FORM */}
-                <form className="space-y-4 ">
-                  {/* EMAIL */}
-                  <input
-                    type="email"
-                    placeholder="Enter email"
-                    className="
-                      h-11
-                      w-full
-                      rounded-[0.9rem]
-                      border-none
-                      bg-[#d9d9df]
-                      px-4
-                      text-[0.95rem]
-                      font-medium
-                      text-[#2e3156]
-                      outline-none
-                      placeholder:text-[#7b7c87]
-                      focus:ring-2
-                      focus:ring-[#676cff]
-                      md:h-12
-                    "
-                  />
+                {/* SERVER ERROR */}
+                {serverError && (
+                  <div className="rounded-xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                    {serverError}
+                  </div>
+                )}
 
-                  {/* PASSWORD */}
-                  <div className="relative">
+                {/* FORM */}
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="space-y-4"
+                  noValidate
+                >
+                  {/* EMAIL */}
+                  <div>
                     <input
-                      type="password"
-                      placeholder="Enter password"
+                      type="email"
+                      placeholder="Enter email"
+                      autoComplete="email"
+                      {...register("email", {
+                        required: "Email is required",
+                        pattern: {
+                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                          message: "Enter a valid email address",
+                        },
+                      })}
                       className="
                         h-11
                         w-full
@@ -113,7 +173,6 @@ function siginupFrom() {
                         border-none
                         bg-[#d9d9df]
                         px-4
-                        pr-12
                         text-[0.95rem]
                         font-medium
                         text-[#2e3156]
@@ -125,24 +184,88 @@ function siginupFrom() {
                       "
                     />
 
-                    <Eye
-                      size={18}
-                      strokeWidth={2.5}
-                      className="
-                        pointer-events-none
-                        absolute
-                        right-4
-                        top-1/2
-                        -translate-y-1/2
-                        text-[#85858d]
-                      "
-                    />
+                    {errors.email && (
+                      <p className="mt-1 px-2 text-xs text-red-300">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* PASSWORD */}
+                  <div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter password"
+                        autoComplete="new-password"
+                        {...register("password", {
+                          required: "Password is required",
+                          minLength: {
+                            value: 6,
+                            message:
+                              "Password must be at least 6 characters",
+                          },
+                        })}
+                        className="
+                          h-11
+                          w-full
+                          rounded-[0.9rem]
+                          border-none
+                          bg-[#d9d9df]
+                          px-4
+                          pr-12
+                          text-[0.95rem]
+                          font-medium
+                          text-[#2e3156]
+                          outline-none
+                          placeholder:text-[#7b7c87]
+                          focus:ring-2
+                          focus:ring-[#676cff]
+                          md:h-12
+                        "
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowPassword((prev) => !prev)
+                        }
+                        className="
+                          absolute
+                          right-4
+                          top-1/2
+                          -translate-y-1/2
+                          text-[#85858d]
+                          transition
+                          hover:text-[#5d65f7]
+                        "
+                        aria-label={
+                          showPassword
+                            ? "Hide password"
+                            : "Show password"
+                        }
+                      >
+                        {showPassword ? (
+                          <EyeOff size={18} strokeWidth={2.5} />
+                        ) : (
+                          <Eye size={18} strokeWidth={2.5} />
+                        )}
+                      </button>
+                    </div>
+
+                    {errors.password && (
+                      <p className="mt-1 px-2 text-xs text-red-300">
+                        {errors.password.message}
+                      </p>
+                    )}
                   </div>
 
                   {/* CREATE ACCOUNT BUTTON */}
-                  <button 
+                  <button
                     type="submit"
-                    className=" 
+                    disabled={isPending}
+
+                    className="
                       h-11
                       w-full
                       rounded-full
@@ -156,10 +279,14 @@ function siginupFrom() {
                       transition
                       hover:brightness-110
                       active:scale-[0.99]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
                       md:h-11
                     "
                   >
-                    Create a Account
+                    {isPending
+                      ? "Creating..."
+                      : "Create an Account"}
                   </button>
                 </form>
 
@@ -263,12 +390,21 @@ function siginupFrom() {
                       text-[#7e7d97]
                     "
                   >
-                    By creating an account, you agree to Mindly&apos;s <br />
-                    <a href="#" className="text-[#8588ff] hover:text-[#a3a5ff]">
+                    By creating an account, you agree to Mindly&apos;s{" "}
+                    <br />
+
+                    <a
+                      href="#"
+                      className="text-[#8588ff] hover:text-[#a3a5ff]"
+                    >
                       Privacy Policy
                     </a>{" "}
                     and{" "}
-                    <a href="#" className="text-[#8588ff] hover:text-[#a3a5ff]">
+
+                    <a
+                      href="#"
+                      className="text-[#8588ff] hover:text-[#a3a5ff]"
+                    >
                       Terms of Service
                     </a>
                     .
@@ -276,7 +412,7 @@ function siginupFrom() {
 
                   <p className="text-[0.95rem] text-[#7e7d97]">
                     Already have an account?{" "}
-                    <a
+                    <Link
                       href="/login"
                       className="
                         font-medium
@@ -285,7 +421,7 @@ function siginupFrom() {
                       "
                     >
                       Log in
-                    </a>
+                    </Link>
                   </p>
                 </div>
               </div>
@@ -297,4 +433,5 @@ function siginupFrom() {
   );
 }
 
-export default siginupFrom;
+export default SignupForm;
+

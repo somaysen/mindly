@@ -20,16 +20,16 @@ const calendarDays = [
 function Page() {
   return (
     <div className="min-h-screen w-full bg-[#0d0c20] px-3 py-3 text-white sm:px-5 sm:py-5 lg:px-7">
-      <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[1500px] gap-4">
+      <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[1550px] gap-10">
         {/* LEFT SIDEBAR */}
         <DashboradSidbar />
 
         {/* MAIN CONTENT */}
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 flex-1 ">
           <div className="overflow-hidden rounded-[22px]">
             <Topbar />
 
-            <div className="grid gap-6 pt-2 pb-8 xl:grid-cols-[minmax(0,1fr)_292px]">
+            <div className="grid gap-10 pt-2 pb-8 xl:grid-cols-[minmax(0,1fr)_292px]">
               {/* CENTER CONTENT */}
               <section className="min-w-0">
                 {/* HERO */}
@@ -133,9 +133,7 @@ function Page() {
                     Reminder
                   </h2>
 
-                  <p className="mt-2 text-sm font-medium">
-                    Start small.
-                  </p>
+                  <p className="mt-2 text-sm font-medium">Start small.</p>
 
                   <p className="mt-5 text-sm leading-5 text-white/75">
                     You don&apos;t have to organize everything today, just
@@ -201,6 +199,7 @@ function Page() {
                   </div>
                 </section>
               </aside>
+
             </div>
           </div>
         </main>

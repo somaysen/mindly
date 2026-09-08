@@ -266,12 +266,12 @@ function SigninForm() {
 
                   <p className="text-[0.95rem] text-[#7e7d97]">
                     You have not a Account{" "}
-                    <a
+                    <Link
                       href="/register"
                       className="font-medium text-[#8588ff] hover:text-[#a3a5ff]"
                     >
                       register
-                    </a>
+                    </Link>
                   </p>
                 </div>
               </div>
