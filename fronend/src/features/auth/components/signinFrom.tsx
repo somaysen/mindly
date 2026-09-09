@@ -3,6 +3,7 @@ import LoginAnimation from "../../../components/auth/LoginAnimation";
 import { FaGoogle } from "react-icons/fa";
 import { IoLogoApple } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
+import Link from "next/link";
 
 
 function SigninForm() {

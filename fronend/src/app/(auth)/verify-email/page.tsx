@@ -1,12 +1,12 @@
-import React from 'react'
-import Verifyemail from '../.../../../../features/auth/components/verify-email'
+import { Suspense } from "react";
+import Verifyemail from "../.../../../../features/auth/components/verify-email";
 
-function page() {
+function Page() {
   return (
-    <div>
-      <Verifyemail/>
-    </div>
-  )
+    <Suspense fallback={null}>
+      <Verifyemail />
+    </Suspense>
+  );
 }
 
-export default page
+export default Page;
