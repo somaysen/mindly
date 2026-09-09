@@ -2,27 +2,60 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+const STORAGE_KEY = "onboardingData";
 
 export default function OnboardingPage() {
+  const router = useRouter();
+
   const [name, setName] = useState("");
+
+  const handleContinue = () => {
+    if (!name.trim()) {
+      return;
+    }
+
+    // Get existing onboarding data
+    const existingData =
+      JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+    // Save Step 1 data
+    const updatedData = {
+      ...existingData,
+      name: name.trim(),
+    };
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(updatedData)
+    );
+
+    // Go to Step 2
+    router.push("./intention");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="flex w-full max-w-7xl h-[640px] flex items-center rounded-2xl overflow-hidden">
+      <div className="flex w-full max-w-7xl h-[640px] items-center rounded-2xl overflow-hidden">
+
+        {/* Left Image */}
         <div className="w-5xl h-screen flex items-center justify-center flex-col">
           <img
             className="w-[500px]"
-            src="\images\Saying Hello.png"
+            src="/images/Saying Hello.png"
             alt="image"
           />
         </div>
 
-        {/* Right Panel - Form */}
+        {/* Right Panel */}
         <div className="w-1/2 bg-[#181A46] h-full rounded-2xl flex flex-col p-10 text-white">
+
           {/* Step indicator */}
           <div className="flex items-center justify-between mb-10">
-            <span className="text-sm text-slate-400">Step 1 of 6</span>
+            <span className="text-sm text-slate-400">
+              Step 1 of 6
+            </span>
 
             <div className="w-32 h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <div className="h-full w-1/6 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full" />
@@ -31,6 +64,7 @@ export default function OnboardingPage() {
 
           {/* Content */}
           <div className="flex-1 flex flex-col justify-center">
+
             <AnimatePresence mode="wait">
               {name ? (
                 <motion.div
@@ -44,7 +78,7 @@ export default function OnboardingPage() {
                   }}
                 >
                   <h1 className="text-3xl font-semibold mb-3 tracking-tight">
-                    Welcome to Mindly, { name}!
+                    Welcome to Mindly, {name}!
                   </h1>
 
                   <p className="text-slate-400 text-[15px] leading-relaxed mb-8 max-w-sm">
@@ -67,8 +101,8 @@ export default function OnboardingPage() {
                   </h1>
 
                   <p className="text-slate-400 text-[15px] leading-relaxed mb-8 max-w-sm">
-                    Tell us what you'd like Mindly to call you. You can change
-                    this anytime in Settings.
+                    Tell us what you'd like Mindly to call you.
+                    You can change this anytime in Settings.
                   </p>
                 </motion.div>
               )}
@@ -96,10 +130,15 @@ export default function OnboardingPage() {
           </div>
 
           {/* Continue Button */}
-          <Link href="./intention" className="w-full bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 text-white font-medium py-4 rounded-full transition-colors flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={handleContinue}
+            disabled={!name.trim()}
+            className="w-full bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-4 rounded-full transition-colors flex items-center justify-center gap-2"
+          >
             Continue
             <span className="text-lg">→</span>
-          </Link>
+          </button>
         </div>
       </div>
     </div>

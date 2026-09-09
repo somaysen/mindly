@@ -29,6 +29,16 @@ const planningOptions = [
 export default function PlanningPage() {
   const [selectedPlanning, setSelectedPlanning] = useState("");
 
+  const existingData = JSON.parse(localStorage.getItem("onboardingData")) || {};
+
+  localStorage.setItem(
+    "onboardingData",
+    JSON.stringify({
+      ...existingData,
+      intention: selectedPlanning,
+    }),
+  );
+
   return (
     <main className="min-h-screen overflow-hidden text-white">
       {/* Background */}
@@ -95,9 +105,7 @@ export default function PlanningPage() {
           >
             {/* Step Indicator */}
             <div className="flex items-center justify-between mb-9">
-              <span className="text-sm text-slate-300">
-                Step 3 of 6
-              </span>
+              <span className="text-sm text-slate-300">Step 3 of 6</span>
 
               <div className="w-32 h-2 bg-[#d5d7ff] rounded-full overflow-hidden">
                 <motion.div
@@ -138,8 +146,8 @@ export default function PlanningPage() {
                 </h1>
 
                 <p className="text-[14px] leading-[1.35] text-slate-300 mt-2 max-w-[400px]">
-                  Choose the approach that feels most natural.
-                  You can change it anytime.
+                  Choose the approach that feels most natural. You can change it
+                  anytime.
                 </p>
               </motion.div>
 
@@ -148,16 +156,13 @@ export default function PlanningPage() {
                 {planningOptions.map((option, index) => {
                   const Icon = option.icon;
 
-                  const isSelected =
-                    selectedPlanning === option.id;
+                  const isSelected = selectedPlanning === option.id;
 
                   return (
                     <motion.button
                       key={option.id}
                       type="button"
-                      onClick={() =>
-                        setSelectedPlanning(option.id)
-                      }
+                      onClick={() => setSelectedPlanning(option.id)}
                       initial={{
                         opacity: 0,
                         y: 20,
@@ -199,10 +204,7 @@ export default function PlanningPage() {
                     >
                       {/* Icon */}
                       <div className="mb-4 text-white">
-                        <Icon
-                          size={23}
-                          strokeWidth={1.8}
-                        />
+                        <Icon size={23} strokeWidth={1.8} />
                       </div>
 
                       {/* Title */}
@@ -222,19 +224,11 @@ export default function PlanningPage() {
 
             {/* Continue Button */}
             <Link
-              href={
-                selectedPlanning
-                  ? "/onboarding/notes"
-                  : "#"
-              }
+              href={selectedPlanning ? "/onboarding/notes" : "#"}
               aria-disabled={!selectedPlanning}
               className={`
                 w-full
-                ${
-                  !selectedPlanning
-                    ? "pointer-events-none"
-                    : ""
-                }
+                ${!selectedPlanning ? "pointer-events-none" : ""}
               `}
             >
               <motion.div

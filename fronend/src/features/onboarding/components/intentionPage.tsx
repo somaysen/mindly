@@ -3,12 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Atom,
-  BookOpen,
-  Focus,
-} from "lucide-react";
+import { ArrowRight, Atom, BookOpen, Focus } from "lucide-react";
 
 const intentions = [
   {
@@ -33,6 +28,16 @@ const intentions = [
 
 export default function IntentionPage() {
   const [selectedIntention, setSelectedIntention] = useState("");
+
+  const existingData = JSON.parse(localStorage.getItem("onboardingData")) || {};
+
+  localStorage.setItem(
+    "onboardingData",
+    JSON.stringify({
+      ...existingData,
+      intention: selectedIntention,
+    }),
+  );
 
   return (
     <main className="min-h-screen overflow-hidden text-white">
@@ -109,9 +114,7 @@ export default function IntentionPage() {
           >
             {/* Step Indicator */}
             <div className="flex items-center justify-between mb-9">
-              <span className="text-sm text-slate-300">
-                Step 2 of 6
-              </span>
+              <span className="text-sm text-slate-300">Step 2 of 6</span>
 
               <div className="w-32 h-2 bg-[#d5d7ff] rounded-full overflow-hidden">
                 <motion.div
@@ -161,16 +164,13 @@ export default function IntentionPage() {
                 {intentions.map((item, index) => {
                   const Icon = item.icon;
 
-                  const isSelected =
-                    selectedIntention === item.id;
+                  const isSelected = selectedIntention === item.id;
 
                   return (
                     <motion.button
                       key={item.id}
                       type="button"
-                      onClick={() =>
-                        setSelectedIntention(item.id)
-                      }
+                      onClick={() => setSelectedIntention(item.id)}
                       initial={{
                         opacity: 0,
                         y: 20,
@@ -222,10 +222,7 @@ export default function IntentionPage() {
                           text-white
                         "
                       >
-                        <Icon
-                          size={23}
-                          strokeWidth={1.7}
-                        />
+                        <Icon size={23} strokeWidth={1.7} />
                       </div>
 
                       {/* Text */}
@@ -246,19 +243,11 @@ export default function IntentionPage() {
 
             {/* Continue Button */}
             <Link
-              href={
-                selectedIntention
-                  ? "/onboarding/planning"
-                  : "#"
-              }
+              href={selectedIntention ? "/onboarding/planning" : "#"}
               aria-disabled={!selectedIntention}
               className={`
                 w-full
-                ${
-                  !selectedIntention
-                    ? "pointer-events-none"
-                    : ""
-                }
+                ${!selectedIntention ? "pointer-events-none" : ""}
               `}
             >
               <motion.div
