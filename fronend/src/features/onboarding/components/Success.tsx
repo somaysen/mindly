@@ -3,7 +3,13 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Bell, Target, Sparkles, ArrowRight } from "lucide-react";
+import {
+  Bell,
+  Target,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
+
 import { useUserInfo } from "@/features/onboarding/hooks/userOnbordingApi";
 
 const STORAGE_KEY = "onboardingData";
@@ -30,15 +36,23 @@ const SUMMARY_ITEMS = [
 ];
 
 export default function SuccessPage() {
-  const router = useRouter();
-  const { mutate, isPending, isError, error } = useUserInfo();
+  const {
+    mutate,
+    isPending,
+    isError,
+    error,
+    isSuccess,
+  } = useUserInfo();
 
   const submitted = useRef(false);
 
   useEffect(() => {
-    if (submitted.current) return;
+    if (submitted.current) {
+      return;
+    }
 
     const savedData = localStorage.getItem(STORAGE_KEY);
+    console.log(savedData);
 
     if (!savedData) {
       console.error("Onboarding data not found");
@@ -52,36 +66,21 @@ export default function SuccessPage() {
 
       mutate(data, {
         onSuccess: () => {
-          // Remove only after successful API request
+          // Remove onboarding data only after
+          // the API request succeeds.
           localStorage.removeItem(STORAGE_KEY);
-
-          // Go dashboard
-          router.push("/");
         },
 
-        onError: (error) => {
-          console.error("Create user failed:", error);
+        onError: (err) => {
+          console.error("Create user failed:", err);
           submitted.current = false;
         },
       });
-    } catch (error) {
-      console.error("Invalid onboarding data:", error);
+    } catch (err) {
+      console.error("Invalid onboarding data:", err);
+      submitted.current = false;
     }
-  }, [mutate, router]);
-
-  return (
-    <div>
-      {isPending && <p>Saving your profile...</p>}
-
-      {isError && (
-        <p>
-          {error?.message || "Something went wrong"}
-        </p>
-      )}
-    </div>
-  );
-}
-
+  }, [mutate]);
 
   return (
     <main className="min-h-screen overflow-hidden text-white">
@@ -94,20 +93,37 @@ export default function SuccessPage() {
               src="/images/organized%201.png"
               alt="You're all set illustration"
               className="w-[500px] max-w-full object-contain"
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+              initial={{
+                opacity: 0,
+                x: -40,
+              }}
+              animate={{
+                opacity: 1,
+                x: 0,
+              }}
+              transition={{
+                duration: 0.6,
+                ease: "easeOut",
+              }}
             />
           </div>
 
           {/* RIGHT PANEL */}
           <motion.div
             className="w-full max-w-[500px] h-[600px] bg-[#181A46] rounded-[22px] flex flex-col p-8 sm:p-10 text-white"
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            initial={{
+              opacity: 0,
+              x: 40,
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+            }}
+            transition={{
+              duration: 0.6,
+              ease: "easeOut",
+            }}
           >
-
             {/* STEP INDICATOR */}
             <div className="flex items-center justify-between mb-9">
               <span className="text-sm text-slate-300">
@@ -117,8 +133,12 @@ export default function SuccessPage() {
               <div className="w-32 h-2 bg-[#d5d7ff]/30 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-[#575CF2] rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: "100%" }}
+                  initial={{
+                    width: 0,
+                  }}
+                  animate={{
+                    width: "100%",
+                  }}
                   transition={{
                     duration: 0.7,
                     ease: "easeOut",
@@ -130,9 +150,16 @@ export default function SuccessPage() {
             {/* CONTENT */}
             <div className="flex-1 flex flex-col">
 
+              {/* HEADER */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{
+                  opacity: 0,
+                  y: 15,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
                 transition={{
                   duration: 0.45,
                   delay: 0.1,
@@ -155,7 +182,8 @@ export default function SuccessPage() {
               {isError && (
                 <div className="mt-5 rounded-xl bg-red-500/10 border border-red-500/30 p-4">
                   <p className="text-sm text-red-300">
-                    {error?.message || "Failed to save your information."}
+                    {error?.message ||
+                      "Failed to save your information."}
                   </p>
                 </div>
               )}
@@ -163,19 +191,39 @@ export default function SuccessPage() {
               {/* SUMMARY */}
               <motion.div
                 className="mt-8 flex flex-col gap-3"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{
+                  opacity: 0,
+                  y: 12,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
                 transition={{
                   duration: 0.4,
                   delay: 0.2,
                 }}
               >
                 {SUMMARY_ITEMS.map(
-                  ({ id, icon: Icon, title, description }, index) => (
+                  (
+                    {
+                      id,
+                      icon: Icon,
+                      title,
+                      description,
+                    },
+                    index,
+                  ) => (
                     <motion.div
                       key={id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{
+                        opacity: 0,
+                        y: 10,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
                       transition={{
                         duration: 0.35,
                         delay: 0.25 + index * 0.08,
@@ -216,16 +264,18 @@ export default function SuccessPage() {
                 </Link>
               ) : (
                 <button
+                  type="button"
                   disabled
                   className="w-full py-3.5 rounded-full font-medium bg-[#575CF2]/50 text-white flex items-center justify-center gap-2 cursor-not-allowed"
                 >
                   {isPending
                     ? "Saving..."
-                    : "Saving your information..."}
+                    : isError
+                      ? "Unable to save"
+                      : "Saving your information..."}
                 </button>
               )}
             </div>
-
           </motion.div>
         </div>
       </div>

@@ -12,6 +12,8 @@ import {
   Plus,
 } from "lucide-react";
 
+import { useTaskCreate } from "@/features/onboarding/hooks/userOnbordingApi";
+
 export default function NotesPage() {
   const [task, setTask] = useState("");
   const [notes, setNotes] = useState("");
@@ -24,8 +26,16 @@ export default function NotesPage() {
   const dateInputRef = useRef<HTMLInputElement>(null);
   const timeInputRef = useRef<HTMLInputElement>(null);
 
-  const openDatePicker = () => dateInputRef.current?.showPicker();
-  const openTimePicker = () => timeInputRef.current?.showPicker();
+  // Task creation hook
+  const { mutate: createTask, isPending } = useTaskCreate();
+
+  const openDatePicker = () => {
+    dateInputRef.current?.showPicker();
+  };
+
+  const openTimePicker = () => {
+    timeInputRef.current?.showPicker();
+  };
 
   const formattedDate = dueDate
     ? new Date(dueDate + "T00:00:00").toLocaleDateString("en-IN", {
@@ -44,10 +54,71 @@ export default function NotesPage() {
 
   const isValid = task.trim().length > 0;
 
+  // ==========================================
+  // CREATE TASK
+  // ==========================================
   const handleContinue = () => {
-    if (!isValid) return;
-    // TODO: persist task + notes + dueDate + dueTime + priority
-    // then navigate
+    if (!isValid || isPending) return;
+
+    const formData = new FormData();
+
+    formData.append("TaskName", task.trim());
+    formData.append("description", notes.trim());
+
+    if (dueDate) {
+      formData.append("dueDate", dueDate);
+    }
+
+    if (dueTime) {
+      formData.append("dueTime", dueTime);
+    }
+
+    formData.append("priority", priority === "high" ? "high" : "medium");
+
+    formData.append("status", "todo");
+
+    createTask(formData, {
+      onSuccess: (response) => {
+        console.log("Task created:", response);
+
+        // Your backend returns the task directly in response.data
+        const taskId = response?.data?._id;
+
+        if (!taskId) {
+          console.error("Task ID not found in response");
+          return;
+        }
+        console.log("Task is complied");
+
+        // Save task ID separately
+        localStorage.setItem("taskId", taskId);
+
+        // Get previous onboarding data
+        const existingData = JSON.parse(
+          localStorage.getItem("onboardingData") || "{}",
+        );
+
+        // Add task ID to onboarding data
+        localStorage.setItem(
+          "onboardingData",
+          JSON.stringify({
+            ...existingData,
+            taskId: taskId,
+          }),
+        );
+
+
+
+        console.log("Task ID saved:", taskId);
+
+        // Move to notification page
+        window.location.href = "/onboarding/notification";
+      },
+
+      onError: (error) => {
+        console.error("Task creation failed:", error);
+      },
+    });
   };
 
   return (
@@ -76,23 +147,31 @@ export default function NotesPage() {
             {/* STEP INDICATOR */}
             <div className="flex items-center justify-between mb-8">
               <span className="text-sm text-slate-300">Step 4 of 6</span>
+
               <div className="w-32 h-2 bg-[#d5d7ff]/30 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-[#575CF2] rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: "66.66%" }}
-                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  transition={{
+                    duration: 0.7,
+                    ease: "easeOut",
+                  }}
                 />
               </div>
             </div>
 
             {/* CONTENT */}
             <div className="flex-1 flex flex-col">
+              {/* HEADING */}
               <motion.h1
                 className="text-[25px] font-semibold tracking-tight"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
+                transition={{
+                  duration: 0.4,
+                  delay: 0.1,
+                }}
               >
                 Add your first task
               </motion.h1>
@@ -102,11 +181,15 @@ export default function NotesPage() {
                 className="mt-7"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.15 }}
+                transition={{
+                  duration: 0.4,
+                  delay: 0.15,
+                }}
               >
                 <label htmlFor="task" className="sr-only">
                   Task title
                 </label>
+
                 <input
                   id="task"
                   type="text"
@@ -131,7 +214,9 @@ export default function NotesPage() {
                   aria-expanded={showDetails}
                 >
                   <motion.span
-                    animate={{ rotate: showDetails ? 180 : 0 }}
+                    animate={{
+                      rotate: showDetails ? 180 : 0,
+                    }}
                     transition={{ duration: 0.2 }}
                   >
                     <ChevronDown size={16} />
@@ -143,9 +228,18 @@ export default function NotesPage() {
                   {showDetails && (
                     <motion.div
                       key="details"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
+                      initial={{
+                        height: 0,
+                        opacity: 0,
+                      }}
+                      animate={{
+                        height: "auto",
+                        opacity: 1,
+                      }}
+                      exit={{
+                        height: 0,
+                        opacity: 0,
+                      }}
                       transition={{ duration: 0.25 }}
                       className="overflow-hidden"
                     >
@@ -157,9 +251,14 @@ export default function NotesPage() {
                             onClick={openDatePicker}
                             className="w-full h-[38px] rounded-xl bg-[#3F416C] border border-[#5D6090] flex items-center justify-center gap-2 text-[12px] text-slate-200 hover:bg-[#4A4D7A] hover:border-[#7276B5] active:scale-[0.98] transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.12)]"
                           >
-                            <CalendarDays size={16} className="text-[#AEB2FF]" />
+                            <CalendarDays
+                              size={16}
+                              className="text-[#AEB2FF]"
+                            />
+
                             <span>{formattedDate}</span>
                           </button>
+
                           <input
                             ref={dateInputRef}
                             type="date"
@@ -178,8 +277,10 @@ export default function NotesPage() {
                             className="w-full h-[38px] rounded-xl bg-[#3F416C] border border-[#5D6090] flex items-center justify-center gap-2 text-[12px] text-slate-200 hover:bg-[#4A4D7A] hover:border-[#7276B5] active:scale-[0.98] transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.12)]"
                           >
                             <Clock3 size={16} className="text-[#AEB2FF]" />
+
                             <span>{formattedTime}</span>
                           </button>
+
                           <input
                             ref={timeInputRef}
                             type="time"
@@ -198,7 +299,8 @@ export default function NotesPage() {
                           }
                           className={`
                             flex-1 h-[38px] rounded-xl border flex items-center justify-center gap-2 text-[12px]
-                            transition-all duration-200 shadow-[0_4px_15px_rgba(0,0,0,0.12)]
+                            transition-all duration-200
+                            shadow-[0_4px_15px_rgba(0,0,0,0.12)]
                             ${
                               priority === "high"
                                 ? "bg-[#575CF2] border-[#777CFF] text-white"
@@ -208,6 +310,7 @@ export default function NotesPage() {
                           aria-pressed={priority === "high"}
                         >
                           <Flag size={16} />
+
                           {priority === "high" ? "High priority" : "Priority"}
                         </button>
                       </div>
@@ -216,24 +319,36 @@ export default function NotesPage() {
                 </AnimatePresence>
               </motion.div>
 
-              {/* SELECTED DATE / TIME SUMMARY */}
+              {/* DATE / TIME SUMMARY */}
               <AnimatePresence>
                 {(dueDate || dueTime) && (
                   <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 6 }}
+                    initial={{
+                      opacity: 0,
+                      y: 6,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: 6,
+                    }}
                     className="flex items-center gap-4 mt-3 text-xs text-slate-400"
                   >
                     {dueDate && (
                       <span className="flex items-center gap-1.5">
                         <CalendarDays size={14} className="text-[#AEB2FF]" />
+
                         {formattedDate}
                       </span>
                     )}
+
                     {dueTime && (
                       <span className="flex items-center gap-1.5">
                         <Clock3 size={14} className="text-[#AEB2FF]" />
+
                         {formattedTime}
                       </span>
                     )}
@@ -267,9 +382,18 @@ export default function NotesPage() {
                   {showNotes && (
                     <motion.div
                       key="notes"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
+                      initial={{
+                        height: 0,
+                        opacity: 0,
+                      }}
+                      animate={{
+                        height: "auto",
+                        opacity: 1,
+                      }}
+                      exit={{
+                        height: 0,
+                        opacity: 0,
+                      }}
                       transition={{ duration: 0.25 }}
                       className="overflow-hidden"
                     >
@@ -288,6 +412,7 @@ export default function NotesPage() {
 
             {/* BOTTOM ACTIONS */}
             <div className="flex items-center gap-5 mt-auto pt-6">
+              {/* SKIP */}
               <Link
                 href="./notification"
                 className="text-[15px] text-slate-300 hover:text-white transition-colors whitespace-nowrap"
@@ -295,24 +420,26 @@ export default function NotesPage() {
                 Skip for now
               </Link>
 
+              {/* CONTINUE */}
               <motion.button
                 type="button"
-                disabled={!isValid}
+                disabled={!isValid || isPending}
                 onClick={handleContinue}
-                whileHover={isValid ? { scale: 1.01 } : undefined}
-                whileTap={isValid ? { scale: 0.98 } : undefined}
+                whileHover={isValid && !isPending ? { scale: 1.01 } : undefined}
+                whileTap={isValid && !isPending ? { scale: 0.98 } : undefined}
                 className={`
                   flex-1 py-3.5 rounded-full font-medium flex items-center justify-center gap-2
                   transition-all duration-200
                   ${
-                    isValid
+                    isValid && !isPending
                       ? "bg-[#575CF2] hover:bg-[#6569F5] text-white"
                       : "bg-[#575CF2]/60 cursor-not-allowed text-white/70"
                   }
                 `}
               >
-                Continue
-                <ArrowRight size={20} />
+                {isPending ? "Creating..." : "Continue"}
+
+                {!isPending && <ArrowRight size={20} />}
               </motion.button>
             </div>
           </motion.div>

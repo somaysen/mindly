@@ -42,62 +42,31 @@ function SigninForm() {
 
     const data = new FormData();
 
-    data.append("email", formData.email);
+    data.append("email", formData.email.trim().toLowerCase());
     data.append("password", formData.password);
 
     loginUser(data, {
       onSuccess: (res: any) => {
-        console.log("Login successful:", res);
+        console.log("LOGIN RESPONSE:", res);
 
-        /*
-          Expected response:
+        // Support both possible response shapes
+        const user = res?.data?.user || res?.data?.data?.user;
 
-          {
-            success: true,
-            data: {
-              isVerified: true
-            }
-          }
-        */
+        const isVerified = user?.isVerified;
 
-        const isVerified = res?.data?.isVerified;
+        console.log("LOGIN USER:", user);
+        console.log("IS VERIFIED:", isVerified);
 
         if (isVerified === true) {
-          // User is verified
-          window.location.href = "/";
-        } else {
-          // User is not verified
-          window.location.href = `/verify-email?email=${encodeURIComponent(
-            formData.email
-          )}`;
-        }
-      },
-
-      onError: (error: any) => {
-        console.error("Login failed:", error);
-
-        const message =
-          error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Unable to login. Please check your email and password.";
-
-        // Backend response:
-        // {
-        //   success: false,
-        //   message: "Please verify your email first"
-        // }
-
-        if (message === "Please verify your email first") {
-          window.location.href = `/verify-email?email=${encodeURIComponent(
-            formData.email
-          )}`;
-
+          // Verified user
+          window.location.replace("/");
           return;
         }
 
-        // Show other errors on login page
-        setServerError(message);
+        // Only unverified users go to verification page
+        window.location.replace(
+          `/verify-email?email=${encodeURIComponent(formData.email)}`,
+        );
       },
     });
   };
@@ -142,14 +111,10 @@ function SigninForm() {
               "
             >
               <div className="space-y-6">
-
                 {/* Header */}
                 <div className="space-y-4">
                   <div className="text-[1rem] font-semibold leading-none tracking-[-0.02em] text-[#aaaaff]">
-                    <img
-                      src="/images/Group 10.png"
-                      alt="Logo-img"
-                    />
+                    <img src="/images/Group 10.png" alt="Logo-img" />
                   </div>
 
                   <div className="space-y-2.5">
@@ -182,10 +147,7 @@ function SigninForm() {
                 </div>
 
                 {/* FORM */}
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-3.5"
-                >
+                <form onSubmit={handleSubmit} className="space-y-3.5">
                   {/* Email */}
                   <input
                     type="email"
@@ -240,9 +202,7 @@ function SigninForm() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword((prev) => !prev)
-                      }
+                      onClick={() => setShowPassword((prev) => !prev)}
                       className="
                         absolute
                         right-4
@@ -252,15 +212,9 @@ function SigninForm() {
                       "
                     >
                       {showPassword ? (
-                        <EyeOff
-                          size={18}
-                          strokeWidth={2.5}
-                        />
+                        <EyeOff size={18} strokeWidth={2.5} />
                       ) : (
-                        <Eye
-                          size={18}
-                          strokeWidth={2.5}
-                        />
+                        <Eye size={18} strokeWidth={2.5} />
                       )}
                     </button>
                   </div>
@@ -386,9 +340,7 @@ function SigninForm() {
                       text-[#7e7d97]
                     "
                   >
-                    By creating an account, you agree to Mindly's{" "}
-                    <br />
-
+                    By creating an account, you agree to Mindly's <br />
                     <Link
                       href="/privacy-policy"
                       className="text-[#8588ff] hover:text-[#a3a5ff]"
@@ -396,7 +348,6 @@ function SigninForm() {
                       Privacy Policy
                     </Link>{" "}
                     and{" "}
-
                     <Link
                       href="/terms"
                       className="text-[#8588ff] hover:text-[#a3a5ff]"
@@ -408,7 +359,6 @@ function SigninForm() {
 
                   <p className="text-[0.95rem] text-[#7e7d97]">
                     You don't have an account?{" "}
-
                     <Link
                       href="/register"
                       className="
@@ -421,7 +371,6 @@ function SigninForm() {
                     </Link>
                   </p>
                 </div>
-
               </div>
             </div>
           </section>

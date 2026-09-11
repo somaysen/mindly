@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Bell, Target, Sparkles, ArrowRight, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useNotificationCrate } from "@/features/onboarding/hooks/userOnbordingApi";
 
 const REMINDER_OPTIONS = [
   {
@@ -27,12 +29,77 @@ const REMINDER_OPTIONS = [
 ];
 
 export default function RemindersOnboardingPage() {
+  const router = useRouter();
+
   const [selected, setSelected] = useState<string[]>([]);
+
+  const { mutate: createNotification, isPending } = useNotificationCrate();
 
   const toggle = (id: string) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
+  };
+
+  const handleContinue = () => {
+    const notificationData = {
+      notificationsEnabled: selected.length > 0,
+      taskReminders: selected.includes("task-reminders"),
+      focusSessions: selected.includes("focus-sessions"),
+      weeklyReflections: selected.includes("weekly-reflections"),
+    };
+
+    createNotification(notificationData, {
+      onSuccess: (response: any) => {
+        console.log("Notification response:", response);
+
+        // Get notification ID from API response
+        const notificationId =
+          response?._id ||
+          response?.id ||
+          response?.data?._id ||
+          response?.data?.id;
+
+        if (!notificationId) {
+          console.error(
+            "Notification created but ID was not returned:",
+            response,
+          );
+          return;
+        }
+
+        // Save notification ID separately
+        localStorage.setItem("notificationId", notificationId);
+
+        // Get previous onboarding data
+        const existingData = JSON.parse(
+          localStorage.getItem("onboardingData") || "{}",
+        );
+
+        // Add notification ID to onboarding data
+        const updatedOnboardingData = {
+          ...existingData,
+          notificationId,
+        };
+
+        localStorage.setItem(
+          "onboardingData",
+          JSON.stringify(updatedOnboardingData),
+        );
+
+        console.log("Notification ID saved:", notificationId);
+
+        // Go to success page
+        router.push("./success");
+      },
+
+      onError: (error) => {
+        console.error("Failed to create notification settings:", error);
+      },
+    });
+  };
+  const handleSkip = () => {
+    router.push("./success");
   };
 
   return (
@@ -85,9 +152,10 @@ export default function RemindersOnboardingPage() {
                 <h1 className="text-[25px] font-semibold tracking-tight mb-3">
                   Stay in the loop
                 </h1>
+
                 <p className="text-slate-400 text-[15px] leading-relaxed max-w-sm">
-                  Choose the reminders you&apos;d like to receive. You can change
-                  these anytime.
+                  Choose the reminders you&apos;d like to receive. You can
+                  change these anytime.
                 </p>
               </motion.div>
 
@@ -98,90 +166,123 @@ export default function RemindersOnboardingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
               >
-                {REMINDER_OPTIONS.map(({ id, icon: Icon, title, description }) => {
-                  const isSelected = selected.includes(id);
+                {REMINDER_OPTIONS.map(
+                  ({ id, icon: Icon, title, description }) => {
+                    const isSelected = selected.includes(id);
 
-                  return (
-                    <motion.button
-                      key={id}
-                      type="button"
-                      onClick={() => toggle(id)}
-                      whileTap={{ scale: 0.985 }}
-                      aria-pressed={isSelected}
-                      className={`
-                        w-full flex items-center gap-4 rounded-2xl px-5 py-4 text-left
-                        transition-all duration-200 border
-                        focus:outline-none focus-visible:ring-2 focus-visible:ring-[#575CF2]/60
-                        ${
-                          isSelected
-                            ? "bg-[#575CF2] border-[#777CFF] shadow-[0_0_0_1px_rgba(87,92,242,0.4)]"
-                            : "bg-[#3F416C]/60 border-[#5D6090]/50 hover:bg-[#4A4D7A] hover:border-[#7276B5]"
-                        }
-                      `}
-                    >
-                      {/* Icon */}
-                      <div
+                    return (
+                      <motion.button
+                        key={id}
+                        type="button"
+                        onClick={() => toggle(id)}
+                        whileTap={{ scale: 0.985 }}
+                        aria-pressed={isSelected}
                         className={`
-                          w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                          transition-colors
-                          ${isSelected ? "bg-white/15" : "bg-[#2A2C55]"}
+                          w-full flex items-center gap-4 rounded-2xl px-5 py-4
+                          text-left transition-all duration-200 border
+                          focus:outline-none focus-visible:ring-2
+                          focus-visible:ring-[#575CF2]/60
+                          ${
+                            isSelected
+                              ? "bg-[#575CF2] border-[#777CFF] shadow-[0_0_0_1px_rgba(87,92,242,0.4)]"
+                              : "bg-[#3F416C]/60 border-[#5D6090]/50 hover:bg-[#4A4D7A] hover:border-[#7276B5]"
+                          }
                         `}
                       >
-                        <Icon
-                          size={18}
-                          className={isSelected ? "text-white" : "text-[#AEB2FF]"}
-                        />
-                      </div>
-
-                      {/* Text */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[15px] font-medium text-white">
-                          {title}
-                        </p>
-                        <p
-                          className={`text-sm mt-0.5 ${
-                            isSelected ? "text-indigo-100" : "text-slate-400"
-                          }`}
+                        {/* Icon */}
+                        <div
+                          className={`
+                            w-10 h-10 rounded-xl flex items-center justify-center
+                            shrink-0 transition-colors
+                            ${isSelected ? "bg-white/15" : "bg-[#2A2C55]"}
+                          `}
                         >
-                          {description}
-                        </p>
-                      </div>
+                          <Icon
+                            size={18}
+                            className={
+                              isSelected ? "text-white" : "text-[#AEB2FF]"
+                            }
+                          />
+                        </div>
 
-                      {/* Check indicator */}
-                      <div className="w-6 h-6 flex items-center justify-center">
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                            className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"
+                        {/* Text */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[15px] font-medium text-white">
+                            {title}
+                          </p>
+
+                          <p
+                            className={`text-sm mt-0.5 ${
+                              isSelected ? "text-indigo-100" : "text-slate-400"
+                            }`}
                           >
-                            <Check size={14} className="text-white" strokeWidth={2.5} />
-                          </motion.div>
-                        )}
-                      </div>
-                    </motion.button>
-                  );
-                })}
+                            {description}
+                          </p>
+                        </div>
+
+                        {/* Check */}
+                        <div className="w-6 h-6 flex items-center justify-center">
+                          {isSelected && (
+                            <motion.div
+                              initial={{
+                                scale: 0.5,
+                                opacity: 0,
+                              }}
+                              animate={{
+                                scale: 1,
+                                opacity: 1,
+                              }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 20,
+                              }}
+                              className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"
+                            >
+                              <Check
+                                size={14}
+                                className="text-white"
+                                strokeWidth={2.5}
+                              />
+                            </motion.div>
+                          )}
+                        </div>
+                      </motion.button>
+                    );
+                  },
+                )}
               </motion.div>
             </div>
 
             {/* FOOTER */}
             <div className="flex items-center gap-6 mt-auto pt-6">
-              <Link
-                href="./success"
-                className="text-[15px] text-slate-300 hover:text-white transition-colors whitespace-nowrap"
+              {/* SKIP */}
+              <button
+                type="button"
+                onClick={handleSkip}
+                disabled={isPending}
+                className="text-[15px] text-slate-300 hover:text-white transition-colors whitespace-nowrap disabled:opacity-50"
               >
                 Skip for now
-              </Link>
+              </button>
 
-              <Link
-                href="./success"
-                className="flex-1 py-3.5 rounded-full font-medium bg-[#575CF2] hover:bg-[#6569F5] text-white flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98]"
+              {/* CONTINUE */}
+              <button
+                type="button"
+                onClick={handleContinue}
+                disabled={isPending}
+                className="
+                  flex-1 py-3.5 rounded-full font-medium
+                  bg-[#575CF2] hover:bg-[#6569F5]
+                  text-white flex items-center justify-center gap-2
+                  transition-all duration-200 active:scale-[0.98]
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
               >
-                Continue
-                <ArrowRight size={20} />
-              </Link>
+                {isPending ? "Saving..." : "Continue"}
+
+                {!isPending && <ArrowRight size={20} />}
+              </button>
             </div>
           </motion.div>
         </div>
