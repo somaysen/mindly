@@ -42,30 +42,30 @@
       formData.append("email", data.email.trim());
       formData.append("password", data.password);
       
-      registerUser(formData, {
-        onSuccess: (res) => {
-          console.log("Registration successful:", res);
+        registerUser(formData, {
+          onSuccess: (res) => {
+            console.log("Registration successful:", res);
+            
+            // If your backend returns a token and you need to store it:
+            // localStorage.setItem("token", res.data.token);
+
+            // Redirect after successful registration.
+            window.location.href = "/verify-email";
+          },
           
-          // If your backend returns a token and you need to store it:
-          // localStorage.setItem("token", res.data.token);
+          onError: (error: any) => {
+            console.log(error);
+            console.error("Registration failed:", error);
 
-          // Redirect after successful registration.
-          window.location.href = "/verify-email";
-        },
-        
-        onError: (error: any) => {
-          console.log(error);
-          console.error("Registration failed:", error);
+            const message =
+              error?.response?.data?.message ||
+              error?.response?.data?.error ||
+              error?.message ||
+              "Unable to create account. Please try again.";
 
-          const message =
-            error?.response?.data?.message ||
-            error?.response?.data?.error ||
-            error?.message ||
-            "Unable to create account. Please try again.";
-
-          setServerError(message);
-        },
-      });
+            setServerError(message);
+          },
+        });
     };
 
     return (

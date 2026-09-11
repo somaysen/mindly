@@ -42,7 +42,7 @@ export default function OnboardingPage() {
         {/* Left Image */}
         <div className="w-5xl h-screen flex items-center justify-center flex-col">
           <img
-            className="w-[500px]"
+            className="w-[500px]" 
             src="/images/Saying Hello.png"
             alt="image"
           />
