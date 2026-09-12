@@ -35,7 +35,7 @@ export default function IntentionPage() {
     "onboardingData",
     JSON.stringify({
       ...existingData,
-      intention: selectedIntention,
+      intention: [selectedIntention],
     }),
   );
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle, Sparkles, Sun } from "lucide-react";
 import Link from "next/link";
@@ -26,24 +26,30 @@ const planningOptions = [
   },
 ];
 
+const STORAGE_KEY = "onboardingData";
+
 export default function PlanningPage() {
   const [selectedPlanning, setSelectedPlanning] = useState("");
 
-  const existingData = JSON.parse(localStorage.getItem("onboardingData")) || {};
+  // Save selected planning as an array
+  useEffect(() => {
+    if (!selectedPlanning) return;
 
-  localStorage.setItem(
-    "onboardingData",
-    JSON.stringify({
-      ...existingData,
-      intention: selectedPlanning,
-    }),
-  );
+    const existingData =
+      JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        ...existingData,
+        planning: [selectedPlanning],
+      })
+    );
+  }, [selectedPlanning]);
 
   return (
     <main className="min-h-screen overflow-hidden text-white">
-      {/* Background */}
       <div className="relative min-h-screen flex items-center justify-center p-4">
-        {/* Main Container */}
         <div
           className="
             flex
@@ -105,7 +111,9 @@ export default function PlanningPage() {
           >
             {/* Step Indicator */}
             <div className="flex items-center justify-between mb-9">
-              <span className="text-sm text-slate-300">Step 3 of 6</span>
+              <span className="text-sm text-slate-300">
+                Step 3 of 6
+              </span>
 
               <div className="w-32 h-2 bg-[#d5d7ff] rounded-full overflow-hidden">
                 <motion.div
@@ -126,7 +134,6 @@ export default function PlanningPage() {
 
             {/* CONTENT */}
             <div className="flex-1 flex flex-col">
-              {/* Heading */}
               <motion.div
                 initial={{
                   opacity: 0,
@@ -146,8 +153,8 @@ export default function PlanningPage() {
                 </h1>
 
                 <p className="text-[14px] leading-[1.35] text-slate-300 mt-2 max-w-[400px]">
-                  Choose the approach that feels most natural. You can change it
-                  anytime.
+                  Choose the approach that feels most natural. You can
+                  change it anytime.
                 </p>
               </motion.div>
 
@@ -155,14 +162,16 @@ export default function PlanningPage() {
               <div className="grid grid-cols-3 gap-4 mt-8">
                 {planningOptions.map((option, index) => {
                   const Icon = option.icon;
-
-                  const isSelected = selectedPlanning === option.id;
+                  const isSelected =
+                    selectedPlanning === option.id;
 
                   return (
                     <motion.button
                       key={option.id}
                       type="button"
-                      onClick={() => setSelectedPlanning(option.id)}
+                      onClick={() =>
+                        setSelectedPlanning(option.id)
+                      }
                       initial={{
                         opacity: 0,
                         y: 20,
@@ -202,17 +211,14 @@ export default function PlanningPage() {
                         }
                       `}
                     >
-                      {/* Icon */}
                       <div className="mb-4 text-white">
                         <Icon size={23} strokeWidth={1.8} />
                       </div>
 
-                      {/* Title */}
                       <h2 className="text-[17px] font-medium leading-5">
                         {option.title}
                       </h2>
 
-                      {/* Description */}
                       <p className="text-[13px] text-slate-200 leading-[1.3] mt-1">
                         {option.description}
                       </p>
@@ -224,26 +230,27 @@ export default function PlanningPage() {
 
             {/* Continue Button */}
             <Link
-              href={selectedPlanning ? "/onboarding/notes" : "#"}
+              href={
+                selectedPlanning
+                  ? "/onboarding/notes"
+                  : "#"
+              }
               aria-disabled={!selectedPlanning}
-              className={`
-                w-full
-                ${!selectedPlanning ? "pointer-events-none" : ""}
-              `}
+              className={`w-full ${
+                !selectedPlanning
+                  ? "pointer-events-none"
+                  : ""
+              }`}
             >
               <motion.div
                 whileHover={
                   selectedPlanning
-                    ? {
-                        scale: 1.01,
-                      }
+                    ? { scale: 1.01 }
                     : {}
                 }
                 whileTap={
                   selectedPlanning
-                    ? {
-                        scale: 0.98,
-                      }
+                    ? { scale: 0.98 }
                     : {}
                 }
                 className={`

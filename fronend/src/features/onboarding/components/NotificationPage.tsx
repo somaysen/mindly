@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Bell, Target, Sparkles, ArrowRight, Check } from "lucide-react";
+import {
+  Bell,
+  Target,
+  Sparkles,
+  ArrowRight,
+  Check,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useNotificationCrate } from "@/features/onboarding/hooks/userOnbordingApi";
 
@@ -33,11 +39,16 @@ export default function RemindersOnboardingPage() {
 
   const [selected, setSelected] = useState<string[]>([]);
 
-  const { mutate: createNotification, isPending } = useNotificationCrate();
+  const {
+    mutate: createNotification,
+    isPending,
+  } = useNotificationCrate();
 
   const toggle = (id: string) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id],
     );
   };
 
@@ -53,8 +64,22 @@ export default function RemindersOnboardingPage() {
       onSuccess: (response: any) => {
         console.log("Notification response:", response);
 
-        // Get notification ID from API response
+        // Your API returns:
+        // response.data.notificationId
+        //
+        // Example:
+        // {
+        //   success: true,
+        //   data: {
+        //     notificationId: "6aa39855818511cd5fbdbb3b",
+        //     settings: {...}
+        //   }
+        // }
+
         const notificationId =
+          response?.data?.notificationId ||
+          response?.data?.settings?._id ||
+          response?.notificationId ||
           response?._id ||
           response?.id ||
           response?.data?._id ||
@@ -69,12 +94,24 @@ export default function RemindersOnboardingPage() {
         }
 
         // Save notification ID separately
-        localStorage.setItem("notificationId", notificationId);
+        localStorage.setItem(
+          "notificationId",
+          notificationId,
+        );
 
         // Get previous onboarding data
-        const existingData = JSON.parse(
-          localStorage.getItem("onboardingData") || "{}",
-        );
+        let existingData = {};
+
+        try {
+          existingData = JSON.parse(
+            localStorage.getItem("onboardingData") || "{}",
+          );
+        } catch (error) {
+          console.error(
+            "Failed to parse onboardingData:",
+            error,
+          );
+        }
 
         // Add notification ID to onboarding data
         const updatedOnboardingData = {
@@ -87,17 +124,24 @@ export default function RemindersOnboardingPage() {
           JSON.stringify(updatedOnboardingData),
         );
 
-        console.log("Notification ID saved:", notificationId);
+        console.log(
+          "Notification ID saved:",
+          notificationId,
+        );
 
         // Go to success page
         router.push("./success");
       },
 
       onError: (error) => {
-        console.error("Failed to create notification settings:", error);
+        console.error(
+          "Failed to create notification settings:",
+          error,
+        );
       },
     });
   };
+
   const handleSkip = () => {
     router.push("./success");
   };
@@ -106,6 +150,7 @@ export default function RemindersOnboardingPage() {
     <main className="min-h-screen overflow-hidden text-white">
       <div className="relative min-h-screen flex items-center justify-center p-4">
         <div className="flex w-full max-w-7xl h-[640px] items-center gap-5 justify-center overflow-hidden">
+
           {/* LEFT PANEL */}
           <div className="hidden md:flex w-1/2 h-full items-center justify-center">
             <motion.img
@@ -114,7 +159,10 @@ export default function RemindersOnboardingPage() {
               className="w-[500px] max-w-full object-contain"
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+              transition={{
+                duration: 0.6,
+                ease: "easeOut",
+              }}
             />
           </div>
 
@@ -123,11 +171,16 @@ export default function RemindersOnboardingPage() {
             className="w-full max-w-[500px] h-[600px] bg-[#181A46] rounded-[22px] flex flex-col p-8 sm:p-10 text-white"
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            transition={{
+              duration: 0.6,
+              ease: "easeOut",
+            }}
           >
             {/* STEP INDICATOR */}
             <div className="flex items-center justify-between mb-9">
-              <span className="text-sm text-slate-300">Step 5 of 6</span>
+              <span className="text-sm text-slate-300">
+                Step 5 of 6
+              </span>
 
               <div
                 className="w-32 h-2 bg-[#d5d7ff]/30 rounded-full overflow-hidden"
@@ -137,7 +190,10 @@ export default function RemindersOnboardingPage() {
                   className="h-full bg-[#575CF2] rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: "83.33%" }}
-                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  transition={{
+                    duration: 0.7,
+                    ease: "easeOut",
+                  }}
                 />
               </div>
             </div>
@@ -147,15 +203,18 @@ export default function RemindersOnboardingPage() {
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.1 }}
+                transition={{
+                  duration: 0.45,
+                  delay: 0.1,
+                }}
               >
                 <h1 className="text-[25px] font-semibold tracking-tight mb-3">
                   Stay in the loop
                 </h1>
 
                 <p className="text-slate-400 text-[15px] leading-relaxed max-w-sm">
-                  Choose the reminders you&apos;d like to receive. You can
-                  change these anytime.
+                  Choose the reminders you'd like to receive.
+                  You can change these anytime.
                 </p>
               </motion.div>
 
@@ -164,11 +223,20 @@ export default function RemindersOnboardingPage() {
                 className="mt-8 flex flex-col gap-3"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
+                transition={{
+                  duration: 0.4,
+                  delay: 0.2,
+                }}
               >
                 {REMINDER_OPTIONS.map(
-                  ({ id, icon: Icon, title, description }) => {
-                    const isSelected = selected.includes(id);
+                  ({
+                    id,
+                    icon: Icon,
+                    title,
+                    description,
+                  }) => {
+                    const isSelected =
+                      selected.includes(id);
 
                     return (
                       <motion.button
@@ -194,13 +262,19 @@ export default function RemindersOnboardingPage() {
                           className={`
                             w-10 h-10 rounded-xl flex items-center justify-center
                             shrink-0 transition-colors
-                            ${isSelected ? "bg-white/15" : "bg-[#2A2C55]"}
+                            ${
+                              isSelected
+                                ? "bg-white/15"
+                                : "bg-[#2A2C55]"
+                            }
                           `}
                         >
                           <Icon
                             size={18}
                             className={
-                              isSelected ? "text-white" : "text-[#AEB2FF]"
+                              isSelected
+                                ? "text-white"
+                                : "text-[#AEB2FF]"
                             }
                           />
                         </div>
@@ -213,7 +287,9 @@ export default function RemindersOnboardingPage() {
 
                           <p
                             className={`text-sm mt-0.5 ${
-                              isSelected ? "text-indigo-100" : "text-slate-400"
+                              isSelected
+                                ? "text-indigo-100"
+                                : "text-slate-400"
                             }`}
                           >
                             {description}
@@ -256,6 +332,7 @@ export default function RemindersOnboardingPage() {
 
             {/* FOOTER */}
             <div className="flex items-center gap-6 mt-auto pt-6">
+
               {/* SKIP */}
               <button
                 type="button"
@@ -281,7 +358,9 @@ export default function RemindersOnboardingPage() {
               >
                 {isPending ? "Saving..." : "Continue"}
 
-                {!isPending && <ArrowRight size={20} />}
+                {!isPending && (
+                  <ArrowRight size={20} />
+                )}
               </button>
             </div>
           </motion.div>
