@@ -35,8 +35,9 @@ export default function PlanningPage() {
   useEffect(() => {
     if (!selectedPlanning) return;
 
-    const existingData =
-      JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    // FIX 1: Safely handle the 'string | null' return type from localStorage
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    const existingData = storedData ? JSON.parse(storedData) : {};
 
     localStorage.setItem(
       STORAGE_KEY,
@@ -50,12 +51,13 @@ export default function PlanningPage() {
   return (
     <main className="min-h-screen overflow-hidden text-white">
       <div className="relative min-h-screen flex items-center justify-center p-4">
+        {/* FIX 2: Updated Tailwind canonical classes */}
         <div
           className="
             flex
             w-full
-            max-w-[1400px]
-            h-[640px]
+            max-w-350
+            h-160
             items-center
             justify-center
             rounded-2xl
@@ -67,7 +69,7 @@ export default function PlanningPage() {
             <motion.img
               src="/images/timeline 1.png"
               alt="Planning"
-              className="w-[500px] object-contain"
+              className="w-125 object-contain"
               initial={{
                 opacity: 0,
                 x: -40,
@@ -87,7 +89,7 @@ export default function PlanningPage() {
           <motion.div
             className="
               w-1/3
-              h-[580px]
+              h-145
               bg-[#181A46]
               rounded-[22px]
               flex
@@ -152,7 +154,7 @@ export default function PlanningPage() {
                   How do you like to plan?
                 </h1>
 
-                <p className="text-[14px] leading-[1.35] text-slate-300 mt-2 max-w-[400px]">
+                <p className="text-[14px] leading-[1.35] text-slate-300 mt-2 max-w-100">
                   Choose the approach that feels most natural. You can
                   change it anytime.
                 </p>
@@ -192,7 +194,7 @@ export default function PlanningPage() {
                         scale: 0.97,
                       }}
                       className={`
-                        h-[153px]
+                        h-38.25
                         rounded-[17px]
                         border
                         px-3

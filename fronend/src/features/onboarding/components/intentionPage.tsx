@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Atom, BookOpen, Focus } from "lucide-react";
@@ -29,60 +29,61 @@ const intentions = [
 export default function IntentionPage() {
   const [selectedIntention, setSelectedIntention] = useState("");
 
-  const existingData = JSON.parse(localStorage.getItem("onboardingData")) || {};
+  // FIX 1 & 2: Read from localStorage safely inside useEffect
+  // to avoid Next.js SSR hydration errors.
+  useEffect(() => {
+    const storedData = localStorage.getItem("onboardingData");
+    if (storedData) {
+      try {
+        const parsed = JSON.parse(storedData);
+        if (parsed.intention && parsed.intention.length > 0) {
+          setSelectedIntention(parsed.intention[0]);
+        }
+      } catch (error) {
+        console.error("Failed to parse onboarding data", error);
+      }
+    }
+  }, []);
 
-  localStorage.setItem(
-    "onboardingData",
-    JSON.stringify({
-      ...existingData,
-      intention: [selectedIntention],
-    }),
-  );
+  // FIX 3: Save to localStorage when selectedIntention changes
+  useEffect(() => {
+    if (selectedIntention) {
+      const storedData = localStorage.getItem("onboardingData");
+      let existingData = {};
+      if (storedData) {
+        try {
+          existingData = JSON.parse(storedData);
+        } catch (error) {
+          console.error("Failed to parse onboarding data", error);
+        }
+      }
+
+      localStorage.setItem(
+        "onboardingData",
+        JSON.stringify({
+          ...existingData,
+          intention: [selectedIntention],
+        })
+      );
+    }
+  }, [selectedIntention]);
 
   return (
     <main className="min-h-screen overflow-hidden text-white">
       {/* Background */}
-      <div
-        className="
-          relative
-          min-h-screen
-          flex
-          items-center
-          justify-center
-          p-4
-        "
-      >
+      <div className="relative min-h-screen flex items-center justify-center p-4">
         {/* Main Container */}
-        <div
-          className="
-            flex
-            w-full
-            max-w-[1400px]
-            h-[640px]
-            items-center
-            justify-center
-            rounded-2xl
-            overflow-hidden
-          "
-        >
+        {/* FIX 4: Updated Tailwind classes to canonical versions */}
+        <div className="flex w-full max-w-350 h-160 items-center justify-center rounded-2xl overflow-hidden">
           {/* LEFT SIDE */}
           <div className="w-1/2 h-full flex items-center justify-center">
             <motion.img
               src="/images/Questions 1.png"
               alt="Questions"
-              className="w-[500px] object-contain"
-              initial={{
-                opacity: 0,
-                x: -40,
-              }}
-              animate={{
-                opacity: 1,
-                x: 0,
-              }}
-              transition={{
-                duration: 0.6,
-                ease: "easeOut",
-              }}
+              className="w-125 object-contain"
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
             />
           </div>
 
@@ -90,7 +91,7 @@ export default function IntentionPage() {
           <motion.div
             className="
               w-1/3
-              h-[580px]
+              h-145
               bg-[#181A46]
               rounded-[22px]
               flex
@@ -99,18 +100,9 @@ export default function IntentionPage() {
               md:p-8
               text-white
             "
-            initial={{
-              opacity: 0,
-              x: 40,
-            }}
-            animate={{
-              opacity: 1,
-              x: 0,
-            }}
-            transition={{
-              duration: 0.6,
-              ease: "easeOut",
-            }}
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           >
             {/* Step Indicator */}
             <div className="flex items-center justify-between mb-9">
@@ -118,21 +110,10 @@ export default function IntentionPage() {
 
               <div className="w-32 h-2 bg-[#d5d7ff] rounded-full overflow-hidden">
                 <motion.div
-                  className="
-                    h-full
-                    bg-[#575cf2]
-                    rounded-full
-                  "
-                  initial={{
-                    width: 0,
-                  }}
-                  animate={{
-                    width: "33.33%",
-                  }}
-                  transition={{
-                    duration: 0.7,
-                    ease: "easeOut",
-                  }}
+                  className="h-full bg-[#575cf2] rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: "33.33%" }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
                 />
               </div>
             </div>
@@ -141,20 +122,11 @@ export default function IntentionPage() {
             <div className="flex-1 flex flex-col">
               {/* Heading */}
               <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 15,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                }}
-                transition={{
-                  duration: 0.45,
-                  delay: 0.15,
-                }}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.15 }}
               >
-                <h1 className="text-[25px] leading-[1.2] font-semibold tracking-tight max-w-[440px]">
+                <h1 className="text-[25px] leading-[1.2] font-semibold tracking-tight max-w-110">
                   What do you want Mindly to help you with?
                 </h1>
               </motion.div>
@@ -163,7 +135,6 @@ export default function IntentionPage() {
               <div className="mt-8 space-y-4">
                 {intentions.map((item, index) => {
                   const Icon = item.icon;
-
                   const isSelected = selectedIntention === item.id;
 
                   return (
@@ -171,28 +142,18 @@ export default function IntentionPage() {
                       key={item.id}
                       type="button"
                       onClick={() => setSelectedIntention(item.id)}
-                      initial={{
-                        opacity: 0,
-                        y: 20,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                      }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{
                         duration: 0.4,
                         delay: 0.2 + index * 0.08,
                         ease: "easeOut",
                       }}
-                      whileHover={{
-                        scale: 1.01,
-                      }}
-                      whileTap={{
-                        scale: 0.98,
-                      }}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
                       className={`
                         w-full
-                        min-h-[68px]
+                        min-h-17
                         rounded-[17px]
                         border
                         px-4
@@ -210,18 +171,7 @@ export default function IntentionPage() {
                       `}
                     >
                       {/* Icon */}
-                      <div
-                        className="
-                          w-8
-                          h-8
-                          flex
-                          items-center
-                          justify-center
-                          mr-4
-                          shrink-0
-                          text-white
-                        "
-                      >
+                      <div className="w-8 h-8 flex items-center justify-center mr-4 shrink-0 text-white">
                         <Icon size={23} strokeWidth={1.7} />
                       </div>
 
@@ -230,7 +180,6 @@ export default function IntentionPage() {
                         <h2 className="text-[16px] font-medium leading-5">
                           {item.title}
                         </h2>
-
                         <p className="text-[13px] text-slate-200 mt-1">
                           {item.description}
                         </p>
@@ -245,26 +194,11 @@ export default function IntentionPage() {
             <Link
               href={selectedIntention ? "/onboarding/planning" : "#"}
               aria-disabled={!selectedIntention}
-              className={`
-                w-full
-                ${!selectedIntention ? "pointer-events-none" : ""}
-              `}
+              className={`w-full ${!selectedIntention ? "pointer-events-none" : ""}`}
             >
               <motion.div
-                whileHover={
-                  selectedIntention
-                    ? {
-                        scale: 1.01,
-                      }
-                    : {}
-                }
-                whileTap={
-                  selectedIntention
-                    ? {
-                        scale: 0.98,
-                      }
-                    : {}
-                }
+                whileHover={selectedIntention ? { scale: 1.01 } : {}}
+                whileTap={selectedIntention ? { scale: 0.98 } : {}}
                 className={`
                   w-full
                   py-3.5

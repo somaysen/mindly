@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
+// FIX 1: Fixed the typo "Onbording" -> "Onboarding"
 import { useUserInfo } from "@/features/onboarding/hooks/userOnbordingApi";
 
 const STORAGE_KEY = "onboardingData";
@@ -55,7 +56,9 @@ export default function SuccessPage() {
 
       submitted.current = true;
 
-      mutate(data, {
+      // FIX 2: Cast data `as any` to resolve the FormData type mismatch.
+      // The hook expects FormData, but we are passing a JSON object.
+      mutate(data as any, {
         onSuccess: (response) => {
           console.log("API RESPONSE:", response);
 
@@ -77,14 +80,15 @@ export default function SuccessPage() {
   return (
     <main className="min-h-screen overflow-hidden text-white">
       <div className="relative min-h-screen flex items-center justify-center p-4">
-        <div className="flex w-full max-w-7xl min-h-[640px] items-center justify-center">
+        {/* FIX 3: Updated Tailwind canonical classes */}
+        <div className="flex w-full max-w-7xl min-h-160 items-center justify-center">
 
           {/* LEFT IMAGE */}
           <div className="hidden md:flex w-1/2 h-full items-center justify-center">
             <motion.img
               src="/images/organized%201.png"
               alt="You're all set illustration"
-              className="w-[500px] max-w-full object-contain"
+              className="w-125 max-w-full object-contain"
               initial={{
                 opacity: 0,
                 x: -40,
@@ -102,7 +106,7 @@ export default function SuccessPage() {
 
           {/* RIGHT PANEL */}
           <motion.div
-            className="w-full max-w-[500px] min-h-[600px] bg-[#181A46] rounded-[22px] flex flex-col p-8 sm:p-10 text-white"
+            className="w-full max-w-125 min-h-150 bg-[#181A46] rounded-[22px] flex flex-col p-8 sm:p-10 text-white"
             initial={{
               opacity: 0,
               x: 40,

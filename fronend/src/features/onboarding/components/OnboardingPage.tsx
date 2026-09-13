@@ -16,9 +16,9 @@ export default function OnboardingPage() {
       return;
     }
 
-    // Get existing onboarding data
-    const existingData =
-      JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    // FIX 1: Safely handle the 'string | null' return type from localStorage
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    const existingData = storedData ? JSON.parse(storedData) : {};
 
     // Save Step 1 data
     const updatedData = {
@@ -37,12 +37,15 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="flex w-full max-w-7xl h-[640px] items-center rounded-2xl overflow-hidden">
+      {/* FIX 2: Updated h-[640px] to h-160 */}
+      <div className="flex w-full max-w-7xl h-160 items-center rounded-2xl overflow-hidden">
 
         {/* Left Image */}
-        <div className="w-5xl h-screen flex items-center justify-center flex-col">
+        {/* FIX 3: Changed w-5xl to w-1/2 and h-screen to h-full for proper layout */}
+        <div className="w-1/2 h-full flex items-center justify-center flex-col">
           <img
-            className="w-[500px]" 
+            // {/* FIX 4: Updated w-[500px] to w-125 */}
+            className="w-125" 
             src="/images/Saying Hello.png"
             alt="image"
           />
@@ -58,7 +61,8 @@ export default function OnboardingPage() {
             </span>
 
             <div className="w-32 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-              <div className="h-full w-1/6 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full" />
+              {/* FIX 5: Updated bg-gradient-to-r to bg-linear-to-r */}
+              <div className="h-full w-1/6 bg-linear-to-r from-indigo-400 to-blue-400 rounded-full" />
             </div>
           </div>
 

@@ -6,17 +6,14 @@ export const verifyUser = async (token: string) => {
   }
 
   const response = await api.post(
-    `/api/auth/verify-email?token=${encodeURIComponent(token)}`
+    `/api/auth/verify-email?token=${encodeURIComponent(token)}`,
   );
 
   return response.data;
 };
 
 export const resendVerification = async (data: FormData) => {
-  const response = await api.post(
-    `/api/auth/resend-verification`,
-    data
-  );
+  const response = await api.post(`/api/auth/resend-verification`, data);
 
   return response.data;
 };

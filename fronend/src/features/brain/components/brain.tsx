@@ -1,4 +1,4 @@
-import BrainSideber from "../../../components/Navber/brainSideber"
+import BrainSideber from "@/components/Navber/BrainSideber"
 
 function brain() {
   return (
