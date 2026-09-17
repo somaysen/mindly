@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole } from "lucide-react";
 import LoginAnimation from "../../../components/auth/LoginAnimation";
 import { FaGoogle } from "react-icons/fa";
 import { IoLogoApple } from "react-icons/io5";
@@ -29,7 +29,6 @@ function SigninForm() {
       [name]: value,
     }));
 
-    // Clear previous error when user starts typing
     if (serverError) {
       setServerError("");
     }
@@ -49,23 +48,16 @@ function SigninForm() {
       onSuccess: (res: any) => {
         console.log("LOGIN RESPONSE:", res);
 
-        // Support both possible response shapes
         const user = res?.data?.user || res?.data?.data?.user;
-
         const isVerified = user?.isVerified;
 
-        console.log("LOGIN USER:", user);
-        console.log("IS VERIFIED:", isVerified);
-
         if (isVerified === true) {
-          // Verified user
           window.location.replace("/");
           return;
         }
 
-        // Only unverified users go to verification page
         window.location.replace(
-          `/verify-email?email=${encodeURIComponent(formData.email)}`,
+          `/verify-email?email=${encodeURIComponent(formData.email)}`
         );
       },
     });
@@ -73,13 +65,14 @@ function SigninForm() {
 
   return (
     <main className="min-h-screen overflow-hidden text-white">
+      {/* Background */}
       <div
         className="
           relative min-h-screen
-          bg-[radial-gradient(circle_at_15%_15%,rgba(255,255,255,0.55),transparent_30%),
-          radial-gradient(circle_at_70%_10%,rgba(255,255,255,0.3),transparent_25%),
-          radial-gradient(circle_at_20%_80%,rgba(255,255,255,0.28),transparent_25%),
-          radial-gradient(circle_at_90%_90%,rgba(116,105,255,0.6),transparent_25%),
+          bg-[radial-gradient(circle_at_15%_15%,rgba(255,255,255,0.5),transparent_30%),
+          radial-gradient(circle_at_70%_10%,rgba(255,255,255,0.25),transparent_25%),
+          radial-gradient(circle_at_20%_80%,rgba(255,255,255,0.2),transparent_25%),
+          radial-gradient(circle_at_90%_90%,rgba(116,105,255,0.55),transparent_25%),
           linear-gradient(135deg,#6973ff_0%,#5361ff_48%,#5966ff_100%)]
         "
       >
@@ -98,83 +91,100 @@ function SigninForm() {
           <section className="flex items-center justify-center py-4 lg:px-3">
             <div
               className="
-                w-full
-                max-w-[480px]
-                rounded-[1.75rem]
-                bg-[#1d2057]
-                px-3
-                py-6
-                shadow-[0_28px_80px_rgba(16,18,59,0.35)]
-                md:px-7
-                md:py-7
-                lg:min-h-[700px]
+                w-full max-w-[480px]
+                rounded-[20px]
+                border border-black/20
+                bg-[#191b50]
+                px-7 py-7
+                shadow-[0_25px_70px_rgba(12,14,55,0.4)]
+                sm:px-8 sm:py-8
               "
             >
-              <div className="space-y-6">
-                {/* Header */}
-                <div className="space-y-4">
-                  <div className="text-[1rem] font-semibold leading-none tracking-[-0.02em] text-[#aaaaff]">
-                    <img src="/images/Group 10.png" alt="Logo-img" />
-                  </div>
-
-                  <div className="space-y-2.5">
-                    <h2
-                      className="
-                        font-[family-name:var(--font-bricolage-grotesque)]
-                        text-[1rem]
-                        font-semibold
-                        md:text-[1.5rem]
-                      "
-                    >
-                      Let's get started.
-                    </h2>
-
-                    <p
-                      className="
-                        max-w-[440px]
-                        text-[0.80rem]
-                        leading-6
-                        text-white/95
-                        md:text-[0.98rem]
-                      "
-                    >
-                      A quieter place for your thoughts. Sign in to capture,
-                      organize, and focus on what matters.
-                    </p>
-                  </div>
-
-                  <div className="h-[2px] w-full rounded-full bg-[#4144a7]" />
+              <div className="space-y-5">
+                {/* LOGO */}
+                <div>
+                  <img
+                    src="/images/Group 10.png"
+                    alt="Mindly"
+                    className="h-auto w-[82px]"
+                  />
                 </div>
 
-                {/* FORM */}
-                <form onSubmit={handleSubmit} className="space-y-3.5">
-                  {/* Email */}
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter email"
-                    required
+                {/* HEADER */}
+                <div className="space-y-2">
+                  <h2
                     className="
-                      h-11
-                      w-full
-                      rounded-[0.9rem]
-                      border-none
-                      bg-[#d9d9df]
-                      px-4
-                      text-[0.95rem]
-                      font-medium
-                      text-[#2e3156]
-                      outline-none
-                      placeholder:text-[#7b7c87]
-                      focus:ring-2
-                      focus:ring-[#676cff]
+                      font-[family-name:var(--font-bricolage-grotesque)]
+                      text-[24px]
+                      font-semibold
+                      leading-tight
+                      tracking-[-0.02em]
                     "
-                  />
+                  >
+                    Let's get started.
+                  </h2>
 
-                  {/* Password */}
+                  <p className="max-w-[420px] text-[14px] leading-[1.45] text-white/90">
+                    A quieter place for your thoughts. Sign in to capture,
+                    organize, and focus on what matters.
+                  </p>
+                </div>
+
+                {/* PURPLE DIVIDER */}
+                <div className="h-[3px] w-full rounded-full bg-[#3d40a1]" />
+
+                {/* FORM */}
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  {/* EMAIL */}
                   <div className="relative">
+                    <HiOutlineMail
+                      className="
+                        absolute left-4 top-1/2
+                        -translate-y-1/2
+                        text-[#6d6f88]
+                      "
+                      size={20}
+                    />
+
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter email"
+                      required
+                      className="
+                        h-[43px]
+                        w-full
+                        rounded-[9px]
+                        border
+                        border-[#303263]
+                        bg-[#171938]
+                        pl-11 pr-4
+                        text-[13px]
+                        font-medium
+                        text-white
+                        outline-none
+                        transition
+                        placeholder:text-[#66677d]
+                        focus:border-[#5559df]
+                        focus:ring-1
+                        focus:ring-[#5559df]
+                      "
+                    />
+                  </div>
+
+                  {/* PASSWORD */}
+                  <div className="relative">
+                    <LockKeyhole
+                      className="
+                        absolute left-4 top-1/2
+                        -translate-y-1/2
+                        text-[#6d6f88]
+                      "
+                      size={19}
+                    />
+
                     <input
                       type={showPassword ? "text" : "password"}
                       name="password"
@@ -183,20 +193,22 @@ function SigninForm() {
                       placeholder="Enter password"
                       required
                       className="
-                        h-11
+                        h-[43px]
                         w-full
-                        rounded-[0.9rem]
-                        border-none
-                        bg-[#d9d9df]
-                        px-4
-                        pr-12
-                        text-[0.95rem]
+                        rounded-[9px]
+                        border
+                        border-[#303263]
+                        bg-[#171938]
+                        pl-11 pr-12
+                        text-[13px]
                         font-medium
-                        text-[#2e3156]
+                        text-white
                         outline-none
-                        placeholder:text-[#7b7c87]
-                        focus:ring-2
-                        focus:ring-[#676cff]
+                        transition
+                        placeholder:text-[#66677d]
+                        focus:border-[#5559df]
+                        focus:ring-1
+                        focus:ring-[#5559df]
                       "
                     />
 
@@ -204,40 +216,40 @@ function SigninForm() {
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
                       className="
-                        absolute
-                        right-4
-                        top-1/2
+                        absolute right-4 top-1/2
                         -translate-y-1/2
-                        text-[#85858d]
+                        text-[#77798f]
+                        transition
+                        hover:text-white
                       "
                     >
                       {showPassword ? (
-                        <EyeOff size={18} strokeWidth={2.5} />
+                        <EyeOff size={18} />
                       ) : (
-                        <Eye size={18} strokeWidth={2.5} />
+                        <Eye size={18} />
                       )}
                     </button>
                   </div>
 
-                  {/* Forgot Password */}
-                  <div className="flex justify-end">
+                  {/* FORGOT PASSWORD */}
+                  <div className="flex justify-end pt-0.5">
                     <Link
                       href="/forgot-password"
                       className="
-                        text-[0.95rem]
+                        text-[13px]
                         font-medium
                         text-[#8588ff]
                         transition
-                        hover:text-[#aaaaff]
+                        hover:text-[#a5a7ff]
                       "
                     >
                       Forgot password?
                     </Link>
                   </div>
 
-                  {/* Error */}
+                  {/* ERROR */}
                   {(isError || serverError) && (
-                    <p className="text-center text-sm text-red-400">
+                    <p className="text-center text-xs text-red-400">
                       {serverError ||
                         (error instanceof Error
                           ? error.message
@@ -245,21 +257,22 @@ function SigninForm() {
                     </p>
                   )}
 
-                  {/* Sign In */}
+                  {/* SIGN IN BUTTON */}
                   <button
                     type="submit"
                     disabled={isPending}
                     className="
-                      h-11
+                      h-[43px]
                       w-full
                       rounded-full
+                      border border-white/10
                       bg-gradient-to-r
-                      from-[#585be7]
-                      to-[#5d65f7]
-                      text-lg
+                      from-[#5558e8]
+                      to-[#5d65f5]
+                      text-[13px]
                       font-medium
                       text-white
-                      shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]
+                      shadow-[0_4px_15px_rgba(82,87,235,0.25)]
                       transition
                       hover:brightness-110
                       active:scale-[0.99]
@@ -267,107 +280,126 @@ function SigninForm() {
                       disabled:opacity-60
                     "
                   >
-                    {isPending ? "Signing in..." : "Sign in"}
+                    {isPending ? "Signing in..." : "Sign In"}
                   </button>
                 </form>
 
-                {/* Divider */}
-                <div className="flex items-center gap-4 text-[#7d7c8f]">
-                  <div className="h-px flex-1 bg-[#595a73]" />
+                {/* DIVIDER */}
+                <div className="flex items-center gap-4">
+                  <div className="h-px flex-1 bg-[#494b70]" />
 
-                  <span className="whitespace-nowrap text-sm font-medium">
+                  <span className="whitespace-nowrap text-[13px] text-[#85859a]">
                     Or continue with
                   </span>
 
-                  <div className="h-px flex-1 bg-[#595a73]" />
+                  <div className="h-px flex-1 bg-[#494b70]" />
                 </div>
 
-                {/* Social Buttons */}
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                {/* SOCIAL BUTTONS */}
+                <div className="grid grid-cols-3 gap-3">
+                  {/* GOOGLE */}
                   <button
                     type="button"
                     className="
-                      flex h-11 items-center justify-center
-                      gap-1.5 rounded-xl bg-white px-4
-                      text-[0.95rem] font-semibold text-[#4d5063]
-                      transition hover:bg-gray-100
+                      flex h-[43px]
+                      items-center justify-center
+                      gap-2
+                      rounded-[9px]
+                      border border-[#85879e]
+                      bg-transparent
+                      text-[14px]
+                      font-semibold
+                      text-white
+                      transition
+                      hover:bg-white/5
                     "
                   >
-                    <span className="text-xl font-bold text-[#f11818]">
-                      <FaGoogle />
-                    </span>
-                    Google
+                    <FaGoogle className="text-[17px]" />
+                    <span>Google</span>
                   </button>
 
+                  {/* APPLE */}
                   <button
                     type="button"
                     className="
-                      flex h-11 items-center justify-center
-                      gap-2.5 rounded-xl bg-white px-4
-                      text-[0.95rem] font-semibold text-[#4d5063]
-                      transition hover:bg-gray-100
+                      flex h-[43px]
+                      items-center justify-center
+                      gap-2
+                      rounded-[9px]
+                      border border-[#85879e]
+                      bg-transparent
+                      text-[14px]
+                      font-semibold
+                      text-white
+                      transition
+                      hover:bg-white/5
                     "
                   >
-                    <span className="text-2xl">
-                      <IoLogoApple />
-                    </span>
-                    Apple
+                    <IoLogoApple className="text-[19px]" />
+                    <span>Apple</span>
                   </button>
 
+                  {/* EMAIL */}
                   <button
                     type="button"
                     className="
-                      flex h-11 items-center justify-center
-                      gap-2.5 rounded-xl bg-white px-4
-                      text-[0.95rem] font-semibold text-[#4d5063]
-                      transition hover:bg-gray-100
+                      flex h-[43px]
+                      items-center justify-center
+                      gap-2
+                      rounded-[9px]
+                      border border-[#85879e]
+                      bg-transparent
+                      text-[14px]
+                      font-semibold
+                      text-white
+                      transition
+                      hover:bg-white/5
                     "
                   >
-                    <span className="text-2xl">
-                      <HiOutlineMail />
-                    </span>
-                    Email
+                    <HiOutlineMail className="text-[19px]" />
+                    <span>Email</span>
                   </button>
                 </div>
 
-                {/* Terms */}
-                <div className="space-y-6 pt-3 text-center">
+                {/* TERMS */}
+                <div className="space-y-4 pt-1 text-center">
                   <p
                     className="
-                      mx-auto max-w-[430px]
-                      text-[0.80rem]
-                      leading-6
-                      text-[#7e7d97]
+                      mx-auto
+                      max-w-[420px]
+                      text-[12px]
+                      leading-5
+                      text-[#777990]
                     "
                   >
-                    By creating an account, you agree to Mindly's <br />
+                    By creating an account, you agree to Mindly's{" "}
                     <Link
                       href="/privacy-policy"
-                      className="text-[#8588ff] hover:text-[#a3a5ff]"
+                      className="text-[#8588ff] hover:text-[#a5a7ff]"
                     >
                       Privacy Policy
                     </Link>{" "}
                     and{" "}
                     <Link
                       href="/terms"
-                      className="text-[#8588ff] hover:text-[#a3a5ff]"
+                      className="text-[#8588ff] hover:text-[#a5a7ff]"
                     >
                       Terms of Service
                     </Link>
                     .
                   </p>
 
-                  <p className="text-[0.95rem] text-[#7e7d97]">
-                    You don't have an account?{" "}
+                  <p className="text-[13px] text-[#777990]">
+                    Already have an account?{" "}
                     <Link
                       href="/register"
                       className="
                         font-medium
                         text-[#8588ff]
-                        hover:text-[#a3a5ff]
+                        hover:text-[#a5a7ff]
                       "
                     >
-                      Register
+                      register
                     </Link>
                   </p>
                 </div>
