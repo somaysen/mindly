@@ -1,35 +1,27 @@
+import Calendar from "@/components/Calendar";
 import DashboradSidbar from "@/features/dashboard/components/DashboradSidbar";
 import Topbar from "@/features/dashboard/components/Topbar";
 import {
-  ChevronLeft,
-  ChevronRight,
   Lightbulb,
   Mic,
   Paperclip,
   Plus,
 } from "lucide-react";
 
-const calendarDays = [
-  ["1", "2", "3", "4", "5", "6", "7"],
-  ["8", "9", "10", "11", "12", "13", "14"],
-  ["15", "16", "17", "18", "19", "20", "21"],
-  ["22", "23", "24", "25", "26", "27", "28"],
-  ["29", "30", "1", "2", "3", "4", "5"],
-];
-
 function Page() {
   return (
     <div className="min-h-screen w-full bg-[#0d0c20] px-3 py-3 text-white sm:px-5 sm:py-5 lg:px-7">
-      <div className="mx-auto flex min-h-[calc(100vh-2.5rem)] w-full max-w-[1550px] gap-10">
+      <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-[1590px] gap-8">
         {/* LEFT SIDEBAR */}
         <DashboradSidbar />
 
         {/* MAIN CONTENT */}
-        <main className="min-w-0 flex-1 ">
-          <div className="overflow-hidden rounded-[22px]">
+        <main className="min-w-0 flex-1">
+          <div className="overflow-hidden rounded-[22px] ">
             <Topbar />
 
-            <div className="grid gap-10 pt-2 pb-8 xl:grid-cols-[minmax(0,1fr)_292px]">
+            {/* CENTER + RIGHT SIDEBAR */}
+            <div className="grid gap-4 pt-2 pb-8 xl:grid-cols-[minmax(0,1fr)_292px]">
               {/* CENTER CONTENT */}
               <section className="min-w-0">
                 {/* HERO */}
@@ -126,14 +118,16 @@ function Page() {
               </section>
 
               {/* RIGHT SIDEBAR */}
-              <aside className="space-y-6">
+              <aside className="w-full space-y-6">
                 {/* REMINDER */}
                 <section className="rounded-[18px] border border-[#4a4771] bg-[#24234d] p-5">
                   <h2 className="font-[family-name:var(--font-bricolage-grotesque)] text-xl font-medium">
                     Reminder
                   </h2>
 
-                  <p className="mt-2 text-sm font-medium">Start small.</p>
+                  <p className="mt-2 text-sm font-medium">
+                    Start small.
+                  </p>
 
                   <p className="mt-5 text-sm leading-5 text-white/75">
                     You don&apos;t have to organize everything today, just
@@ -142,64 +136,8 @@ function Page() {
                 </section>
 
                 {/* CALENDAR */}
-                <section className="overflow-hidden rounded-[18px] bg-[#5962ed] p-3">
-                  <div className="flex items-center justify-between px-2 pb-3">
-                    <h2 className="font-[family-name:var(--font-bricolage-grotesque)] text-xl font-medium">
-                      June, 2026
-                    </h2>
-
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        aria-label="Previous month"
-                        className="grid h-6 w-6 place-items-center rounded-full bg-white/30 transition hover:bg-white/40"
-                      >
-                        <ChevronLeft size={15} />
-                      </button>
-
-                      <button
-                        type="button"
-                        aria-label="Next month"
-                        className="grid h-6 w-6 place-items-center rounded-full bg-white/30 transition hover:bg-white/40"
-                      >
-                        <ChevronRight size={15} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="rounded-[14px] bg-[#f9f9ff] p-3 text-center text-xs text-[#58596b]">
-                    {/* WEEKDAYS */}
-                    <div className="mb-3 grid grid-cols-7 font-medium text-[#858595]">
-                      <span>M</span>
-                      <span>T</span>
-                      <span>W</span>
-                      <span>Th</span>
-                      <span>F</span>
-                      <span>S</span>
-                      <span>Su</span>
-                    </div>
-
-                    {/* DAYS */}
-                    <div className="grid grid-cols-7 gap-y-3">
-                      {calendarDays.flat().map((day, index) => (
-                        <span
-                          key={`${day}-${index}`}
-                          className={
-                            index === 17
-                              ? "mx-auto grid h-6 w-6 place-items-center rounded-full bg-[#5962ed] font-medium text-white"
-                              : index > 30
-                                ? "grid h-6 place-items-center text-black/15"
-                                : "grid h-6 place-items-center"
-                          }
-                        >
-                          {day}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </section>
+                <Calendar />
               </aside>
-
             </div>
           </div>
         </main>

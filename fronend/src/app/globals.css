@@ -251,3 +251,82 @@ body {
   .react-clock__second-hand__body {
   background: #777cff;
 }
+
+
+.mindly-calendar {
+  width: 100%;
+  color: white;
+}
+
+.mindly-calendar .rdp-months {
+  width: 100%;
+}
+
+.mindly-calendar .rdp-month {
+  width: 100%;
+}
+
+.mindly-calendar .rdp-month_grid {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 4px;
+}
+
+/* Header */
+.mindly-calendar .rdp-caption {
+  color: white;
+  font-weight: 600;
+}
+
+/* Weekday names */
+.mindly-calendar .rdp-weekday {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Day buttons */
+.mindly-calendar .rdp-day_button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: white;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.mindly-calendar .rdp-day_button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Selected day */
+.mindly-calendar .rdp-selected .rdp-day_button {
+  background: white;
+  color: #4d57dd;
+  font-weight: 700;
+}
+
+/* Today */
+.mindly-calendar .rdp-today .rdp-day_button {
+  font-weight: 700;
+}
+
+/* Previous / next month buttons */
+.mindly-calendar .rdp-button_previous,
+.mindly-calendar .rdp-button_next {
+  color: white;
+  border-radius: 8px;
+}
+
+.mindly-calendar .rdp-button_previous:hover,
+.mindly-calendar .rdp-button_next:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.mindly-calendar .rdp-selected .rdp-day_button {
+  background: #8b5cf6;
+  color: white;
+  font-weight: 700;
+  border-radius: 10px;
+}
