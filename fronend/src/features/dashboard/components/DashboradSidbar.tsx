@@ -133,10 +133,7 @@ export default function DashboardSidebar() {
                       : "text-white/85 hover:bg-white/5 hover:text-white",
                   ].join(" ")}
                 >
-                  <Icon
-                    size={18}
-                    strokeWidth={isActive ? 2.4 : 1.8}
-                  />
+                  <Icon size={18} strokeWidth={isActive ? 2.4 : 1.8} />
 
                   <span>{item.label}</span>
                 </Link>
@@ -189,9 +186,7 @@ export default function DashboardSidebar() {
                   `}
                 />
 
-                <span className="truncate">
-                  {project.label}
-                </span>
+                <span className="truncate">{project.label}</span>
               </Link>
             ))}
 
@@ -210,10 +205,7 @@ export default function DashboardSidebar() {
                 hover:text-white/80
               "
             >
-              <Plus
-                size={18}
-                strokeWidth={1.8}
-              />
+              <Plus size={18} strokeWidth={1.8} />
 
               <span>Add Project</span>
             </button>
