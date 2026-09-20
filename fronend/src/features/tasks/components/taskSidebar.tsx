@@ -7,32 +7,32 @@ import { Plus } from "lucide-react";
 import Sidebar from "@/components/Navber/Sidebar";
 
 import {
-  TrayIcon,
-  CircleDashedIcon,
-  BookmarkSimpleIcon,
-  ListChecksIcon,
+  House,
+  SunDim,
+  Star,
+  ClockClockwise,
 } from "@phosphor-icons/react";
 
 const views = [
   {
     href: "/",
-    label: "Inbox",
-    icon: TrayIcon,
+    label: "All Tasks",
+    icon: House,
   },
   {
     href: "/today",
-    label: "Unprocessed",
-    icon: CircleDashedIcon,
+    label: "Today",
+    icon: SunDim,
   },
   {
     href: "/upcoming",
-    label: "Saved thoughts",
-    icon: BookmarkSimpleIcon,
+    label: "Important",
+    icon: Star,
   },
   {
     href: "/completed",
-    label: "Turned into tasks",
-    icon: ListChecksIcon,
+    label: "Upcoming",
+    icon: ClockClockwise,
   },
 ];
 
@@ -54,7 +54,7 @@ const projects = [
   },
 ];
 
-export default function BrainSidebar() {
+export default function taskSidebar() {
   const pathname = usePathname();
 
   return (
