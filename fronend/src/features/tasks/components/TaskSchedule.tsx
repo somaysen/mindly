@@ -8,27 +8,27 @@ import {
 } from "lucide-react";
 
 const schedules = [
-//   {
-//     time: "09:00",
-//     title: "Design Class",
-//     subtitle: "Typography Workshop",
-//     duration: "9:00 - 10:30",
-//     type: "design",
-//   },
-//   {
-//     time: "10:30",
-//     title: "Team Stand-up",
-//     subtitle: "Mindly Project sync",
-//     duration: "10:30 - 11:30",
-//     type: "team",
-//   },
-//   {
-//     time: "13:00",
-//     title: "Portfolio Review",
-//     subtitle: "Review case study with mentor",
-//     duration: "13:00 - 13:30",
-//     type: "design",
-//   },
+  // {
+  //    time: "09:00",
+  //    title: "Design Class",
+  //    subtitle: "Typography Workshop",
+  //    duration: "9:00 - 10:30",
+  //    type: "design",
+  //  },
+  //  {
+  //    time: "10:30",
+  //    title: "Team Stand-up",
+  //    subtitle: "Mindly Project sync",
+  //    duration: "10:30 - 11:30",
+  //    type: "team",
+  //  },
+  //  {
+  //    time: "13:00",
+  //    title: "Portfolio Review",
+  //    subtitle: "Review case study with mentor",
+  //    duration: "13:00 - 13:30",
+  //    type: "design",
+  //  },
 ];
 
 export default function TaskSchedule() {
@@ -36,7 +36,7 @@ export default function TaskSchedule() {
     <div className="w-full max-w-[440px] rounded-[28px] border border-[#555477] bg-[#191936] px-5 py-5 text-white shadow-xl">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-[29px] font-medium tracking-[-0.8px]">
+        <h2 className="text-[25px] font-medium tracking-[-0.8px]">
           Today’s Schedule
         </h2>
 

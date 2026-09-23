@@ -4,20 +4,20 @@ import TaskbarCenter from "./TaskbarCenter";
 
 function TasksPage() {
   return (
-    <div className="h-screen w-full overflow-hidden bg-[#0d0c0f]">
+    <div className="h-screen w-full overflow-hidden bg-[#0d0c1f]">
       <aside className="fixed left-8 top-5 z-50 h-screen w-[260px]">
         <TaskSidebar />
       </aside>
 
       {/* Main Area */}
-      <div className="ml-[260px] h-screen">
+      <div className="ml-[260px] W-[50%] h-screen">
         {/* Fixed Topbar */}
         <div className="fixed left-[350px] right-5 top-0 z-50">
           <Topbar />
         </div>
 
         {/* Scrollable Content */}
-        <main className="h-screen overflow-y-auto pt-[80px] scrollbar-hide">
+        <main className="h-screen ml-[70px]  right-5  overflow-y-auto pt-[80px] scrollbar-hide">
           <TaskbarCenter />
         </main>
       </div>
