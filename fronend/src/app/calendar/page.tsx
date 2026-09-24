@@ -4,7 +4,7 @@ import Calendar from "@/features/calendar/components/Calendar"
 function Page() {
   return (
     <div>
-      <CalendarComponent />
+      <Calendar />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Search,
@@ -17,12 +17,14 @@ import { clearAuthCookies } from "@/lib/auth";
 
 function Topbar() {
   const router = useRouter();
+  const pathname = usePathname();
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   const { mutate: logout, isPending } = useLogOut();
 
+  // Close settings dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -40,11 +42,13 @@ function Topbar() {
     };
   }, []);
 
+  // Profile
   const handleProfile = () => {
     setIsSettingsOpen(false);
     router.push("/profile");
   };
 
+  // Logout
   const handleLogout = () => {
     setIsSettingsOpen(false);
 
@@ -53,8 +57,10 @@ function Topbar() {
         clearAuthCookies();
         window.location.replace("/login");
       },
+
       onError: (error) => {
         console.error("Logout failed:", error);
+
         clearAuthCookies();
         window.location.replace("/login");
       },
@@ -64,7 +70,7 @@ function Topbar() {
   return (
     <header className="flex h-[82px] w-full items-center px-0">
       <div className="flex w-full items-center justify-between">
-        {/* LEFT SECTION */}
+        {/* ================= LEFT SECTION ================= */}
         <div className="flex min-w-0 items-center gap-2">
           {/* Back Button */}
           <button
@@ -79,43 +85,47 @@ function Topbar() {
               transition-all
               hover:bg-[#211f3d]
             "
+            aria-label="Go back"
           >
             <ArrowLeft size={21} strokeWidth={1.8} />
           </button>
 
-          {/* Search */}
-          <div className="relative w-[min(360px,40vw)]">
-            <Search
-              size={18}
-              strokeWidth={2}
-              className="
-                absolute right-3.5 top-1/2
-                -translate-y-1/2
-                text-[#66648c]
-              "
-            />
+          {/* ================= SEARCH ================= */}
+          {/* Search bar only appears on "/" */}
+          {pathname === "/" && (
+            <div className="relative w-[min(360px,40vw)]">
+              <Search
+                size={18}
+                strokeWidth={2}
+                className="
+                  absolute right-3.5 top-1/2
+                  -translate-y-1/2
+                  text-[#66648c]
+                "
+              />
 
-            <input
-              type="text"
-              placeholder="Search tasks, projects, or notes..."
-              className="
-                h-10 w-full
-                rounded-full
-                border border-[#55509d]
-                bg-[#17162f]
-                px-4 pr-10
-                text-xs text-white
-                outline-none
-                placeholder:text-[#626080]
-                focus:border-[#6562c9]
-                focus:ring-1
-                focus:ring-[#6562c9]
-              "
-            />
-          </div>
+              <input
+                type="text"
+                placeholder="Search tasks, projects, or notes..."
+                className="
+                  h-10 w-full
+                  rounded-full
+                  border border-[#55509d]
+                  bg-[#17162f]
+                  px-4 pr-10
+                  text-xs text-white
+                  outline-none
+                  placeholder:text-[#626080]
+                  focus:border-[#6562c9]
+                  focus:ring-1
+                  focus:ring-[#6562c9]
+                "
+              />
+            </div>
+          )}
         </div>
 
-        {/* RIGHT SECTION */}
+        {/* ================= RIGHT SECTION ================= */}
         <div className="flex shrink-0 items-center gap-2">
           {/* Notification */}
           <button
@@ -133,7 +143,7 @@ function Topbar() {
             <Bell size={20} strokeWidth={1.8} />
           </button>
 
-          {/* Settings */}
+          {/* ================= SETTINGS ================= */}
           <div ref={settingsRef} className="relative">
             <button
               onClick={() => setIsSettingsOpen((prev) => !prev)}
@@ -153,7 +163,7 @@ function Topbar() {
               <Settings size={20} strokeWidth={1.8} />
             </button>
 
-            {/* Dropdown */}
+            {/* Settings Dropdown */}
             {isSettingsOpen && (
               <div
                 className="
@@ -184,6 +194,7 @@ function Topbar() {
                   "
                 >
                   <User size={17} strokeWidth={1.8} />
+
                   <span>Profile</span>
                 </button>
 
@@ -207,13 +218,15 @@ function Topbar() {
                 >
                   <LogOut size={17} strokeWidth={1.8} />
 
-                  <span>{isPending ? "Logging out..." : "Logout"}</span>
+                  <span>
+                    {isPending ? "Logging out..." : "Logout"}
+                  </span>
                 </button>
               </div>
             )}
           </div>
 
-          {/* Calm Mode */}
+          {/* ================= CALM MODE ================= */}
           <button
             className="
               flex h-10
@@ -233,6 +246,7 @@ function Topbar() {
             "
           >
             <Sparkles size={17} strokeWidth={1.8} />
+
             <span>Calm Mode</span>
           </button>
         </div>
