@@ -1,26 +1,11 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-const CalendarComponent = dynamic(
-  () =>
-    import("../../features/calendar/components/calendar").then(
-      (mod) => mod.CalendarComponent
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex min-h-screen items-center justify-center bg-[#0d0c20] text-white/70">
-        Loading calendar...
-      </div>
-    ),
-  }
-);
+import Calendar from "@/features/calendar/components/calendar";
 
 function Page() {
   return (
     <div>
-      <CalendarComponent />
+      <Calendar />
     </div>
   );
 }

@@ -1,37 +1,28 @@
-"use client";
+import Topbar from "@/features/dashboard/components/Topbar";
+import TaskbarCenter from "./calenderCenter";
+import Sidebar from "@/components/Navber/Sidebar";
 
-import { Calendar } from '@fullcalendar/react'
-import themePlugin from '@fullcalendar/react/themes/monarch'
-import timeGridPlugin from '@fullcalendar/react/timegrid'
-import dayGridPlugin from '@fullcalendar/react/daygrid'
-
-import './calender.css'
-import '@fullcalendar/react/skeleton.css'
-import '@fullcalendar/react/themes/monarch/theme.css'
-import '@fullcalendar/react/themes/monarch/palettes/purple.css'
-
-export function CalendarComponent() {
+function calendar() {
   return (
-    <Calendar
-      colorScheme='light'
-      plugins={[
-        themePlugin,  
-        timeGridPlugin,
-        dayGridPlugin,
-      ]}
-      headerToolbar={{
-        start: 'add today prev,next title',
-        end: 'timeGridWeek,timeGridDay,dayGridMonth',
-      }}
-      buttons={{
-        add: {
-          text: 'Add Event',
-          click() {
-            alert('handle add event...')
-          },
-        }
-      }}
-      initialView='timeGridWeek'
-    />
-  )
+    <div className="h-screen w-full  overflow-hidden bg-[#0d0c1f]">
+      <aside className="fixed h-40 left-10 top-8 z-50 h-screen w-[260px]">
+        <Sidebar />
+      </aside>
+
+      {/* Main Area */}
+      <div className="ml-[260px] W-[50%] h-screen">
+        {/* Fixed Topbar */}
+        <div className="fixed left-[150px] right-5 top-3 z-50">
+          <Topbar />
+        </div>
+
+        {/* Scrollable Content */}
+        <main className="h-screen left-[150px]  overflow-y-auto pt-[80px] scrollbar-hide">
+          <TaskbarCenter />
+        </main>
+      </div>
+    </div>
+  );
 }
+
+export default calendar;
