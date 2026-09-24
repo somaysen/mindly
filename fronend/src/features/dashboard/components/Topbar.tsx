@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { useLogOut } from "@/features/auth/hooks/useAuthApi";
+import { clearAuthCookies } from "@/lib/auth";
 
 function Topbar() {
   const router = useRouter();
@@ -49,10 +50,13 @@ function Topbar() {
 
     logout(undefined, {
       onSuccess: () => {
-        router.push("/login");
+        clearAuthCookies();
+        window.location.replace("/login");
       },
       onError: (error) => {
         console.error("Logout failed:", error);
+        clearAuthCookies();
+        window.location.replace("/login");
       },
     });
   };
