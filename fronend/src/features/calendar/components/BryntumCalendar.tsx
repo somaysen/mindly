@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { BryntumCalendar, BryntumCalendarProps } from "@bryntum/calendar-react";
 
-import "@bryntum/calendar/calendar.stockholm.css";
 
 const events: BryntumCalendarProps["events"] = [
   {
