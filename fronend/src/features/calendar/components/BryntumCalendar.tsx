@@ -28,7 +28,7 @@ const events: BryntumCalendarProps["events"] = [
   },
 ];
 
-export default function BryntumCalendarView() {
+export default function BryntumCalendarView(props: BryntumCalendarProps) {
   const calendarRef = useRef<BryntumCalendar>(null);
 
   const calendarConfig: BryntumCalendarProps = {
@@ -50,6 +50,7 @@ export default function BryntumCalendarView() {
       },
     },
     events,
+    ...props,
   };
 
   return (
