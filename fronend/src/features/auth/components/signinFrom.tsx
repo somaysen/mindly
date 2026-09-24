@@ -8,6 +8,7 @@ import { IoLogoApple } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
 import { useLogin } from "@/features/auth/hooks/useAuthApi";
+import { persistAuthToken, startGoogleOAuth } from "@/lib/auth";
 
 function SigninForm() {
   const { mutate: loginUser, isPending, isError, error } = useLogin();
@@ -49,9 +50,16 @@ function SigninForm() {
         console.log("LOGIN RESPONSE:", res);
 
         const user = res?.data?.user || res?.data?.data?.user;
+        const token =
+          res?.data?.token ||
+          res?.data?.accessToken ||
+          res?.token ||
+          res?.data?.data?.token;
         const isVerified = user?.isVerified;
 
-        if (isVerified === true) {
+        persistAuthToken(token);
+
+        if (isVerified === true || token) {
           window.location.replace("/");
           return;
         }
@@ -300,6 +308,7 @@ function SigninForm() {
                   {/* GOOGLE */}
                   <button
                     type="button"
+                    onClick={startGoogleOAuth}
                     className="
                       flex h-[43px]
                       items-center justify-center

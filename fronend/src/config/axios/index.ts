@@ -1,22 +1,14 @@
 // config/axios.ts
 import axios from "axios";
-import Cookies from "js-cookie";
+import { clearAuthCookies, isPublicPath } from "@/lib/auth";
 
 
-const rawBaseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+const rawBaseURL = (process.env.NEXT_PUBLIC_API_BASE_URL || "").trim();
 const baseURL = rawBaseURL.replace(/\/$/, "").replace(/\/api$/, "");
 
-const publicRoutes = ["/login", "/register"] as const;
-
-
-// Updated: Check if path starts with these instead of exact match
 const isPublicRoute = (path: string) => {
   if (!path) return false;
-
-  return (
-    publicRoutes.some(route => path.startsWith(route)) ||
-    path.includes("/user-verification")
-  );
+  return isPublicPath(path) || path.includes("/user-verification");
 };
 
 const api = axios.create({
@@ -98,8 +90,11 @@ api.interceptors.response.use(
     ) {
       console.log("🚪 Logging out user");
 
-      Cookies.remove("refreshToken");
-      Cookies.remove("token");
+      clearAuthCookies();
+
+      if (typeof window !== "undefined" && !isPublicRoute(currentPath)) {
+        window.location.replace("/login");
+      }
 
       return Promise.reject(
         new Error("Session expired. Redirecting to login...")

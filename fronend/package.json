@@ -8,6 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@calendarjs/ce": "^1.1.0",
+    "@fullcalendar/react": "^7.1.0",
     "@phosphor-icons/react": "^2.1.10",
     "@reduxjs/toolkit": "^2.12.0",
     "@tanstack/react-query": "^5.102.8",

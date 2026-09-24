@@ -1,12 +1,12 @@
 
 import Calendar from "@/features/calendar/components/Calendar"
 
-function page() {
+function Page() {
   return (
     <div>
-      <Calendar/>
+      <CalendarComponent />
     </div>
-  )
+  );
 }
 
-export default page
+export default Page;

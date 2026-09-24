@@ -17,6 +17,7 @@ import {
   useVerifyUser,
   useResendVerification,
 } from "@/features/auth/hooks/useAuthApi";
+import { persistAuthToken } from "@/lib/auth";
 
 export default function VerificationPage() {
   const params = useParams();
@@ -126,10 +127,7 @@ export default function VerificationPage() {
             const accessToken =
               response?.data?.token;
 
-            console.log(
-              "Access token:",
-              accessToken
-            );
+            persistAuthToken(accessToken);
 
             return;
           }

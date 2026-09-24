@@ -14,6 +14,7 @@ import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
 
 import { useRegister } from "../hooks/useAuthApi";
+import { startGoogleOAuth } from "@/lib/auth";
 
 type SignupFormData = {
   email: string;
@@ -373,6 +374,7 @@ function SignupForm() {
                   {/* GOOGLE */}
                   <button
                     type="button"
+                    onClick={startGoogleOAuth}
                     className="
                       flex
                       h-[43px]
