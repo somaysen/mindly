@@ -9,7 +9,8 @@ export * from "./auth/logout"
 export * from "./users/userInfo"
 
 /* ===================task================= */
-export * from "./task/creatingTask"
+export * from "./tasks/creatingTask";
+export * from "./tasks/getTask"
 
 
 /* ==================== Notification =============== */
