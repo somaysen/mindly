@@ -9,14 +9,6 @@ export const useUserInfo = () => {
   });
 };
 
-export const useTaskCreate = () => {
-  return useMutation({
-    mutationKey: ["taskCrating"],
-    mutationFn: (data: FormData) => api.createTask(data),
-    retry: 0
-  });
-};
-
 export const useNotificationCrate = () => {
   return useMutation({
     mutationKey: [""],

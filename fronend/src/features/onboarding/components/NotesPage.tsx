@@ -12,7 +12,7 @@ import {
   Plus,
 } from "lucide-react";
 
-import { useTaskCreate } from "@/features/onboarding/hooks/userOnbordingApi";
+import { useTaskCreate } from "@/features/tasks/hooks/useTesk";
 
 export default function NotesPage() {
   const [task, setTask] = useState("");
