@@ -39,13 +39,13 @@ const navItems = [
     icon: Folder,
   },
   {
-    href: "/apps",
-    label: "Apps",
+    href: "/thoughtSpaces",
+    label: "thoughtSpaces",
     icon: PuzzlePiece,
   },
   {
-    href: "/history",
-    label: "History",
+    href: "/weeklyReflection",
+    label: "WeeklyReflection",
     icon: ChartDonutIcon ,
   },
 ];
