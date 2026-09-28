@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import Calendar from "@/components/Calendar";
 import DashboradSidbar from "@/features/dashboard/components/DashboradSidbar";
 import Topbar from "@/features/dashboard/components/Topbar";
@@ -9,9 +11,28 @@ import { Lightbulb, Mic, Paperclip, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useTaskCreate, useTaskGet } from "@/features/tasks/hooks/useTesk";
+import { useUserInfo } from "@/features/dashboard/hooks/useDashboard";
 
 function Page() {
   const queryClient = useQueryClient();
+
+  // =========================
+  // GET USER INFO
+  // =========================
+
+  const {
+    data: userData,
+    isLoading: isUserLoading,
+    isError: isUserError,
+  } = useUserInfo();
+
+  
+
+  // =========================
+  // USER NAME
+  // =========================
+
+  const userName = userData?.data?.name || "User";
 
   // =========================
   // CREATE TASK
@@ -35,12 +56,9 @@ function Page() {
     isError: isTasksGetError,
   } = useTaskGet();
 
-  // Backend response:
-  //
-  // {
-  //   success: true,
-  //   data: [...]
-  // }
+  // =========================
+  // TASK DATA
+  // =========================
 
   const tasks = tasksData?.data ?? [];
 
@@ -58,7 +76,6 @@ function Page() {
 
     createTask(formData, {
       onSuccess: () => {
-        // Refetch tasks after successful creation
         queryClient.invalidateQueries({
           queryKey: ["getTasks"],
         });
@@ -89,7 +106,7 @@ function Page() {
                 CENTER + RIGHT SIDEBAR
             ========================= */}
 
-            <div className="grid gap-4 pt-2 pb-8 xl:grid-cols-[minmax(0,1fr)_292px]">
+            <div className="grid gap-4 pb-8 pt-2 xl:grid-cols-[minmax(0,1fr)_292px]">
               {/* =========================
                   CENTER CONTENT
               ========================= */}
@@ -102,12 +119,18 @@ function Page() {
                 <div className="flex min-h-[205px] items-center justify-between gap-6 px-1 sm:px-5">
                   <div className="min-w-0">
                     <h1 className="font-[family-name:var(--font-bricolage-grotesque)] text-2xl font-semibold tracking-[-0.02em] sm:text-[28px]">
-                      Good evening, Tanya
+                      Good evening, {isUserLoading ? "..." : userName}
                     </h1>
 
-                    <p className="mt-3 text-sm text-white/60 sm:text-[15px]">
-                      Let&apos;s start by clearing your mind.
-                    </p>
+                    {isUserError ? (
+                      <p className="mt-2 text-xs text-red-400">
+                        Unable to load your profile.
+                      </p>
+                    ) : (
+                      <p className="mt-3 text-sm text-white/60 sm:text-[15px]">
+                        Let&apos;s start by clearing your mind.
+                      </p>
+                    )}
                   </div>
 
                   <img
@@ -229,7 +252,7 @@ function Page() {
 
                   {!isTasksLoading && !isTasksGetError && tasks.length > 0 && (
                     <div className="space-y-3">
-                      {tasks.map((task) => (
+                      {tasks.map((task: any) => (
                         <div
                           key={task._id}
                           className="group flex min-h-[70px] items-center gap-3 rounded-[17px] border border-[#3d3b5c] bg-[#171633] px-4 transition hover:border-[#7775a0]"

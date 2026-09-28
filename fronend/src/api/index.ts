@@ -7,6 +7,7 @@ export * from "./auth/logout"
 
 /*==================  USER ================= */
 export * from "./users/userInfo"
+export * from "./users/getUserInfo"
 
 /* ===================task================= */
 export * from "./tasks/creatingTask";

@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 export const useUserInfo = () => {
   return useMutation({
     mutationKey: ["userInfo"],
-    mutationFn: (data: FormData) => api.userInfo(data),
+    mutationFn: () => api.getUserInfo(),
     retry: 0,
   });
 };

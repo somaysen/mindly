@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Search,
   SlidersHorizontal,
@@ -11,8 +11,11 @@ import {
 
 import Calendar from "@/components/Calendar";
 import TaskSchedule from "./TaskSchedule";
+import NewTaskModal from "./cretingTask";
 
 function TaskbarCenter() {
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+
   return (
     <main
       className="
@@ -37,7 +40,8 @@ function TaskbarCenter() {
           "
         >
           {/* ================= LEFT ================= */}
-          <section className="min-w-0 pt-">
+          <section className="min-w-0">
+
             {/* HERO */}
             <div className="relative flex h-[190px] w-full items-start justify-between overflow-hidden">
               <div className="relative z-20">
@@ -69,7 +73,7 @@ function TaskbarCenter() {
             </div>
 
             {/* SEARCH */}
-            <div className="flex items-center justify-between pt-5 ">
+            <div className="flex items-center justify-between pt-5">
               <div
                 className="
                   flex
@@ -101,12 +105,34 @@ function TaskbarCenter() {
                 />
               </div>
 
-              <div className="flex items-center justify-between gap-3 " >
-                <button className="flex h-11 w-11 items-center justify-center rounded-full border border-[#30304D] bg-[#18172F] text-[#A9AAC8]">
+              <div className="flex items-center justify-between gap-3">
+                <button
+                  className="
+                    flex h-11 w-11
+                    items-center
+                    justify-center
+                    rounded-full
+                    border
+                    border-[#30304D]
+                    bg-[#18172F]
+                    text-[#A9AAC8]
+                  "
+                >
                   <SlidersHorizontal size={16} />
                 </button>
- 
-                <button className="flex h-11   w-11  items-center justify-center rounded-full border border-[#30304D] bg-[#18172F] text-[#A9AAC8]">
+
+                <button
+                  className="
+                    flex h-11 w-11
+                    items-center
+                    justify-center
+                    rounded-full
+                    border
+                    border-[#30304D]
+                    bg-[#18172F]
+                    text-[#A9AAC8]
+                  "
+                >
                   <ArrowDownUp size={16} />
                 </button>
               </div>
@@ -115,9 +141,13 @@ function TaskbarCenter() {
             {/* TODAY'S FOCUS */}
             <section className="mt-7">
               <div className="mb-2 flex items-center justify-between">
-                <h2 className="text-[20px] font-medium">Today’s Focus</h2>
+                <h2 className="text-[20px] font-medium">
+                  Today’s Focus
+                </h2>
 
-                <button className="text-[15px] text-[#6468F2]">Show all</button>
+                <button className="text-[15px] text-[#6468F2]">
+                  Show all
+                </button>
               </div>
 
               <div
@@ -134,11 +164,18 @@ function TaskbarCenter() {
                   bg-[#191832]
                 "
               >
-                <FilePenLine size={25} className="mb-2 text-[#B5B5C9]" />
+                <FilePenLine
+                  size={25}
+                  className="mb-2 text-[#B5B5C9]"
+                />
 
-                <p className="text-[15px] text-[#B5B5C9]">No tasks yet.</p>
+                <p className="text-[15px] text-[#B5B5C9]">
+                  No tasks yet.
+                </p>
 
+                {/* ADD TASK BUTTON */}
                 <button
+                  onClick={() => setIsTaskModalOpen(true)}
                   className="
                     mt-5
                     flex
@@ -150,6 +187,8 @@ function TaskbarCenter() {
                     py-1.5
                     text-[15px]
                     font-medium
+                    transition
+                    hover:bg-[#6569f5]
                   "
                 >
                   <Plus size={18} />
@@ -171,6 +210,19 @@ function TaskbarCenter() {
           </aside>
         </div>
       </div>
+
+      {/* ================= NEW TASK MODAL ================= */}
+      {isTaskModalOpen && (
+        <NewTaskModal
+          onClose={() => setIsTaskModalOpen(false)}
+          onAddTask={(task) => {
+            console.log("New Task:", task);
+
+            // Modal close
+            setIsTaskModalOpen(false);
+          }}
+        />
+      )}
     </main>
   );
 }
