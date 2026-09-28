@@ -9,7 +9,7 @@ import {
   CalendarBlank,
   Folder,
   PuzzlePiece,
-  ClockCounterClockwise,
+  ChartDonutIcon ,
 } from "@phosphor-icons/react";
 
 const navItems = [
@@ -46,7 +46,7 @@ const navItems = [
   {
     href: "/history",
     label: "History",
-    icon: ClockCounterClockwise,
+    icon: ChartDonutIcon ,
   },
 ];
 
