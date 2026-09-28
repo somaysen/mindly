@@ -2,22 +2,23 @@ import Topbar from "@/features/dashboard/components/Topbar";
 import TaskbarCenter from "./calenderCenter";
 import Sidebar from "@/components/Navber/Sidebar";
 
-function calendar() {
+function Calendar() {
   return (
-    <div className="h-screen w-full  overflow-hidden bg-[#0d0c1f]">
-      <aside className="fixed h-40 left-10 top-8 z-50 h-screen w-[260px]">
+    <div className="flex h-screen w-full overflow-hidden bg-[#0d0c1f]">
+      {/* Global Navigation Sidebar (Slim) */}
+      <aside className="w-[100px] shrink-0 z-50">
         <Sidebar />
       </aside>
 
-      {/* Main Area */}
-      <div className="ml-[260px] W-[50%] h-screen">
-        {/* Fixed Topbar */}
-        <div className="fixed left-[150px] right-5 top-3 z-50">
+      {/* Main Container */}
+      <div className="flex flex-col flex-1 min-w-0 h-screen">
+        {/* Topbar */}
+        <header className="h-[80px] shrink-0 px-6 flex items-center z-40">
           <Topbar />
-        </div>
+        </header>
 
-        {/* Scrollable Content */}
-        <main className="h-screen left-[150px]  overflow-y-auto pt-[80px] scrollbar-hide">
+        {/* Scrollable Main Content */}
+        <main className="flex-1 overflow-y-auto scrollbar-hide">
           <TaskbarCenter />
         </main>
       </div>
@@ -25,4 +26,4 @@ function calendar() {
   );
 }
 
-export default calendar;
+export default Calendar;
