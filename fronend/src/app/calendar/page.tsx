@@ -1,6 +1,6 @@
 "use client";
 
-import Calendar from "@/features/calendar/components/calendar";
+import Calendar from "@/features/calendar/components/Calendar"
 
 function Page() {
   return (
