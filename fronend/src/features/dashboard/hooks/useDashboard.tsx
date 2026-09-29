@@ -1,10 +1,12 @@
 import * as api from "@/api";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export const useUserInfo = () => {
-  return useMutation({
-    mutationKey: ["userInfo"],
-    mutationFn: () => api.getUserInfo(),
+  return useQuery({
+    queryKey: ["userInfo"],
+    queryFn: api.getUserInfo,
     retry: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 };
