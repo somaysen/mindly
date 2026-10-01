@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import { bricolageGrotesque } from "@/lib/fonts";
 import QueryProvider from "@/config/tanstack/QueryProvider";
+import ToastProvider from "@/components/ToastProvider";
 
 
 export const metadata: Metadata = {
@@ -24,6 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="relative z-10 flex min-h-full flex-1 flex-col">
           <QueryProvider>{children}</QueryProvider>
         </div>
+        <ToastProvider />
       </body>
     </html>
   );

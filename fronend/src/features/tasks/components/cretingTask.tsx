@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+
 import {
   X,
   CalendarDays,
@@ -11,8 +12,16 @@ import {
   Plus,
 } from "lucide-react";
 
+import { useTaskCreate } from "@/features/tasks/hooks/useTesk";
+import { toast } from "react-toastify";
+
+// ===============================
+// TYPES
+// ===============================
+
 interface NewTaskModalProps {
   onClose?: () => void;
+
   onAddTask?: (task: {
     taskName: string;
     description: string;
@@ -23,62 +32,225 @@ interface NewTaskModalProps {
   }) => void;
 }
 
+// ===============================
+// COMPONENT
+// ===============================
+
 export default function NewTaskModal({
   onClose,
   onAddTask,
 }: NewTaskModalProps) {
+  // ===============================
+  // FORM STATES
+  // ===============================
+
   const [taskName, setTaskName] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [dueTime, setDueTime] = useState("");
   const [priority, setPriority] = useState("");
+
   const [showOptional, setShowOptional] = useState(true);
 
   const [checklist, setChecklist] = useState<string[]>([
-    "Update wireframes",
-    "Finalize typography",
+    // "Update wireframes",
+    // "Finalize typography",
   ]);
 
   const [newChecklistItem, setNewChecklistItem] = useState("");
 
-  // Add checklist item
-  const addChecklistItem = () => {
-    if (!newChecklistItem.trim()) return;
+  const [errorMessage, setErrorMessage] = useState("");
 
-    setChecklist((prev) => [
-      ...prev,
-      newChecklistItem.trim(),
-    ]);
+  // ===============================
+  // CREATE TASK HOOK
+  // ===============================
+
+  const {
+    mutateAsync: createTask,
+    isPending,
+  } = useTaskCreate();
+
+  // ===============================
+  // ADD CHECKLIST ITEM
+  // ===============================
+
+  const addChecklistItem = () => {
+    const item = newChecklistItem.trim();
+
+    if (!item) return;
+
+    setChecklist((prev) => [...prev, item]);
 
     setNewChecklistItem("");
   };
 
-  // Remove checklist item
+  // ===============================
+  // REMOVE CHECKLIST ITEM
+  // ===============================
+
   const removeChecklistItem = (index: number) => {
     setChecklist((prev) =>
       prev.filter((_, i) => i !== index)
     );
   };
 
-  // Add task
-  const handleAddTask = () => {
-    if (!taskName.trim()) return;
+  // ===============================
+  // CREATE TASK
+  // ===============================
 
-    const task = {
-      taskName,
-      description,
-      dueDate,
-      dueTime,
-      priority,
-      checklist,
-    };
+  const handleAddTask = async () => {
+    if (!taskName.trim()) {
+      const message = "Please enter a task name.";
+      setErrorMessage(message);
+      toast.error(message);
+      return;
+    }
 
-    onAddTask?.(task);
+    try {
+      setErrorMessage("");
+
+      // ===============================
+      // CREATE FORMDATA
+      // ===============================
+
+      const formData = new FormData();
+
+      formData.append(
+        "taskName",
+        taskName.trim()
+      );
+
+      formData.append(
+        "description",
+        description.trim()
+      );
+
+      if (dueDate) {
+        formData.append(
+          "dueDate",
+          dueDate
+        );
+      }
+
+      if (dueTime) {
+        formData.append(
+          "dueTime",
+          dueTime
+        );
+      }
+
+      if (priority) {
+        formData.append(
+          "priority",
+          priority
+        );
+      }
+
+      // Send checklist as JSON string
+      formData.append(
+        "checklist",
+        JSON.stringify(checklist)
+      );
+
+      // ===============================
+      // DEBUG
+      // ===============================
+
+      console.log("📤 Creating task...");
+
+      console.log({
+        taskName: taskName.trim(),
+        description: description.trim(),
+        dueDate,
+        dueTime,
+        priority,
+        checklist,
+      });
+
+      // ===============================
+      // API CALL
+      // ===============================
+
+      const response = await createTask(formData);
+      toast.success("Task created successfully.");
+
+      console.log(
+        "✅ Task created successfully:",
+        response
+      );
+
+      // ===============================
+      // OPTIONAL PARENT CALLBACK
+      // ===============================
+
+      onAddTask?.({
+        taskName: taskName.trim(),
+        description: description.trim(),
+        dueDate,
+        dueTime,
+        priority,
+        checklist,
+      });
+
+      // ===============================
+      // RESET FORM
+      // ===============================
+
+      setTaskName("");
+      setDescription("");
+      setDueDate("");
+      setDueTime("");
+      setPriority("");
+
+      setChecklist([]);
+
+      setNewChecklistItem("");
+
+      // ===============================
+      // CLOSE MODAL
+      // ===============================
+
+      onClose?.();
+
+    } catch (error: any) {
+      console.error(
+        "❌ Task creation failed:",
+        error
+      );
+
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to create task";
+
+      setErrorMessage(message);
+      toast.error(message);
+    }
   };
+
+  // ===============================
+  // ENTER KEY
+  // ===============================
+
+  const handleChecklistKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      addChecklistItem();
+    }
+  };
+
+  // ===============================
+  // UI
+  // ===============================
 
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center">
+
       {/* ================= BACKDROP ================= */}
+
       <div
         className="
           absolute
@@ -90,6 +262,7 @@ export default function NewTaskModal({
       />
 
       {/* ================= MODAL ================= */}
+
       <div
         className="
           relative
@@ -107,9 +280,13 @@ export default function NewTaskModal({
           shadow-[0_30px_100px_rgba(0,0,0,0.55)]
         "
       >
+
         {/* ================= HEADER ================= */}
+
         <div className="flex items-center justify-between px-8 pt-8">
+
           <div className="flex items-center gap-2">
+
             <h2 className="text-[18px] font-semibold text-white">
               New Task
             </h2>
@@ -130,23 +307,33 @@ export default function NewTaskModal({
             >
               ✓
             </span>
+
           </div>
 
-          {/* Close */}
+          {/* CLOSE */}
+
           <button
             type="button"
             onClick={onClose}
+            disabled={isPending}
             className="
               text-[#b5b5d2]
               transition
               hover:text-white
+              disabled:cursor-not-allowed
+              disabled:opacity-50
             "
           >
-            <X size={20} strokeWidth={1.7} />
+            <X
+              size={20}
+              strokeWidth={1.7}
+            />
           </button>
+
         </div>
 
         {/* ================= FORM ================= */}
+
         <div
           className="
             mt-7
@@ -157,8 +344,11 @@ export default function NewTaskModal({
             scrollbar-none
           "
         >
+
           {/* ================= TASK NAME ================= */}
+
           <div>
+
             <label
               className="
                 mb-2
@@ -174,8 +364,11 @@ export default function NewTaskModal({
             <input
               type="text"
               value={taskName}
-              onChange={(e) => setTaskName(e.target.value)}
+              onChange={(e) =>
+                setTaskName(e.target.value)
+              }
               placeholder="What needs to be done"
+              disabled={isPending}
               className="
                 h-[42px]
                 w-full
@@ -189,12 +382,17 @@ export default function NewTaskModal({
                 outline-none
                 placeholder:text-[#72718d]
                 focus:border-[#6668ed]
+                disabled:cursor-not-allowed
+                disabled:opacity-60
               "
             />
+
           </div>
 
           {/* ================= DESCRIPTION ================= */}
+
           <div className="mt-5">
+
             <label
               className="
                 mb-2
@@ -210,8 +408,11 @@ export default function NewTaskModal({
             <input
               type="text"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) =>
+                setDescription(e.target.value)
+              }
               placeholder="Add more details"
+              disabled={isPending}
               className="
                 h-[42px]
                 w-full
@@ -225,16 +426,21 @@ export default function NewTaskModal({
                 outline-none
                 placeholder:text-[#72718d]
                 focus:border-[#6668ed]
+                disabled:cursor-not-allowed
+                disabled:opacity-60
               "
             />
+
           </div>
 
           {/* ================= OPTIONAL DETAILS ================= */}
+
           <button
             type="button"
             onClick={() =>
               setShowOptional(!showOptional)
             }
+            disabled={isPending}
             className="
               mt-5
               flex
@@ -242,8 +448,10 @@ export default function NewTaskModal({
               gap-2
               text-[11px]
               text-[#d1d0e7]
+              disabled:opacity-50
             "
           >
+
             <ChevronDown
               size={15}
               className={`transition ${
@@ -253,16 +461,25 @@ export default function NewTaskModal({
               }`}
             />
 
-            <span>Optional details</span>
+            <span>
+              Optional details
+            </span>
+
           </button>
 
           {/* ================= OPTIONAL CONTENT ================= */}
+
           {showOptional && (
             <>
-              {/* DATE / TIME / PRIORITY */}
+
+              {/* ================= DATE / TIME / PRIORITY ================= */}
+
               <div className="mt-3 grid grid-cols-3 gap-3">
+
                 {/* DATE */}
+
                 <div className="relative">
+
                   <CalendarDays
                     size={14}
                     className="
@@ -280,6 +497,7 @@ export default function NewTaskModal({
                     onChange={(e) =>
                       setDueDate(e.target.value)
                     }
+                    disabled={isPending}
                     className="
                       h-[36px]
                       w-full
@@ -294,12 +512,17 @@ export default function NewTaskModal({
                       text-[#85849e]
                       outline-none
                       focus:border-[#6668ed]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
                     "
                   />
+
                 </div>
 
                 {/* TIME */}
+
                 <div className="relative">
+
                   <Clock3
                     size={14}
                     className="
@@ -317,6 +540,7 @@ export default function NewTaskModal({
                     onChange={(e) =>
                       setDueTime(e.target.value)
                     }
+                    disabled={isPending}
                     className="
                       h-[36px]
                       w-full
@@ -331,11 +555,15 @@ export default function NewTaskModal({
                       text-[#85849e]
                       outline-none
                       focus:border-[#6668ed]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
                     "
                   />
+
                 </div>
 
                 {/* PRIORITY */}
+
                 <button
                   type="button"
                   onClick={() =>
@@ -345,6 +573,7 @@ export default function NewTaskModal({
                         : "high"
                     )
                   }
+                  disabled={isPending}
                   className={`
                     flex
                     h-[36px]
@@ -356,6 +585,8 @@ export default function NewTaskModal({
                     px-3
                     text-[10px]
                     transition
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
                     ${
                       priority
                         ? "border-[#6869ed] bg-[#30306b] text-white"
@@ -363,16 +594,21 @@ export default function NewTaskModal({
                     }
                   `}
                 >
+
                   <Flag size={13} />
 
                   <span>
                     {priority || "Priority"}
                   </span>
+
                 </button>
+
               </div>
 
               {/* ================= CHECKLIST ================= */}
+
               <div className="mt-5">
+
                 <label
                   className="
                     mb-2
@@ -386,82 +622,102 @@ export default function NewTaskModal({
                 </label>
 
                 <div className="space-y-2">
-                  {checklist.map((item, index) => (
-                    <div
-                      key={`${item}-${index}`}
-                      className="
-                        group
-                        flex
-                        h-[46px]
-                        items-center
-                        rounded-[9px]
-                        border
-                        border-[#55547b]
-                        bg-[#2b2a59]
-                        px-3
-                        transition
-                        hover:border-[#6666a0]
-                      "
-                    >
-                      {/* CHECKBOX */}
-                      <button
-                        type="button"
+
+                  {checklist.map(
+                    (item, index) => (
+
+                      <div
+                        key={`${item}-${index}`}
                         className="
+                          group
                           flex
-                          h-[16px]
-                          w-[16px]
-                          shrink-0
+                          h-[46px]
                           items-center
-                          justify-center
-                          rounded-[4px]
+                          rounded-[9px]
                           border
-                          border-[#d6d6ec]
+                          border-[#55547b]
+                          bg-[#2b2a59]
+                          px-3
                           transition
-                          hover:bg-[#6366ed]
+                          hover:border-[#6666a0]
                         "
                       >
-                        <Check
-                          size={11}
+
+                        {/* CHECKBOX */}
+
+                        <button
+                          type="button"
+                          disabled={isPending}
                           className="
-                            text-white
-                            opacity-0
-                            group-hover:opacity-100
+                            flex
+                            h-[16px]
+                            w-[16px]
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-[4px]
+                            border
+                            border-[#d6d6ec]
+                            transition
+                            hover:bg-[#6366ed]
+                            disabled:opacity-50
                           "
-                        />
-                      </button>
+                        >
+                          <Check
+                            size={11}
+                            className="
+                              text-white
+                              opacity-0
+                              group-hover:opacity-100
+                            "
+                          />
+                        </button>
 
-                      {/* ITEM */}
-                      <span
-                        className="
-                          ml-2.5
-                          text-[12px]
-                          text-white
-                        "
-                      >
-                        {item}
-                      </span>
+                        {/* ITEM */}
 
-                      {/* DELETE */}
-                      <button
-                        type="button"
-                        onClick={() =>
-                          removeChecklistItem(index)
-                        }
-                        className="
-                          ml-auto
-                          text-[#8988a8]
-                          transition
-                          hover:text-red-400
-                        "
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
+                        <span
+                          className="
+                            ml-2.5
+                            text-[12px]
+                            text-white
+                          "
+                        >
+                          {item}
+                        </span>
+
+                        {/* DELETE */}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeChecklistItem(
+                              index
+                            )
+                          }
+                          disabled={isPending}
+                          className="
+                            ml-auto
+                            text-[#8988a8]
+                            transition
+                            hover:text-red-400
+                            disabled:cursor-not-allowed
+                            disabled:opacity-40
+                          "
+                        >
+                          <X size={14} />
+                        </button>
+
+                      </div>
+
+                    )
+                  )}
+
                 </div>
 
                 {/* ================= ADD CHECKLIST ================= */}
+
                 <div className="mt-3 flex gap-2">
+
                   <input
                     type="text"
                     value={newChecklistItem}
@@ -470,13 +726,11 @@ export default function NewTaskModal({
                         e.target.value
                       )
                     }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        addChecklistItem();
-                      }
-                    }}
+                    onKeyDown={
+                      handleChecklistKeyDown
+                    }
                     placeholder="Add checklist item..."
+                    disabled={isPending}
                     className="
                       h-[38px]
                       flex-1
@@ -490,12 +744,18 @@ export default function NewTaskModal({
                       outline-none
                       placeholder:text-[#686781]
                       focus:border-[#6668ed]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
                     "
                   />
 
                   <button
                     type="button"
                     onClick={addChecklistItem}
+                    disabled={
+                      isPending ||
+                      !newChecklistItem.trim()
+                    }
                     className="
                       flex
                       h-[38px]
@@ -508,17 +768,44 @@ export default function NewTaskModal({
                       text-[#a9a9ff]
                       transition
                       hover:bg-[#3b3b7c]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-40
                     "
                   >
                     <Plus size={16} />
                   </button>
+
                 </div>
+
               </div>
+
             </>
           )}
+
+          {/* ================= ERROR ================= */}
+
+          {errorMessage && (
+            <div
+              className="
+                mt-4
+                rounded-[8px]
+                border
+                border-red-500/20
+                bg-red-500/10
+                px-3
+                py-2
+                text-[11px]
+                text-red-300
+              "
+            >
+              {errorMessage}
+            </div>
+          )}
+
         </div>
 
         {/* ================= FOOTER ================= */}
+
         <div
           className="
             flex
@@ -531,10 +818,13 @@ export default function NewTaskModal({
             py-5
           "
         >
+
           {/* CANCEL */}
+
           <button
             type="button"
             onClick={onClose}
+            disabled={isPending}
             className="
               h-[36px]
               rounded-full
@@ -546,16 +836,22 @@ export default function NewTaskModal({
               text-white
               transition
               hover:bg-[#30305e]
+              disabled:cursor-not-allowed
+              disabled:opacity-50
             "
           >
             Cancel
           </button>
 
           {/* ADD TASK */}
+
           <button
             type="button"
             onClick={handleAddTask}
-            disabled={!taskName.trim()}
+            disabled={
+              !taskName.trim() ||
+              isPending
+            }
             className="
               h-[36px]
               rounded-full
@@ -571,10 +867,15 @@ export default function NewTaskModal({
               disabled:opacity-50
             "
           >
-            Add Task
+            {isPending
+              ? "Creating..."
+              : "Add Task"}
           </button>
+
         </div>
+
       </div>
+
     </div>
   );
 }

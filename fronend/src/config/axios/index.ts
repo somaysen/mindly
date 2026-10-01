@@ -1,41 +1,56 @@
-// config/axios.ts
 import axios from "axios";
 import { clearAuthCookies, isPublicPath } from "@/lib/auth";
 
+const rawBaseURL = (
+  process.env.NEXT_PUBLIC_API_BASE_URL || ""
+).trim();
 
-const rawBaseURL = (process.env.NEXT_PUBLIC_API_BASE_URL || "").trim();
-const baseURL = rawBaseURL.replace(/\/$/, "").replace(/\/api$/, "");
+const baseURL = rawBaseURL.replace(/\/$/, "");
 
 const isPublicRoute = (path: string) => {
   if (!path) return false;
-  return isPublicPath(path) || path.includes("/user-verification");
+
+  return (
+    isPublicPath(path) ||
+    path.includes("/user-verification")
+  );
 };
 
 const api = axios.create({
   baseURL,
+
   headers: {
     "Content-Type": "application/json",
   },
+
   withCredentials: true,
-  // validateStatus: (status) => status >= 200 && status < 300,
 });
 
 api.interceptors.response.use(
   (response) => {
-    console.log("✅ Response success:", response.config.url);
+    console.log("✅ Response:", {
+      url: response.config.url,
+      status: response.status,
+    });
+
     return response;
   },
+
   async (error) => {
     const status = error.response?.status;
     const responseData = error.response?.data;
     const originalRequest = error.config;
 
     const currentPath =
-      typeof window !== "undefined" ? window.location.pathname : "";
+      typeof window !== "undefined"
+        ? window.location.pathname
+        : "";
 
-    console.log("❌ Error intercepted");
+    console.log("❌ Axios Error");
     console.log("➡️ URL:", originalRequest?.url);
+    console.log("➡️ Method:", originalRequest?.method);
     console.log("➡️ Status:", status);
+    console.log("➡️ Response:", responseData);
 
     let message = "Something went wrong";
 
@@ -51,55 +66,92 @@ api.interceptors.response.use(
 
     const publicRoute = isPublicRoute(currentPath);
 
-    console.log("➡️ Public Route:", publicRoute);
+    /*
+    ==========================================
+    401 → REFRESH ACCESS TOKEN
+    ==========================================
+    */
 
-    // 🔥 STEP 1: TRY REFRESH
     if (
       !publicRoute &&
       status === 401 &&
-      !originalRequest._retry
+      !originalRequest?._retry
     ) {
-      console.log("🔄 401 detected → trying refresh...");
+      console.log("🔄 401 → trying refresh");
+
       originalRequest._retry = true;
 
       try {
-        console.log("📡 Calling /api/refresh...");
+        // IMPORTANT:
+        // baseURL already contains /api
+        const refreshResponse = await api.post(
+          "/api/auth/refresh"
+        );
 
-        const refreshResponse = await api.post("/api/auth/refresh");
+        console.log(
+          "✅ Refresh successful:",
+          refreshResponse.data
+        );
 
-        console.log("✅ Refresh success:", refreshResponse.data);
-
-        console.log("🔁 Retrying original request:", originalRequest.url);
+        console.log(
+          "🔁 Retrying:",
+          originalRequest.url
+        );
 
         return api(originalRequest);
-      } catch (refreshError) {
-        console.log("❌ Refresh failed:", refreshError);
+      } catch (refreshError: any) {
+        console.error(
+          "❌ Refresh failed:",
+          refreshError?.response?.data ||
+            refreshError?.message
+        );
+
+        clearAuthCookies();
+
+        if (
+          typeof window !== "undefined" &&
+          !isPublicRoute(currentPath)
+        ) {
+          window.location.replace("/login");
+        }
+
+        return Promise.reject(refreshError);
       }
     }
 
-    // 🔥 STEP 2: LOGOUT
+    /*
+    ==========================================
+    OTHER AUTH ERRORS
+    ==========================================
+    */
+
     if (
       !publicRoute &&
-      (status === 401 ||
+      (
         status === 403 ||
-        (message &&
-          (message.toLowerCase().includes("unauthorized") ||
-            message.toLowerCase().includes("token expired") ||
-            message.toLowerCase().includes("unauthenticated") ||
-            message.toLowerCase().includes("invalid token"))))
+        message.toLowerCase().includes("unauthorized") ||
+        message.toLowerCase().includes("unauthenticated") ||
+        message.toLowerCase().includes("invalid token") ||
+        message.toLowerCase().includes("token expired")
+      )
     ) {
-      console.log("🚪 Logging out user");
+      console.log("🚪 Authentication failed");
 
       clearAuthCookies();
 
-      if (typeof window !== "undefined" && !isPublicRoute(currentPath)) {
+      if (
+        typeof window !== "undefined" &&
+        !isPublicRoute(currentPath)
+      ) {
         window.location.replace("/login");
       }
-
-      return Promise.reject(
-        new Error("Session expired. Redirecting to login...")
-      );
     }
+
+    /*
+    ==========================================
+    RETURN ORIGINAL ERROR
+    ==========================================
+    */
 
     if (error.response) {
       error.message = message;

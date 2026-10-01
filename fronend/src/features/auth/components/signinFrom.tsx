@@ -7,22 +7,31 @@ import { FaGoogle } from "react-icons/fa";
 import { IoLogoApple } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLogin } from "@/features/auth/hooks/useAuthApi";
 import { persistAuthToken, startGoogleOAuth } from "@/lib/auth";
+import { toast } from "react-toastify";
 
 function SigninForm() {
-  const { mutate: loginUser, isPending, isError, error } = useLogin();
+  const router = useRouter();
+  const {
+    mutate: loginUser,
+    isPending,
+    isError,
+    error,
+  } = useLogin();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const [serverError, setServerError] = useState("");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -30,42 +39,202 @@ function SigninForm() {
       [name]: value,
     }));
 
-    if (serverError) {
-      setServerError("");
-    }
+    setServerError("");
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     setServerError("");
 
+    const email = formData.email.trim().toLowerCase();
+
     const data = new FormData();
 
-    data.append("email", formData.email.trim().toLowerCase());
+    data.append("email", email);
     data.append("password", formData.password);
 
     loginUser(data, {
       onSuccess: (res: any) => {
-        console.log("LOGIN RESPONSE:", res);
+        console.log("========== LOGIN RESPONSE ==========");
+        console.log(JSON.stringify(res, null, 2));
 
-        const user = res?.data?.user || res?.data?.data?.user;
+        /*
+         * Get user from all possible response structures
+         */
+        const user =
+          res?.data?.user ??
+          res?.data?.data?.user ??
+          res?.user ??
+          res?.data?.data ??
+          null;
+
+        /*
+         * Get token
+         */
         const token =
-          res?.data?.token ||
-          res?.data?.accessToken ||
-          res?.token ||
-          res?.data?.data?.token;
-        const isVerified = user?.isVerified;
+          res?.data?.token ??
+          res?.data?.accessToken ??
+          res?.data?.data?.token ??
+          res?.data?.data?.accessToken ??
+          res?.token ??
+          res?.accessToken ??
+          null;
 
-        persistAuthToken(token);
+        /*
+         * IMPORTANT
+         *
+         * Different backends use different names:
+         *
+         * isVerified
+         * isEmailVerified
+         * emailVerified
+         * verified
+         */
+        const isVerified =
+          user?.isVerified ??
+          user?.isEmailVerified ??
+          user?.emailVerified ??
+          user?.verified ??
+          res?.data?.isVerified ??
+          res?.data?.isEmailVerified ??
+          res?.isVerified ??
+          res?.isEmailVerified;
 
-        if (isVerified === true || token) {
-          window.location.replace("/");
+        console.log("USER:", user);
+        console.log("TOKEN:", token);
+        console.log("IS VERIFIED:", isVerified);
+
+        /*
+         * ==================================================
+         * EMAIL NOT VERIFIED
+         * ==================================================
+         *
+         * This MUST happen before saving the token.
+         */
+        if (
+          isVerified === false ||
+          isVerified === "false" ||
+          isVerified === 0
+        ) {
+          console.log(
+            "EMAIL NOT VERIFIED → REDIRECTING TO VERIFY PAGE"
+          );
+
+          window.location.href =
+            `/verify-email?email=${encodeURIComponent(email)}`;
+
           return;
         }
 
-        window.location.replace(
-          `/verify-email?email=${encodeURIComponent(formData.email)}`
+        /*
+         * ==================================================
+         * NO VERIFICATION STATUS
+         * ==================================================
+         *
+         * If backend doesn't send verification status,
+         * don't blindly allow login.
+         */
+        if (
+          isVerified === undefined ||
+          isVerified === null
+        ) {
+          console.error(
+            "Backend did not return email verification status"
+          );
+
+          setServerError(
+            "Email verification status was not received from the server."
+          );
+          toast.error("Email verification status was not received from the server.");
+
+          return;
+        }
+
+        /*
+         * ==================================================
+         * EMAIL VERIFIED
+         * ==================================================
+         */
+        if (isVerified === true || isVerified === "true") {
+          if (!token) {
+            setServerError(
+              "Login successful but authentication token is missing."
+            );
+            toast.error("Login successful but authentication token is missing.");
+
+            return;
+          }
+
+          /*
+           * Save token ONLY after email is verified
+           */
+          persistAuthToken(token);
+
+          console.log(
+            "EMAIL VERIFIED → LOGIN SUCCESS"
+          );
+          toast.success("Welcome back!");
+          router.push("/");
+
+          return;
+        }
+
+        /*
+         * Fallback
+         */
+        setServerError(
+          "Unable to verify your email. Please try again."
+        );
+        toast.error("Unable to verify your email. Please try again.");
+      },
+
+      onError: (err: any) => {
+        console.error(
+          "========== LOGIN ERROR =========="
+        );
+
+        console.error(err);
+
+        /*
+         * Get backend error message
+         */
+        const message =
+          err?.response?.data?.message ??
+          err?.response?.data?.error ??
+          err?.message ??
+          "";
+
+        /*
+         * If backend itself says email is not verified,
+         * send user to verification page.
+         */
+        const lowerMessage =
+          String(message).toLowerCase();
+
+        if (
+          lowerMessage.includes("email") &&
+          (
+            lowerMessage.includes("not verified") ||
+            lowerMessage.includes("verify your email") ||
+            lowerMessage.includes("verification required") ||
+            lowerMessage.includes("unverified")
+          )
+        ) {
+          window.location.href =
+            `/verify-email?email=${encodeURIComponent(email)}`;
+
+          return;
+        }
+
+        setServerError(
+          message ||
+            "Unable to login. Please check your email and password."
+        );
+        toast.error(
+          message || "Unable to login. Please check your email and password."
         );
       },
     });
@@ -73,7 +242,6 @@ function SigninForm() {
 
   return (
     <main className="min-h-screen overflow-hidden text-white">
-      {/* Background */}
       <div
         className="
           relative min-h-screen
@@ -92,10 +260,10 @@ function SigninForm() {
             lg:px-6 lg:py-6
           "
         >
-          {/* LEFT SIDE */}
+          {/* LEFT */}
           <LoginAnimation />
 
-          {/* RIGHT SIDE */}
+          {/* RIGHT */}
           <section className="flex items-center justify-center py-4 lg:px-3">
             <div
               className="
@@ -109,6 +277,7 @@ function SigninForm() {
               "
             >
               <div className="space-y-5">
+
                 {/* LOGO */}
                 <div>
                   <img
@@ -138,11 +307,14 @@ function SigninForm() {
                   </p>
                 </div>
 
-                {/* PURPLE DIVIDER */}
+                {/* DIVIDER */}
                 <div className="h-[3px] w-full rounded-full bg-[#3d40a1]" />
 
                 {/* FORM */}
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-3"
+                >
                   {/* EMAIL */}
                   <div className="relative">
                     <HiOutlineMail
@@ -161,6 +333,7 @@ function SigninForm() {
                       onChange={handleChange}
                       placeholder="Enter email"
                       required
+                      autoComplete="email"
                       className="
                         h-[43px]
                         w-full
@@ -194,12 +367,17 @@ function SigninForm() {
                     />
 
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={
+                        showPassword
+                          ? "text"
+                          : "password"
+                      }
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Enter password"
                       required
+                      autoComplete="current-password"
                       className="
                         h-[43px]
                         w-full
@@ -222,7 +400,11 @@ function SigninForm() {
 
                     <button
                       type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
+                      onClick={() =>
+                        setShowPassword(
+                          (prev) => !prev
+                        )
+                      }
                       className="
                         absolute right-4 top-1/2
                         -translate-y-1/2
@@ -230,6 +412,11 @@ function SigninForm() {
                         transition
                         hover:text-white
                       "
+                      aria-label={
+                        showPassword
+                          ? "Hide password"
+                          : "Show password"
+                      }
                     >
                       {showPassword ? (
                         <EyeOff size={18} />
@@ -265,7 +452,7 @@ function SigninForm() {
                     </p>
                   )}
 
-                  {/* SIGN IN BUTTON */}
+                  {/* LOGIN */}
                   <button
                     type="submit"
                     disabled={isPending}
@@ -288,11 +475,13 @@ function SigninForm() {
                       disabled:opacity-60
                     "
                   >
-                    {isPending ? "Signing in..." : "Sign In"}
+                    {isPending
+                      ? "Signing in..."
+                      : "Sign In"}
                   </button>
                 </form>
 
-                {/* DIVIDER */}
+                {/* SOCIAL */}
                 <div className="flex items-center gap-4">
                   <div className="h-px flex-1 bg-[#494b70]" />
 
@@ -303,8 +492,8 @@ function SigninForm() {
                   <div className="h-px flex-1 bg-[#494b70]" />
                 </div>
 
-                {/* SOCIAL BUTTONS */}
                 <div className="grid grid-cols-3 gap-3">
+
                   {/* GOOGLE */}
                   <button
                     type="button"
@@ -368,6 +557,7 @@ function SigninForm() {
                     <HiOutlineMail className="text-[19px]" />
                     <span>Email</span>
                   </button>
+
                 </div>
 
                 {/* TERMS */}
@@ -399,7 +589,7 @@ function SigninForm() {
                   </p>
 
                   <p className="text-[13px] text-[#777990]">
-                    Already have an account?{" "}
+                    Don't have an account?{" "}
                     <Link
                       href="/register"
                       className="
@@ -408,10 +598,11 @@ function SigninForm() {
                         hover:text-[#a5a7ff]
                       "
                     >
-                      register
+                      Register
                     </Link>
                   </p>
                 </div>
+
               </div>
             </div>
           </section>

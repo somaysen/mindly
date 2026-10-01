@@ -3,7 +3,15 @@
 import React from "react";
 import { Search, Pencil, Plus } from "lucide-react";
 
-const Spaces = [
+type SpacesCardProps = {
+  title: string;
+  tasks: string;
+  updated: string;
+  image: string;
+  progress: number;
+};
+
+const Spaces: SpacesCardProps[] = [
   //   When there are no projects, make this array empty:
   //   {
   //     title: "Mindly UX Case Study",
@@ -91,14 +99,6 @@ function thoughtSpacesCenter() {
     </main>
   );
 }
-
-type SpacesCardProps = {
-  title: string;
-  tasks: string;
-  updated: string;
-  image: string;
-  progress: number;
-};
 
 function SpacesCard({
   title,

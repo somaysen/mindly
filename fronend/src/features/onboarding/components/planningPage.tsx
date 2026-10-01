@@ -234,7 +234,7 @@ export default function PlanningPage() {
             <Link
               href={
                 selectedPlanning
-                  ? "/onboarding/notes"
+                  ? "/onboarding/success"
                   : "#"
               }
               aria-disabled={!selectedPlanning}

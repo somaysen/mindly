@@ -12,9 +12,11 @@ import { FaGoogle } from "react-icons/fa";
 import { IoLogoApple } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { useRegister } from "../hooks/useAuthApi";
 import { startGoogleOAuth } from "@/lib/auth";
+import { toast } from "react-toastify";
 
 type SignupFormData = {
   email: string;
@@ -22,6 +24,7 @@ type SignupFormData = {
 };
 
 function SignupForm() {
+  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -49,8 +52,8 @@ function SignupForm() {
     registerUser(formData, {
       onSuccess: (res) => {
         console.log("Registration successful:", res);
-
-        window.location.href = "/verify-email";
+        toast.success("Account created. Check your email to verify it.");
+        router.push("/verify-email");
       },
 
       onError: (error: any) => {
@@ -64,6 +67,7 @@ function SignupForm() {
           "Unable to create account. Please try again.";
 
         setServerError(message);
+        toast.error(message);
       },
     });
   };

@@ -1,6 +1,13 @@
-import api from "@/config/axios" 
+import api from "@/config/axios";
 
-export const userInfo = async (data: FormData) => {
-   const response = await api.post("/api/user/info-user",data)
-      return response.data;
-  };
+export type UserInfoPayload = {
+  name?: string;
+  interests?: string[];
+  planning?: string[];
+};
+
+export const userInfo = async (data: UserInfoPayload) => {
+  const response = await api.post("/api/user/info-user", data);
+
+  return response.data;
+};

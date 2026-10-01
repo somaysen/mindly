@@ -3,7 +3,15 @@
 import React from "react";
 import { Search, Pencil, Plus } from "lucide-react";
 
-const projects = [
+type ProjectCardProps = {
+  title: string;
+  tasks: string;
+  updated: string;
+  image: string;
+  progress: number;
+};
+
+const projects: ProjectCardProps[] = [
   // When there are no projects, make this array empty:
   // {
   //   title: "Mindly UX Case Study",
@@ -94,14 +102,6 @@ function ProjectCenter() {
     </main>
   );
 }
-
-type ProjectCardProps = {
-  title: string;
-  tasks: string;
-  updated: string;
-  image: string;
-  progress: number;
-};
 
 function ProjectCard({
   title,

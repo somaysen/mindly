@@ -5,18 +5,14 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 
-// FIX 1: Fixed the typo "Onbording" -> "Onboarding"
 import { useUserInfo } from "@/features/onboarding/hooks/userOnbordingApi";
 
 const STORAGE_KEY = "onboardingData";
 
 type OnboardingData = {
-  auth?: string;
   name?: string;
   interests?: string[];
   planning?: string[];
-  taskId?: string;
-  notificationId?: string;
 };
 
 export default function SuccessPage() {
@@ -30,7 +26,6 @@ export default function SuccessPage() {
 
   const submitted = useRef(false);
 
-  // Exact payload passed to mutate()
   const [apiPayload, setApiPayload] =
     useState<OnboardingData | null>(null);
 
@@ -49,16 +44,14 @@ export default function SuccessPage() {
     try {
       const data: OnboardingData = JSON.parse(savedData);
 
-      // Exact data sent to the hook
+      // Data that will be sent to API
       setApiPayload(data);
 
       console.log("DATA SENT TO API:", data);
 
       submitted.current = true;
 
-      // FIX 2: Cast data `as any` to resolve the FormData type mismatch.
-      // The hook expects FormData, but we are passing a JSON object.
-      mutate(data as any, {
+      mutate(data, {
         onSuccess: (response) => {
           console.log("API RESPONSE:", response);
 
@@ -73,6 +66,7 @@ export default function SuccessPage() {
       });
     } catch (err) {
       console.error("Invalid onboarding data:", err);
+
       submitted.current = false;
     }
   }, [mutate]);
@@ -80,7 +74,6 @@ export default function SuccessPage() {
   return (
     <main className="min-h-screen overflow-hidden text-white">
       <div className="relative min-h-screen flex items-center justify-center p-4">
-        {/* FIX 3: Updated Tailwind canonical classes */}
         <div className="flex w-full max-w-7xl min-h-160 items-center justify-center">
 
           {/* LEFT IMAGE */}
@@ -120,7 +113,6 @@ export default function SuccessPage() {
               ease: "easeOut",
             }}
           >
-
             {/* STEP */}
             <div className="flex items-center justify-between mb-9">
               <span className="text-sm text-slate-300">
@@ -182,7 +174,7 @@ export default function SuccessPage() {
                 </div>
               )}
 
-              {/* ACTUAL API PAYLOAD AS FORM */}
+              {/* USER INFORMATION */}
               {apiPayload && (
                 <motion.div
                   className="mt-8"
@@ -239,7 +231,7 @@ export default function SuccessPage() {
                                   >
                                     {interest}
                                   </span>
-                                ),
+                                )
                               )}
                             </div>
                           ) : (
@@ -269,7 +261,7 @@ export default function SuccessPage() {
                                   >
                                     {plan}
                                   </span>
-                                ),
+                                )
                               )}
                             </div>
                           ) : (
@@ -281,31 +273,6 @@ export default function SuccessPage() {
                       </div>
                     )}
 
-                    {/* TASK ID */}
-                    {apiPayload.taskId && (
-                      <div>
-                        <label className="block text-xs text-slate-400 mb-1.5">
-                          Task ID
-                        </label>
-
-                        <div className="w-full rounded-xl bg-[#3F416C]/60 border border-[#5D6090]/40 px-4 py-3 text-xs font-mono text-[#C5C8FF] break-all">
-                          {apiPayload.taskId}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* NOTIFICATION ID */}
-                    {apiPayload.notificationId && (
-                      <div>
-                        <label className="block text-xs text-slate-400 mb-1.5">
-                          Notification ID
-                        </label>
-
-                        <div className="w-full rounded-xl bg-[#3F416C]/60 border border-[#5D6090]/40 px-4 py-3 text-xs font-mono text-[#C5C8FF] break-all">
-                          {apiPayload.notificationId}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </motion.div>
               )}

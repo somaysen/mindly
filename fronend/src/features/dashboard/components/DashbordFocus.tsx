@@ -6,8 +6,8 @@ interface Task {
   _id: string;
   taskName: string;
   description?: string;
-  dueDate?: string;
-  dueTime?: string;
+  dueDate?: string | null;
+  dueTime?: string | null;
   priority?: "high" | "medium" | "low";
   status?: string;
 }

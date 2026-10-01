@@ -26,10 +26,7 @@ export default function OnboardingPage() {
       name: name.trim(),
     };
 
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(updatedData)
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
 
     // Go to Step 2
     router.push("./intention");
@@ -39,13 +36,12 @@ export default function OnboardingPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       {/* FIX 2: Updated h-[640px] to h-160 */}
       <div className="flex w-full max-w-7xl h-160 items-center rounded-2xl overflow-hidden">
-
         {/* Left Image */}
         {/* FIX 3: Changed w-5xl to w-1/2 and h-screen to h-full for proper layout */}
         <div className="w-1/2 h-full flex items-center justify-center flex-col">
           <img
             // {/* FIX 4: Updated w-[500px] to w-125 */}
-            className="w-125" 
+            className="w-125"
             src="/images/Saying Hello.png"
             alt="image"
           />
@@ -53,12 +49,9 @@ export default function OnboardingPage() {
 
         {/* Right Panel */}
         <div className="w-1/2 bg-[#181A46] h-full rounded-2xl flex flex-col p-10 text-white">
-
           {/* Step indicator */}
           <div className="flex items-center justify-between mb-10">
-            <span className="text-sm text-slate-400">
-              Step 1 of 6
-            </span>
+            <span className="text-sm text-slate-400">Step 1 of 6</span>
 
             <div className="w-32 h-1.5 bg-slate-700 rounded-full overflow-hidden">
               {/* FIX 5: Updated bg-gradient-to-r to bg-linear-to-r */}
@@ -68,7 +61,6 @@ export default function OnboardingPage() {
 
           {/* Content */}
           <div className="flex-1 flex flex-col justify-center">
-
             <AnimatePresence mode="wait">
               {name ? (
                 <motion.div
@@ -105,8 +97,8 @@ export default function OnboardingPage() {
                   </h1>
 
                   <p className="text-slate-400 text-[15px] leading-relaxed mb-8 max-w-sm">
-                    Tell us what you'd like Mindly to call you.
-                    You can change this anytime in Settings.
+                    Tell us what you'd like Mindly to call you. You can change
+                    this anytime in Settings.
                   </p>
                 </motion.div>
               )}

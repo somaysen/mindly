@@ -7,7 +7,15 @@ import {
   Users,
 } from "lucide-react";
 
-const schedules = [
+type Schedule = {
+  time: string;
+  title: string;
+  subtitle: string;
+  duration: string;
+  type: "design" | "team";
+};
+
+const schedules: Schedule[] = [
   // {
   //    time: "09:00",
   //    title: "Design Class",

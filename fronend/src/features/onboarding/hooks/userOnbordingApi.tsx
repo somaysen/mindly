@@ -4,8 +4,8 @@ import * as api from "@/api";
 export const useUserInfo = () => {
   return useMutation({
     mutationKey: ["userInfo"],
-    mutationFn: (data: FormData) => api.userInfo(data),
-    retry: 0
+    mutationFn: (data: api.UserInfoPayload) => api.userInfo(data),
+    retry: 0,
   });
 };
 
