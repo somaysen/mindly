@@ -214,11 +214,17 @@ function TaskbarCenter() {
       {/* ================= NEW TASK MODAL ================= */}
       {isTaskModalOpen && (
         <NewTaskModal
+          task={{
+            taskName: "",
+            description: "",
+            dueDate: "",
+            dueTime: "",
+            priority: "",
+            checklist: [],
+          }}
           onClose={() => setIsTaskModalOpen(false)}
-          onAddTask={(task) => {
-            console.log("New Task:", task);
-
-            // Modal close
+          onUpdated={(task) => {
+            console.log("Updated Task:", task);
             setIsTaskModalOpen(false);
           }}
         />

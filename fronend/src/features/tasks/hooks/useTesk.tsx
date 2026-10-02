@@ -32,6 +32,37 @@ export const useTaskCreate = () => {
 };
 
 // ===============================
+// UPDATE TASK
+// ===============================
+
+export const useTaskUpdate = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["taskUpdating"],
+
+    mutationFn: async ({
+      taskId,
+      data,
+    }: {
+      taskId: string;
+      data: FormData;
+    }) => {
+      return await api.updateTask(taskId, data);
+    },
+
+    retry: 0,
+
+    onSuccess: async () => {
+      // Refresh task list after successful update
+      await queryClient.invalidateQueries({
+        queryKey: ["getTasks"],
+      });
+    },
+  });
+};
+
+// ===============================
 // GET TASKS
 // ===============================
 

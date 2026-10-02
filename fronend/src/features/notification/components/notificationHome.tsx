@@ -1,8 +1,8 @@
 import Topbar from "@/components/Navber/Topbar";
 import Sidebar from "@/components/Navber/Sidebar";
-import ProjectCenter from "./ProjectCenter";
+import NotificationCenter from "./notificationCenter";
 
-function projects() {
+function notificationHome() {
   return (
     <div className="flex h-screen w-full absolute overflow-hidden bg-[#0d0c1f]">
       {/* Global Navigation Sidebar */}
@@ -21,11 +21,11 @@ function projects() {
 
         {/* Scrollable Main Content */}
         <main className="flex-1 overflow-y-auto scrollbar-hide">
-          <ProjectCenter />
+          <NotificationCenter />
         </main>
       </div>
     </div>
   );
 }
 
-export default projects;
+export default notificationHome;

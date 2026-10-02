@@ -1,5 +1,5 @@
 import TaskSidebar from "./taskSidebar";
-import Topbar from "@/features/dashboard/components/Topbar";
+import Topbar from "@/components/Navber/Topbar";
 import TaskbarCenter from "./TaskbarCenter";
 
 function TasksPage() {

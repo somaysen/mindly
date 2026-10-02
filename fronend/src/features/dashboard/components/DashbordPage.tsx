@@ -3,7 +3,7 @@
 import React from "react";
 
 import DashboradSidbar from "@/features/dashboard/components/DashboradSidbar";
-import Topbar from "@/features/dashboard/components/Topbar";
+import Topbar from "@/components/Navber/Topbar";
 import DashbordCenter from "./DashbordCenter";
 
 function Page() {

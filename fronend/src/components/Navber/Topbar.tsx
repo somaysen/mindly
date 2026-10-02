@@ -48,6 +48,11 @@ function Topbar() {
     router.push("/profile");
   };
 
+  // Notifications
+  const handleNotifications = () => {
+    router.push("/notifications");
+  };
+
   // Logout
   const handleLogout = () => {
     setIsSettingsOpen(false);
@@ -91,7 +96,6 @@ function Topbar() {
           </button>
 
           {/* ================= SEARCH ================= */}
-          {/* Search bar only appears on "/" */}
           {pathname === "/" && (
             <div className="relative w-[min(360px,40vw)]">
               <Search
@@ -127,8 +131,9 @@ function Topbar() {
 
         {/* ================= RIGHT SECTION ================= */}
         <div className="flex shrink-0 items-center gap-2">
-          {/* Notification */}
+          {/* ================= NOTIFICATION ================= */}
           <button
+            onClick={handleNotifications}
             className="
               flex h-9 w-9
               items-center justify-center
@@ -137,6 +142,7 @@ function Topbar() {
               transition-colors
               hover:bg-[#17162f]
               hover:text-white
+              cursor-pointer
             "
             aria-label="Notifications"
           >
@@ -155,6 +161,7 @@ function Topbar() {
                 transition-colors
                 hover:bg-[#17162f]
                 hover:text-white
+                cursor-pointer
                 ${isSettingsOpen ? "bg-[#17162f] text-white" : ""}
               `}
               aria-label="Settings"
@@ -194,7 +201,6 @@ function Topbar() {
                   "
                 >
                   <User size={17} strokeWidth={1.8} />
-
                   <span>Profile</span>
                 </button>
 
@@ -243,6 +249,7 @@ function Topbar() {
               shadow-[#5968e8]/20
               transition-all
               hover:opacity-90
+              cursor-pointer
             "
           >
             <Sparkles size={17} strokeWidth={1.8} />

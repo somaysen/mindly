@@ -1,4 +1,4 @@
-import Topbar from "@/features/dashboard/components/Topbar";
+import Topbar from "@/components/Navber/Topbar";
 import Sidebar from "@/components/Navber/Sidebar";
 import ThoughtSpacesCenter from "./thoughtSpacesCenter";
 

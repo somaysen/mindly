@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Topbar from "@/features/dashboard/components/Topbar";
+import Topbar from "@/components/Navber/Topbar";
 import {
   Lightbulb,
   Mic,

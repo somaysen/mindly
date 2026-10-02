@@ -19,6 +19,14 @@ export const createTask = async (data: FormData) => {
   return response.data;
 };
 
+export const updateTask = async (taskId: string, data: FormData) => {
+  const response = await api.put(`/api/task/update/${taskId}`, data);
+
+  console.log("Update Task Response:", response.data);
+
+  return response.data;
+};
+
 // // ===============================
 // // GET TASKS
 // // ===============================
