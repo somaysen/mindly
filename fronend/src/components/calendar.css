@@ -176,6 +176,7 @@
 ===================================== */
 
 .mindly-calendar .rdp-day_button {
+  position: relative;
   width: 38px;
   height: 38px;
 
@@ -197,7 +198,6 @@
   align-items: center;
   justify-content: center;
 }
-
 
 /* =====================================
    SELECTED DATE
