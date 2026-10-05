@@ -39,6 +39,16 @@ body {
     sans-serif;
 }
 
+@keyframes query-loading {
+  0% {
+    transform: translateX(-120%);
+  }
+
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 /* =========================================
    MINDLY BACKGROUND
 ========================================= */

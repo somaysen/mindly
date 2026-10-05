@@ -6,7 +6,6 @@ export const useUserInfo = () => {
     queryKey: ["userInfo"],
     queryFn: api.getUserInfo,
     retry: 0,
-    refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 };

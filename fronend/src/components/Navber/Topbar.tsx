@@ -205,7 +205,7 @@ function Topbar() {
                 </button>
 
                 {/* Logout */}
-                <button
+                {/* <button
                   onClick={handleLogout}
                   disabled={isPending}
                   className="
@@ -227,7 +227,7 @@ function Topbar() {
                   <span>
                     {isPending ? "Logging out..." : "Logout"}
                   </span>
-                </button>
+                </button> */}
               </div>
             )}
           </div>
