@@ -1,31 +1,28 @@
-"use client";
-
-import React from "react";
-
-import DashboradSidbar from "@/features/dashboard/components/DashboradSidbar";
 import Topbar from "@/components/Navber/Topbar";
+import DashboardSidebar from "./DashboradSidbar";
 import DashbordCenter from "./DashbordCenter";
 
-function Page() {
+function TasksPage() {
   return (
-    <div className="min-h-screen w-full bg-[#0d0c20] px-3 py-3 text-white sm:px-5 sm:py-5 lg:px-7">
-      <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-[1590px] gap-8">
-        {/* LEFT SIDEBAR */}
-        <DashboradSidbar />
+    <div className="h-screen w-full overflow-hidden bg-[#0d0c1f]">
+      <aside className="fixed left-8 top-5 z-50 h-screen w-[260px]">
+        <DashboardSidebar />
+      </aside>
 
-        {/* MAIN CONTENT */}
-        <main className="min-w-0 flex-1">
-          <div className="overflow-hidden rounded-[22px]">
-            {/* TOPBAR */}
-            <Topbar />
+      {/* Main Area */}
+      <div className="ml-[260px] W-[50%] h-screen">
+        {/* Fixed Topbar */}
+        <div className="fixed left-[350px] right-5 top-2 z-50">
+          <Topbar />
+        </div>
 
-            {/* DASHBOARD CENTER */}
-            <DashbordCenter />
-          </div>
+        {/* Scrollable Content */}
+        <main className="h-screen ml-[90px] mr-[18px]  right-10  overflow-y-auto pt-[130px] scrollbar-hide">
+          <DashbordCenter />
         </main>
       </div>
     </div>
   );
 }
 
-export default Page;
+export default TasksPage;

@@ -9,8 +9,10 @@ import {
   CalendarBlank,
   Folder,
   PuzzlePiece,
-  ChartDonutIcon ,
+  ChartDonutIcon,
 } from "@phosphor-icons/react";
+
+import ProfileModal from "./ProfileModel";
 
 const navItems = [
   {
@@ -20,7 +22,7 @@ const navItems = [
   },
   {
     href: "/brain",
-    label: "brain",
+    label: "Brain",
     icon: Lightbulb,
   },
   {
@@ -40,14 +42,29 @@ const navItems = [
   },
   {
     href: "/thoughtSpaces",
-    label: "thoughtSpaces",
+    label: "Thought Spaces",
     icon: PuzzlePiece,
   },
   {
     href: "/weeklyReflection",
-    label: "WeeklyReflection",
-    icon: ChartDonutIcon ,
+    label: "Weekly Reflection",
+    icon: ChartDonutIcon,
   },
+];
+
+const avatars = [
+  "/Avatar/Asset 32.png",
+  "/Avatar/Asset 33.png",
+  "/Avatar/Asset 34.png",
+  "/Avatar/Asset 35.png",
+  "/Avatar/Asset 36.png",
+  "/Avatar/Asset 37.png",
+  "/Avatar/Asset 39 (1).png",
+  "/Avatar/Asset 32.png",
+  "/Avatar/Asset 40.png",
+  "/Avatar/Asset 41.png",
+  "/Avatar/Asset 42.png",
+  "/Avatar/Frame 904.png",
 ];
 
 export default function Sidebar() {
@@ -106,7 +123,7 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 aria-label={item.label}
-                className={`
+                className="
                   group
                   relative
                   flex
@@ -118,10 +135,8 @@ export default function Sidebar() {
                   text-white
                   transition-all
                   duration-200
-                  
-                `}
+                "
               >
-                {/* Active Indicator */}
                 {isActive && (
                   <span
                     className="
@@ -153,19 +168,7 @@ export default function Sidebar() {
 
         {/* Profile */}
         <div className="mt-auto flex items-center justify-center pb-[50px] pt-[10px]">
-          <button
-            type="button"
-            aria-label="Profile"
-            className="
-              h-[22px]
-              w-[22px]
-              rounded-full
-              bg-[#dfe1f7]
-              shadow-[0_0_0_3px_rgba(255,255,255,0.10)]
-              transition-transform
-              hover:scale-105
-            "
-          />
+          <ProfileModal avatars={avatars} />
         </div>
       </nav>
     </aside>
