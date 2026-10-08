@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import {
   Loader2,
@@ -20,7 +20,6 @@ import {
 import { persistAuthToken } from "@/lib/auth";
 
 export default function VerificationPage() {
-  const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -30,15 +29,12 @@ export default function VerificationPage() {
    * /verify-email?token=xxxxxxxx
    */
 
-  const userId =
-    typeof params?.id === "string"
-      ? params.id
-      : "";
-
   const token = searchParams.get("token");
+  const email = searchParams.get("email")?.trim().toLowerCase() ?? "";
+  const userId = searchParams.get("userId") ?? "";
 
   const [status, setStatus] = useState<
-    "loading" | "success" | "error"
+    "loading" | "pending" | "success" | "error"
   >("loading");
 
   const [message, setMessage] = useState("");
@@ -66,8 +62,12 @@ export default function VerificationPage() {
    */
   useEffect(() => {
     if (!token) {
-      setStatus("error");
-      setMessage("Verification token is missing.");
+      setStatus(email ? "pending" : "error");
+      setMessage(
+        email
+          ? "Check your inbox for the verification link."
+          : "Verification token is missing."
+      );
       return;
     }
 
@@ -77,22 +77,12 @@ export default function VerificationPage() {
 
     verificationStarted.current = true;
 
-    console.log(
-      "Sending verification token:",
-      token
-    );
-
     verify(
       {
         token,
       },
       {
         onSuccess: (response: any) => {
-          console.log(
-            "Verification response:",
-            response
-          );
-
           /*
            * Backend response:
            *
@@ -144,11 +134,6 @@ export default function VerificationPage() {
         },
 
         onError: (error: any) => {
-          console.error(
-            "Email verification failed:",
-            error
-          );
-
           const errorData =
             error?.response?.data;
 
@@ -161,7 +146,7 @@ export default function VerificationPage() {
         },
       }
     );
-  }, [token, verify]);
+  }, [email, token, verify]);
 
   /*
    * ========================================
@@ -171,24 +156,20 @@ export default function VerificationPage() {
   const handleResend = () => {
     if (!userId) {
       setMessage(
-        "Unable to identify your account."
+        "Unable to identify your account. Please sign in again to request a new verification link."
       );
       return;
     }
 
     setMessage("");
 
+    const data = new FormData();
+    data.append("userId", userId);
+
     resendVerification(
-      {
-        userId,
-      },
+      data,
       {
         onSuccess: (response: any) => {
-          console.log(
-            "Resend response:",
-            response
-          );
-
           setMessage(
             response?.message ||
               "A new verification email has been sent. Please check your inbox."
@@ -196,11 +177,6 @@ export default function VerificationPage() {
         },
 
         onError: (error: any) => {
-          console.error(
-            "Resend verification failed:",
-            error
-          );
-
           setMessage(
             error?.response?.data?.message ||
               "Failed to resend verification email. Please try again."
@@ -279,6 +255,30 @@ export default function VerificationPage() {
                 <div className="mx-auto mt-7 h-1.5 w-40 overflow-hidden rounded-full bg-white/10">
                   <div className="h-full w-1/2 animate-pulse rounded-full bg-blue-500" />
                 </div>
+              </div>
+            )}
+
+            {/* ================= SUCCESS ================= */}
+            {status === "pending" && (
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+                  Check your inbox
+                </h1>
+                <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-400">
+                  {message ||
+                    "We sent a verification link to your email address."}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={isResending}
+                  className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${isResending ? "animate-spin" : ""}`}
+                  />
+                  {isResending ? "Sending email..." : "Resend verification email"}
+                </button>
               </div>
             )}
 

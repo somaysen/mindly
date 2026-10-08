@@ -123,8 +123,10 @@ function SigninForm() {
             "EMAIL NOT VERIFIED → REDIRECTING TO VERIFY PAGE"
           );
 
-          window.location.href =
-            `/verify-email?email=${encodeURIComponent(email)}`;
+          const verificationParams = new URLSearchParams({ email });
+          const userId = user?.id ?? user?._id ?? res?.data?.userId ?? res?.userId;
+          if (userId) verificationParams.set("userId", String(userId));
+          window.location.href = `/verify-email?${verificationParams.toString()}`;
 
           return;
         }
@@ -223,8 +225,13 @@ function SigninForm() {
             lowerMessage.includes("unverified")
           )
         ) {
-          window.location.href =
-            `/verify-email?email=${encodeURIComponent(email)}`;
+          const verificationParams = new URLSearchParams({ email });
+          const userId =
+            err?.response?.data?.data?.user?.id ??
+            err?.response?.data?.user?.id ??
+            err?.response?.data?.userId;
+          if (userId) verificationParams.set("userId", String(userId));
+          window.location.href = `/verify-email?${verificationParams.toString()}`;
 
           return;
         }

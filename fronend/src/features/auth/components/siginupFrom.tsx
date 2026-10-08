@@ -53,7 +53,16 @@ function SignupForm() {
       onSuccess: (res) => {
         console.log("Registration successful:", res);
         toast.success("Account created. Check your email to verify it.");
-        router.push("/verify-email");
+        const email = data.email.trim().toLowerCase();
+        const userId =
+          res?.data?.user?.id ??
+          res?.data?.data?.user?.id ??
+          res?.user?.id ??
+          res?.data?.userId ??
+          res?.userId;
+        const params = new URLSearchParams({ email });
+        if (userId) params.set("userId", String(userId));
+        router.push(`/verify-email?${params.toString()}`);
       },
 
       onError: (error: any) => {
