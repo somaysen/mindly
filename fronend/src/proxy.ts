@@ -8,11 +8,11 @@ function hasAuthCookie(request: NextRequest) {
   );
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // API requests are proxied to the backend by next.config.ts and must not be
-  // redirected to the login page before the rewrite runs.
+  // API requests are handled by the API route and must not be redirected to
+  // the login page first.
   if (pathname === "/api" || pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
