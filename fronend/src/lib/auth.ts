@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { AUTH_COOKIE_NAMES, getApiBaseUrl } from "@/lib/auth-routes";
+import { AUTH_COOKIE_NAMES } from "@/lib/auth-routes";
 
 export {
   AUTH_COOKIE_NAMES,
@@ -41,7 +41,7 @@ export function getGoogleOAuthUrl() {
   }
 
   const query = params.toString();
-  return `${getApiBaseUrl()}/api/auth/google${query ? `?${query}` : ""}`;
+  return `/api/auth/google${query ? `?${query}` : ""}`;
 }
 
 export function startGoogleOAuth() {

@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## API configuration
+
+For local development, set `NEXT_PUBLIC_API_BASE_URL` or `API_BASE_URL` to your backend origin (for example, `http://localhost:9000`). Production defaults to `https://mindly-backend-omega.vercel.app`; set `API_BASE_URL` in Vercel only if you use a different backend. Browser API calls use the app's `/api` route and Next.js proxies them to this backend, so the browser does not make cross-origin API requests. Production builds reject insecure or localhost API overrides.
+
 ## Getting Started
 
 First, run the development server:

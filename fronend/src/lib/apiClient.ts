@@ -1,12 +1,8 @@
 import axios from "axios";
 
-const rawBaseURL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:9000"
-).trim();
-const API_BASE_URL = rawBaseURL.replace(/\/$/, "").replace(/\/api$/, "");
-
 const apiClient = axios.create({
-  baseURL: `${API_BASE_URL}/api`,
+  // Keep browser requests on this origin; next.config.ts proxies /api to the backend.
+  baseURL: "/api",
   withCredentials: true,
   timeout: 10000,
 });

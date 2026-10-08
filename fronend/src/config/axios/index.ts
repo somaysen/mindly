@@ -1,12 +1,6 @@
 import axios from "axios";
 import { clearAuthCookies, isPublicPath } from "@/lib/auth";
 
-const rawBaseURL = (
-  process.env.NEXT_PUBLIC_API_BASE_URL || ""
-).trim();
-
-const baseURL = rawBaseURL.replace(/\/$/, "");
-
 const isPublicRoute = (path: string) => {
   if (!path) return false;
 
@@ -17,7 +11,8 @@ const isPublicRoute = (path: string) => {
 };
 
 const api = axios.create({
-  baseURL,
+  // Keep browser requests on this origin; next.config.ts proxies /api to the backend.
+  baseURL: "",
 
   headers: {
     "Content-Type": "application/json",
