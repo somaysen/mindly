@@ -163,11 +163,8 @@ export default function VerificationPage() {
 
     setMessage("");
 
-    const data = new FormData();
-    data.append("userId", userId);
-
     resendVerification(
-      data,
+      { userId },
       {
         onSuccess: (response: any) => {
           setMessage(
