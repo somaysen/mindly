@@ -7,7 +7,7 @@ export default function Loading() {
     >
       <div className="flex items-center gap-3">
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#5965ed] text-lg font-semibold shadow-[0_8px_30px_rgba(89,101,237,0.35)]">
-          <img src="./images/Frame 76.png" alt="" />
+          <img src="/images/Frame 76.png" alt="" />
         </span>
         {/* <span className="text-xl font-semibold tracking-tight">
           <img className="w-20" src="./images/Group 10.png" alt="" />

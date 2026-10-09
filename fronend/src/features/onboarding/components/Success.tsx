@@ -12,6 +12,7 @@ const STORAGE_KEY = "onboardingData";
 type OnboardingData = {
   name?: string;
   interests?: string[];
+  intention?: string[];
   planning?: string[];
 };
 
@@ -43,15 +44,20 @@ export default function SuccessPage() {
 
     try {
       const data: OnboardingData = JSON.parse(savedData);
+      const payload = {
+        name: data.name,
+        interests: data.interests ?? data.intention,
+        planning: data.planning,
+      };
 
       // Data that will be sent to API
-      setApiPayload(data);
+      setApiPayload({ ...data, interests: payload.interests });
 
-      console.log("DATA SENT TO API:", data);
+      console.log("DATA SENT TO API:", payload);
 
       submitted.current = true;
 
-      mutate(data, {
+      mutate(payload, {
         onSuccess: (response) => {
           console.log("API RESPONSE:", response);
 
