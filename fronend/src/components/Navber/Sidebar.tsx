@@ -53,18 +53,18 @@ const navItems = [
 ];
 
 const avatars = [
-  "/Avatar/Asset 32.png",
-  "/Avatar/Asset 33.png",
-  "/Avatar/Asset 34.png",
-  "/Avatar/Asset 35.png",
-  "/Avatar/Asset 36.png",
-  "/Avatar/Asset 37.png",
-  "/Avatar/Asset 39 (1).png",
-  "/Avatar/Asset 32.png",
-  "/Avatar/Asset 40.png",
-  "/Avatar/Asset 41.png",
-  "/Avatar/Asset 42.png",
-  "/Avatar/Frame 904.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2041.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2039%20(1).png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2037.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2033.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2035.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Frame%20904.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2040.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2043.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2042.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2036.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2034.png",
+  "https://ik.imagekit.io/wcerfpt9sm/Avatar/Asset%2032.png",
 ];
 
 export default function Sidebar() {

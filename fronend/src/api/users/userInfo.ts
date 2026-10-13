@@ -1,6 +1,7 @@
 import api from "@/config/axios";
 
 export type UserInfoPayload = {
+  avatar?: string;
   name?: string;
   interests?: string[];
   planning?: string[];

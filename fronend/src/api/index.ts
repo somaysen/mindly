@@ -17,3 +17,9 @@ export * from "./tasks/getTask";
 
 /* ==================== Notification =============== */
 export * from "./notification/createNotification"
+
+/* ==================== Project =================== */
+
+export * from "./project/createProject";
+export * from "./project/getProject";
+export * from "./project/getProjectById"

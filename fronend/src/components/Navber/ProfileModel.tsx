@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { X } from "@phosphor-icons/react";
+import { useProfileInfo } from "@/features/profile/hooks/useProfile";
+import { useUserInfo } from "@/features/onboarding/hooks/userOnbordingApi";
 
 interface ProfileModalProps {
   avatars: string[];
@@ -11,17 +14,44 @@ export default function ProfileModal({
   avatars,
 }: ProfileModalProps) {
   const [showProfile, setShowProfile] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState(0);
-  const [displayName, setDisplayName] = useState("Tanya");
+  const [selectedAvatar, setSelectedAvatar] = useState(avatars[0] ?? "");
+  const [displayName, setDisplayName] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const queryClient = useQueryClient();
+  const { data: response } = useProfileInfo();
+  const profile = response?.data;
+  const saveProfile = useUserInfo();
+
+  useEffect(() => {
+    if (!showProfile) return;
+
+    const savedAvatar = profile?.avatar ?? profile?.avatarUrl;
+    setSelectedAvatar(
+      typeof savedAvatar === "string" && savedAvatar
+        ? savedAvatar
+        : (avatars[0] ?? "")
+    );
+    setDisplayName(profile?.name ?? "");
+    setSaveError("");
+  }, [showProfile, profile, avatars]);
 
   const handleSave = () => {
-    setShowProfile(false);
-
-    // Later API call
-    console.log({
-      avatar: avatars[selectedAvatar],
-      displayName,
-    });
+    setSaveError("");
+    saveProfile.mutate(
+      {
+        avatar: selectedAvatar,
+        ...(displayName.trim() ? { name: displayName.trim() } : {}),
+      },
+      {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: ["userInfo"] });
+          setShowProfile(false);
+        },
+        onError: () => {
+          setSaveError("Could not save your profile. Please try again.");
+        },
+      }
+    );
   };
 
   return (
@@ -44,7 +74,7 @@ export default function ProfileModal({
         "
       >
         <img
-          src={avatars[selectedAvatar]}
+          src={profile?.avatar ?? profile?.avatarUrl ?? avatars[0]}
           alt="Profile"
           className="h-full w-full object-cover"
         />
@@ -116,7 +146,7 @@ export default function ProfileModal({
                     <button
                       key={`${avatar}-${index}`}
                       type="button"
-                      onClick={() => setSelectedAvatar(index)}
+                      onClick={() => setSelectedAvatar(avatar)}
                       className={`
                         h-[36px]
                         w-[36px]
@@ -124,7 +154,7 @@ export default function ProfileModal({
                         rounded-full
                         transition-all
                         ${
-                          selectedAvatar === index
+                          selectedAvatar === avatar
                             ? "ring-2 ring-[#7b82ff] ring-offset-2 ring-offset-[#1d1e55]"
                             : "hover:scale-110"
                         }
@@ -190,17 +220,23 @@ export default function ProfileModal({
                   "
                 >
                   <img
-                    src={avatars[selectedAvatar]}
+                    src={selectedAvatar}
                     alt="Selected avatar"
                     className="h-full w-full object-cover"
                   />
                 </div>
 
                 <p className="mt-3 text-sm font-medium text-white">
-                  {displayName || "Tanya"}
+                  {displayName || "Your name"}
                 </p>
               </div>
             </div>
+
+            {saveError && (
+              <p role="alert" className="mt-4 text-sm text-red-300">
+                {saveError}
+              </p>
+            )}
 
             {/* Buttons */}
             <div className="mt-6 flex justify-end gap-3">
@@ -225,6 +261,7 @@ export default function ProfileModal({
               <button
                 type="button"
                 onClick={handleSave}
+                disabled={saveProfile.isPending || !selectedAvatar}
                 className="
                   h-[38px]
                   rounded-full
@@ -236,9 +273,11 @@ export default function ProfileModal({
                   shadow-[0_8px_20px_rgba(99,109,241,0.25)]
                   transition
                   hover:bg-[#727bf5]
+                  disabled:cursor-not-allowed
+                  disabled:opacity-60
                 "
               >
-                Save Changes
+                {saveProfile.isPending ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>

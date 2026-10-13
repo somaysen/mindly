@@ -110,8 +110,16 @@ function ProfileCenter() {
               <div className="flex items-center gap-5">
 
                 {/* Avatar */}
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#294c3c] text-3xl">
-                  🦌
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#294c3c] text-2xl font-semibold text-white">
+                  {profile.avatar || profile.avatarUrl ? (
+                    <img
+                      src={profile.avatar ?? profile.avatarUrl}
+                      alt={`${profile.name || "Profile"} avatar`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    profile.name?.trim()?.charAt(0)?.toUpperCase() || "?"
+                  )}
                 </div>
 
                 {/* User Info */}
