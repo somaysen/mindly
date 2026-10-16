@@ -60,7 +60,7 @@ function SignupForm() {
         error?.response?.data?.message ||
         error?.response?.data?.error ||
         error?.message ||
-        console.log(error,error?.message);
+        // console.log(error,error?.message);
           "Unable to create account. Please try again.";
 
         setServerError(message);

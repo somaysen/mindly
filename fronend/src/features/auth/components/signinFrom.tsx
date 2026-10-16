@@ -178,12 +178,12 @@ function SigninForm() {
         /*
          * Get backend error message
          */
-        const message =
-        console.log(error,error?.message);
+        const message = String(
           err?.response?.data?.message ??
-          err?.response?.data?.error ??
-          err?.message ??
-          "";
+            err?.response?.data?.error ??
+            err?.message ??
+            ""
+        );
 
         /*
          * If backend itself says email is not verified,
