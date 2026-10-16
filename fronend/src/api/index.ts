@@ -13,6 +13,7 @@ export * from "./users/getUserInfo"
 /* ===================task================= */
 export * from "./tasks/creatingTask";
 export * from "./tasks/getTask";
+export * from "./tasks/updateTask"
 
 
 /* ==================== Notification =============== */

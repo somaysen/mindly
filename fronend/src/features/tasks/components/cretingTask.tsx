@@ -231,12 +231,10 @@ export default function EditTaskModal({
         JSON.stringify(checklist)
       );
 
-      const response = await updateTask({
+      await updateTask({
         taskId,
         data: formData,
       });
-
-      console.log("✅ Task updated:", response);
 
       toast.success("Task updated successfully.");
 
@@ -253,7 +251,6 @@ export default function EditTaskModal({
 
       onClose?.();
     } catch (error: any) {
-      console.error("❌ Task update failed:", error);
 
       const message =
         error?.response?.data?.message ||

@@ -2,6 +2,5 @@ import api from "@/config/axios"
 
 export const register = async (data: FormData) => {
     const response = await api.post("/api/auth/register",data)
-    console.log(data);
     return response.data;
 };

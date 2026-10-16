@@ -38,7 +38,6 @@ export default function SuccessPage() {
     const savedData = localStorage.getItem(STORAGE_KEY);
 
     if (!savedData) {
-      console.error("Onboarding data not found");
       return;
     }
 
@@ -53,26 +52,18 @@ export default function SuccessPage() {
       // Data that will be sent to API
       setApiPayload({ ...data, interests: payload.interests });
 
-      console.log("DATA SENT TO API:", payload);
-
       submitted.current = true;
 
       mutate(payload, {
-        onSuccess: (response) => {
-          console.log("API RESPONSE:", response);
-
+        onSuccess: () => {
           localStorage.removeItem(STORAGE_KEY);
         },
 
-        onError: (err) => {
-          console.error("Create user failed:", err);
-
+        onError: () => {
           submitted.current = false;
         },
       });
-    } catch (err) {
-      console.error("Invalid onboarding data:", err);
-
+    } catch {
       submitted.current = false;
     }
   }, [mutate]);
@@ -122,7 +113,7 @@ export default function SuccessPage() {
             {/* STEP */}
             <div className="flex items-center justify-between mb-9">
               <span className="text-sm text-slate-300">
-                Step 6 of 6
+                Step 3 of 3
               </span>
 
               <div className="w-32 h-2 bg-[#d5d7ff]/30 rounded-full overflow-hidden">

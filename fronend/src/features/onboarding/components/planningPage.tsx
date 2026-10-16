@@ -114,7 +114,7 @@ export default function PlanningPage() {
             {/* Step Indicator */}
             <div className="flex items-center justify-between mb-9">
               <span className="text-sm text-slate-300">
-                Step 3 of 6
+                Step 3 of 3
               </span>
 
               <div className="w-32 h-2 bg-[#d5d7ff] rounded-full overflow-hidden">

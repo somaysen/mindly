@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import {
-  Eye,
-  EyeOff,
-  LockKeyhole,
-} from "lucide-react";
+import { Eye, EyeOff, LockKeyhole } from "lucide-react";
 import LoginAnimation from "../../../components/auth/LoginAnimation";
 import { FaGoogle } from "react-icons/fa";
 import { IoLogoApple } from "react-icons/io5";
@@ -34,14 +30,9 @@ function SignupForm() {
     formState: { errors },
   } = useForm<SignupFormData>();
 
-  const {
-    mutate: registerUser,
-    isPending,
-  } = useRegister();
+  const { mutate: registerUser, isPending } = useRegister();
 
   const onSubmit = (data: SignupFormData) => {
-    console.log(data);
-
     setServerError(null);
 
     const formData = new FormData();
@@ -51,7 +42,6 @@ function SignupForm() {
 
     registerUser(formData, {
       onSuccess: (res) => {
-        console.log("Registration successful:", res);
         toast.success("Account created. Check your email to verify it.");
         const email = data.email.trim().toLowerCase();
         const userId =
@@ -66,13 +56,11 @@ function SignupForm() {
       },
 
       onError: (error: any) => {
-        console.log(error);
-        console.error("Registration failed:", error);
-
         const message =
-          error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        console.log(error,error?.message);
           "Unable to create account. Please try again.";
 
         setServerError(message);
@@ -122,7 +110,6 @@ function SignupForm() {
               "
             >
               <div className="space-y-5">
-
                 {/* ================= LOGO ================= */}
                 <div>
                   <img
@@ -154,8 +141,8 @@ function SignupForm() {
                       text-white/90
                     "
                   >
-                    A quieter place for your thoughts. Create your account
-                    and start organizing what matters.
+                    A quieter place for your thoughts. Create your account and
+                    start organizing what matters.
                   </p>
                 </div>
 
@@ -184,11 +171,9 @@ function SignupForm() {
                   className="space-y-3"
                   noValidate
                 >
-
                   {/* EMAIL */}
                   <div>
                     <div className="relative">
-
                       <HiOutlineMail
                         size={20}
                         className="
@@ -207,10 +192,8 @@ function SignupForm() {
                         {...register("email", {
                           required: "Email is required",
                           pattern: {
-                            value:
-                              /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                            message:
-                              "Enter a valid email address",
+                            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                            message: "Enter a valid email address",
                           },
                         })}
                         className="
@@ -247,7 +230,6 @@ function SignupForm() {
                   {/* PASSWORD */}
                   <div>
                     <div className="relative">
-
                       <LockKeyhole
                         size={19}
                         className="
@@ -267,8 +249,7 @@ function SignupForm() {
                           required: "Password is required",
                           minLength: {
                             value: 6,
-                            message:
-                              "Password must be at least 6 characters",
+                            message: "Password must be at least 6 characters",
                           },
                         })}
                         className="
@@ -297,9 +278,7 @@ function SignupForm() {
                       {/* SHOW / HIDE PASSWORD */}
                       <button
                         type="button"
-                        onClick={() =>
-                          setShowPassword((prev) => !prev)
-                        }
+                        onClick={() => setShowPassword((prev) => !prev)}
                         className="
                           absolute
                           right-4
@@ -310,9 +289,7 @@ function SignupForm() {
                           hover:text-white
                         "
                         aria-label={
-                          showPassword
-                            ? "Hide password"
-                            : "Show password"
+                          showPassword ? "Hide password" : "Show password"
                         }
                       >
                         {showPassword ? (
@@ -358,9 +335,7 @@ function SignupForm() {
                       disabled:opacity-60
                     "
                   >
-                    {isPending
-                      ? "Creating..."
-                      : "Create an Account"}
+                    {isPending ? "Creating..." : "Create an Account"}
                   </button>
                 </form>
 
@@ -383,7 +358,6 @@ function SignupForm() {
 
                 {/* ================= SOCIAL BUTTONS ================= */}
                 <div className="grid grid-cols-3 gap-3">
-
                   {/* GOOGLE */}
                   <button
                     type="button"
@@ -472,7 +446,6 @@ function SignupForm() {
 
                 {/* ================= TERMS ================= */}
                 <div className="space-y-4 pt-1 text-center">
-
                   <p
                     className="
                       mx-auto
@@ -482,9 +455,7 @@ function SignupForm() {
                       text-[#777990]
                     "
                   >
-                    By creating an account, you agree to
-                    Mindly&apos;s{" "}
-
+                    By creating an account, you agree to Mindly&apos;s{" "}
                     <Link
                       href="/privacy-policy"
                       className="
@@ -493,10 +464,8 @@ function SignupForm() {
                       "
                     >
                       Privacy Policy
-                    </Link>
-
-                    {" "}and{" "}
-
+                    </Link>{" "}
+                    and{" "}
                     <Link
                       href="/terms"
                       className="
@@ -517,7 +486,6 @@ function SignupForm() {
                     "
                   >
                     Already have an account?{" "}
-
                     <Link
                       href="/login"
                       className="
@@ -530,7 +498,6 @@ function SignupForm() {
                       Log in
                     </Link>
                   </p>
-
                 </div>
               </div>
             </div>

@@ -18,7 +18,18 @@ function OAuthCallback() {
     persistAuthToken(token);
 
     const next = searchParams.get("from") || "/";
-    router.replace(next.startsWith("/") ? next : "/");
+    let destination = "/";
+
+    try {
+      const candidate = new URL(next, window.location.origin);
+      if (candidate.origin === window.location.origin) {
+        destination = `${candidate.pathname}${candidate.search}${candidate.hash}`;
+      }
+    } catch {
+      // Stay on the safe home destination when the redirect is malformed.
+    }
+
+    router.replace(destination);
   }, [router, searchParams]);
 
   return (

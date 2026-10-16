@@ -224,7 +224,6 @@ function TaskbarCenter() {
           }}
           onClose={() => setIsTaskModalOpen(false)}
           onUpdated={(task) => {
-            console.log("Updated Task:", task);
             setIsTaskModalOpen(false);
           }}
         />

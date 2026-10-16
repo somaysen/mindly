@@ -51,7 +51,7 @@ export default function OnboardingPage() {
         <div className="w-1/2 bg-[#181A46] h-full rounded-2xl flex flex-col p-10 text-white">
           {/* Step indicator */}
           <div className="flex items-center justify-between mb-10">
-            <span className="text-sm text-slate-400">Step 1 of 6</span>
+            <span className="text-sm text-slate-400">Step 1 of 1</span>
 
             <div className="w-32 h-1.5 bg-slate-700 rounded-full overflow-hidden">
               {/* FIX 5: Updated bg-gradient-to-r to bg-linear-to-r */}

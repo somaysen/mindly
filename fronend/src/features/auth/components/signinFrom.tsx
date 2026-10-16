@@ -58,9 +58,6 @@ function SigninForm() {
 
     loginUser(data, {
       onSuccess: (res: any) => {
-        console.log("========== LOGIN RESPONSE ==========");
-        console.log(JSON.stringify(res, null, 2));
-
         /*
          * Get user from all possible response structures
          */
@@ -103,10 +100,6 @@ function SigninForm() {
           res?.isVerified ??
           res?.isEmailVerified;
 
-        console.log("USER:", user);
-        console.log("TOKEN:", token);
-        console.log("IS VERIFIED:", isVerified);
-
         /*
          * ==================================================
          * EMAIL NOT VERIFIED
@@ -119,10 +112,6 @@ function SigninForm() {
           isVerified === "false" ||
           isVerified === 0
         ) {
-          console.log(
-            "EMAIL NOT VERIFIED → REDIRECTING TO VERIFY PAGE"
-          );
-
           const verificationParams = new URLSearchParams({ email });
           const userId = user?.id ?? user?._id ?? res?.data?.userId ?? res?.userId;
           if (userId) verificationParams.set("userId", String(userId));
@@ -143,10 +132,6 @@ function SigninForm() {
           isVerified === undefined ||
           isVerified === null
         ) {
-          console.error(
-            "Backend did not return email verification status"
-          );
-
           setServerError(
             "Email verification status was not received from the server."
           );
@@ -174,10 +159,6 @@ function SigninForm() {
            * Save token ONLY after email is verified
            */
           persistAuthToken(token);
-
-          console.log(
-            "EMAIL VERIFIED → LOGIN SUCCESS"
-          );
           toast.success("Welcome back!");
           router.push("/");
 
@@ -194,16 +175,11 @@ function SigninForm() {
       },
 
       onError: (err: any) => {
-        console.error(
-          "========== LOGIN ERROR =========="
-        );
-
-        console.error(err);
-
         /*
          * Get backend error message
          */
         const message =
+        console.log(error,error?.message);
           err?.response?.data?.message ??
           err?.response?.data?.error ??
           err?.message ??

@@ -106,7 +106,7 @@ export default function IntentionPage() {
           >
             {/* Step Indicator */}
             <div className="flex items-center justify-between mb-9">
-              <span className="text-sm text-slate-300">Step 2 of 6</span>
+              <span className="text-sm text-slate-300">Step 2 of 3</span>
 
               <div className="w-32 h-2 bg-[#d5d7ff] rounded-full overflow-hidden">
                 <motion.div

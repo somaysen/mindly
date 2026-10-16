@@ -1,54 +1,26 @@
 import axios from "axios";
 import { clearAuthCookies, isPublicPath } from "@/lib/auth";
 
-const isPublicRoute = (path: string) => {
-  if (!path) return false;
-
-  return (
-    isPublicPath(path) ||
-    path.includes("/user-verification")
-  );
-};
+const isPublicRoute = (path: string) =>
+  Boolean(path) && (isPublicPath(path) || path.includes("/user-verification"));
 
 const api = axios.create({
-  // Keep browser requests on this origin; next.config.ts proxies /api to the backend.
+  // Keep browser requests on this origin; the Next.js route proxies /api.
   baseURL: "",
-
-  headers: {
-    "Content-Type": "application/json",
-  },
-
+  headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
 api.interceptors.response.use(
-  (response) => {
-    console.log("✅ Response:", {
-      url: response.config.url,
-      status: response.status,
-    });
-
-    return response;
-  },
-
+  (response) => response,
   async (error) => {
     const status = error.response?.status;
     const responseData = error.response?.data;
     const originalRequest = error.config;
-
     const currentPath =
-      typeof window !== "undefined"
-        ? window.location.pathname
-        : "";
-
-    console.log("❌ Axios Error");
-    console.log("➡️ URL:", originalRequest?.url);
-    console.log("➡️ Method:", originalRequest?.method);
-    console.log("➡️ Status:", status);
-    console.log("➡️ Response:", responseData);
+      typeof window !== "undefined" ? window.location.pathname : "";
 
     let message = "Something went wrong";
-
     if (responseData) {
       if (typeof responseData === "string") {
         message = responseData.slice(0, 200);
@@ -61,92 +33,34 @@ api.interceptors.response.use(
 
     const publicRoute = isPublicRoute(currentPath);
 
-    /*
-    ==========================================
-    401 → REFRESH ACCESS TOKEN
-    ==========================================
-    */
-
-    if (
-      !publicRoute &&
-      status === 401 &&
-      !originalRequest?._retry
-    ) {
-      console.log("🔄 401 → trying refresh");
-
+    if (!publicRoute && status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        // IMPORTANT:
-        // baseURL already contains /api
-        const refreshResponse = await api.post(
-          "/api/auth/refresh"
-        );
-
-        console.log(
-          "✅ Refresh successful:",
-          refreshResponse.data
-        );
-
-        console.log(
-          "🔁 Retrying:",
-          originalRequest.url
-        );
-
+        await api.post("/api/auth/refresh");
         return api(originalRequest);
-      } catch (refreshError: any) {
-        console.error(
-          "❌ Refresh failed:",
-          refreshError?.response?.data ||
-            refreshError?.message
-        );
-
+      } catch (refreshError) {
         clearAuthCookies();
-
-        if (
-          typeof window !== "undefined" &&
-          !isPublicRoute(currentPath)
-        ) {
+        if (typeof window !== "undefined" && !isPublicRoute(currentPath)) {
           window.location.replace("/login");
         }
-
         return Promise.reject(refreshError);
       }
     }
 
-    /*
-    ==========================================
-    OTHER AUTH ERRORS
-    ==========================================
-    */
-
     if (
       !publicRoute &&
-      (
-        status === 403 ||
+      (status === 403 ||
         message.toLowerCase().includes("unauthorized") ||
         message.toLowerCase().includes("unauthenticated") ||
         message.toLowerCase().includes("invalid token") ||
-        message.toLowerCase().includes("token expired")
-      )
+        message.toLowerCase().includes("token expired"))
     ) {
-      console.log("🚪 Authentication failed");
-
       clearAuthCookies();
-
-      if (
-        typeof window !== "undefined" &&
-        !isPublicRoute(currentPath)
-      ) {
+      if (typeof window !== "undefined" && !isPublicRoute(currentPath)) {
         window.location.replace("/login");
       }
     }
-
-    /*
-    ==========================================
-    RETURN ORIGINAL ERROR
-    ==========================================
-    */
 
     if (error.response) {
       error.message = message;
