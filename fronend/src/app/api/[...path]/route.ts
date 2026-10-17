@@ -11,7 +11,6 @@ const HOP_BY_HOP_HEADERS = [
   "content-length",
   "host",
   "keep-alive",
-  "origin",
   "proxy-authenticate",
   "proxy-authorization",
   "referer",
@@ -27,8 +26,8 @@ const HOP_BY_HOP_HEADERS = [
 async function proxyRequest(request: NextRequest, context: RouteContext) {
   const origin = request.headers.get("origin");
 
-  // Keep browser requests same-origin; reject cross-site writes before removing
-  // Origin for the server-to-server request to the backend.
+  // Keep browser requests same-origin before forwarding them to the backend.
+  // The backend uses Origin to check its own allowed frontend origins.
   if (origin && origin !== request.nextUrl.origin) {
     return Response.json({ success: false, message: "Origin is not allowed." }, { status: 403 });
   }

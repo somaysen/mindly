@@ -20,6 +20,10 @@ export default function ProfileModal({
   const queryClient = useQueryClient();
   const { data: response } = useProfileInfo();
   const profile = response?.data;
+  const profileAvatar = [profile?.avatar, profile?.avatarUrl, ...avatars].find(
+    (avatar): avatar is string =>
+      typeof avatar === "string" && avatar.trim().length > 0
+  );
   const saveProfile = useUserInfo();
 
   useEffect(() => {
@@ -27,9 +31,9 @@ export default function ProfileModal({
 
     const savedAvatar = profile?.avatar ?? profile?.avatarUrl;
     setSelectedAvatar(
-      typeof savedAvatar === "string" && savedAvatar
-        ? savedAvatar
-        : (avatars[0] ?? "")
+      typeof savedAvatar === "string" && savedAvatar.trim()
+        ? savedAvatar.trim()
+        : (avatars.find((avatar) => avatar.trim()) ?? "")
     );
     setDisplayName(profile?.name ?? "");
     setSaveError("");
@@ -73,11 +77,13 @@ export default function ProfileModal({
           hover:scale-110
         "
       >
-        <img
-          src={profile?.avatar ?? profile?.avatarUrl ?? avatars[0]}
-          alt="Profile"
-          className="h-full w-full object-cover"
-        />
+        {profileAvatar && (
+          <img
+            src={profileAvatar}
+            alt="Profile"
+            className="h-full w-full object-cover"
+          />
+        )}
       </button>
 
       {/* Profile Modal */}
@@ -142,7 +148,9 @@ export default function ProfileModal({
               <div className="w-[175px]">
                 {/* Avatar Selection */}
                 <div className="grid grid-cols-4 gap-3">
-                  {avatars.map((avatar, index) => (
+                  {avatars
+                    .filter((avatar) => avatar.trim())
+                    .map((avatar, index) => (
                     <button
                       key={`${avatar}-${index}`}
                       type="button"
@@ -166,7 +174,7 @@ export default function ProfileModal({
                         className="h-full w-full object-cover"
                       />
                     </button>
-                  ))}
+                    ))}
                 </div>
 
                 {/* Display Name */}
@@ -219,11 +227,13 @@ export default function ProfileModal({
                     bg-[#42c8bb]
                   "
                 >
-                  <img
-                    src={selectedAvatar}
-                    alt="Selected avatar"
-                    className="h-full w-full object-cover"
-                  />
+                  {selectedAvatar && (
+                    <img
+                      src={selectedAvatar}
+                      alt="Selected avatar"
+                      className="h-full w-full object-cover"
+                    />
+                  )}
                 </div>
 
                 <p className="mt-3 text-sm font-medium text-white">
