@@ -1,4 +1,4 @@
-import ProjectDetails from "@/features/projects/components/ProjectDetails/ProjectDetails";
+import ProjectDetails from "@/features/ProjectDetails/components/ProjectDetails";
 
 export default async function ProjectDetailsPage({
   params,

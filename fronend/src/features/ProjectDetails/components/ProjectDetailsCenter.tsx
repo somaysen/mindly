@@ -6,6 +6,7 @@ import {
   useGetProjectById,
   useGetProjects,
 } from "@/features/projects/hooks/useProject";
+ import FileSection from "./fileSection"
 
 type ProjectDetailsRecord = {
   id?: string | number;
@@ -161,21 +162,7 @@ export default function ProjectDetailsCenter({ projectId }: { projectId: string 
             </div>
           </section>
 
-          <section className="rounded-2xl border border-[#292750] bg-[#222147] p-5 sm:p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-medium">Files</h2>
-              <button
-                type="button"
-                aria-label="Add file"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-[#46436e] text-[#aaa7ff] transition hover:bg-[#353260]"
-              >
-                <Plus size={21} />
-              </button>
-            </div>
-            <p className="rounded-xl border border-dashed border-[#514e76] px-4 py-8 text-center text-sm text-[#aaa7c5]">
-              No files added to this project yet.
-            </p>
-          </section>
+          <FileSection />
         </div>
 
         <section className="min-w-0">

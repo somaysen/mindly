@@ -324,3 +324,21 @@ body {
 .mindly-time-picker .react-clock__second-hand__body {
   background: #777cff;
 }
+
+/* Mindly notepad editor */
+.mindly-notepad-editor .bn-editor {
+  min-height: 52vh;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #e1dff2;
+  caret-color: #aaa7ff;
+}
+
+.mindly-notepad-editor .bn-block-content {
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.mindly-notepad-editor .bn-inline-content:focus {
+  outline: none;
+}
