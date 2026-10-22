@@ -1,18 +1,25 @@
 "use client";
 
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, Bounce } from "react-toastify";
 
 export default function ToastProvider() {
   return (
     <ToastContainer
       position="top-right"
-      autoClose={3500}
+      autoClose={1600}
+      hideProgressBar={false}
       newestOnTop
       closeOnClick
+      rtl={false}
       pauseOnFocusLoss
       draggable
       pauseOnHover
-      theme="light"
+      theme="dark"
+      transition={Bounce}
+      limit={4}
+      toastClassName="mindly-toast"
+      progressClassName="mindly-toast-progress"
+      className="mindly-toast-container"
     />
   );
 }
