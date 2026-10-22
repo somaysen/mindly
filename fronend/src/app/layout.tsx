@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { bricolageGrotesque } from "@/lib/fonts";
@@ -11,6 +11,12 @@ export const metadata: Metadata = {
     icons: {
     icon: "/images/Frame 76.png",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
