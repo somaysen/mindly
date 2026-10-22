@@ -4,14 +4,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, LockKeyhole } from "lucide-react";
 import LoginAnimation from "../../../components/auth/LoginAnimation";
-import { FaGoogle } from "react-icons/fa";
 import { IoLogoApple } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useRegister } from "../hooks/useAuthApi";
-import { startGoogleOAuth } from "@/lib/auth";
+import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import { toast } from "react-toastify";
 
 type SignupFormData = {
@@ -350,7 +349,7 @@ function SignupForm() {
                       text-[#85859a]
                     "
                   >
-                    Or continue with
+                    Google
                   </span>
 
                   <div className="h-px flex-1 bg-[#494b70]" />
@@ -359,33 +358,7 @@ function SignupForm() {
                 {/* ================= SOCIAL BUTTONS ================= */}
                 <div className="grid grid-cols-3 gap-3">
                   {/* GOOGLE */}
-                  <button
-                    type="button"
-                    onClick={startGoogleOAuth}
-                    className="
-                      flex
-                      h-[43px]
-                      items-center
-                      justify-center
-                      gap-2
-
-                      rounded-[9px]
-                      border
-                      border-[#85879e]
-
-                      bg-transparent
-
-                      text-[14px]
-                      font-semibold
-                      text-white
-
-                      transition
-                      hover:bg-white/5
-                    "
-                  >
-                    <FaGoogle className="text-[17px]" />
-                    <span>Google</span>
-                  </button>
+                  <GoogleLoginButton />
 
                   {/* APPLE */}
                   <button

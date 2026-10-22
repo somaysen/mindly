@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { Eye, EyeOff, LockKeyhole } from "lucide-react";
 import LoginAnimation from "../../../components/auth/LoginAnimation";
-import { FaGoogle } from "react-icons/fa";
 import { IoLogoApple } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLogin } from "@/features/auth/hooks/useAuthApi";
-import { persistAuthToken, startGoogleOAuth } from "@/lib/auth";
+import { persistAuthToken } from "@/lib/auth";
+import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import { toast } from "react-toastify";
 
 function SigninForm() {
@@ -478,26 +478,7 @@ function SigninForm() {
                 <div className="grid grid-cols-3 gap-3">
 
                   {/* GOOGLE */}
-                  <button
-                    type="button"
-                    onClick={startGoogleOAuth}
-                    className="
-                      flex h-[43px]
-                      items-center justify-center
-                      gap-2
-                      rounded-[9px]
-                      border border-[#85879e]
-                      bg-transparent
-                      text-[14px]
-                      font-semibold
-                      text-white
-                      transition
-                      hover:bg-white/5
-                    "
-                  >
-                    <FaGoogle className="text-[17px]" />
-                    <span>Google</span>
-                  </button>
+                  <GoogleLoginButton />
 
                   {/* APPLE */}
                   <button

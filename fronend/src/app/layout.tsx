@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { bricolageGrotesque } from "@/lib/fonts";
-import QueryProvider from "@/config/tanstack/QueryProvider";
-import ToastProvider from "@/components/ToastProvider";
+import Providers from "./providers";
 
 
 export const metadata: Metadata = {
@@ -22,11 +21,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${bricolageGrotesque.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        
         <div className="relative z-10 flex min-h-full flex-1 flex-col">
-          <QueryProvider>{children}</QueryProvider>
+          <Providers>{children}</Providers>
         </div>
-        <ToastProvider />
       </body>
     </html>
   );

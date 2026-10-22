@@ -4,6 +4,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 For local development, set `NEXT_PUBLIC_API_BASE_URL` or `API_BASE_URL` to your backend origin (for example, `http://localhost:9000`). Production defaults to `https://mindly-backend-omega.vercel.app`; set `API_BASE_URL` in Vercel only if you use a different backend. Browser API calls use the app's `/api` route and Next.js proxies them to this backend, so the browser does not make cross-origin API requests. Production builds reject insecure or localhost API overrides.
 
+## Google sign in
+
+Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` to the OAuth 2.0 web client ID from Google Cloud Console, and add each app origin (for example, `http://localhost:3000` and the production domain) to that client's authorized JavaScript origins. Login and signup send Google's ID token credential to `POST /api/auth/google` through the same-origin API proxy. The backend must validate that credential with Google and return an auth token (`token`, `accessToken`, or `access_token`) or set the app's auth cookie.
+
 ## Getting Started
 
 First, run the development server:

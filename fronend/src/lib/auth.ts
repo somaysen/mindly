@@ -29,21 +29,17 @@ export function clearAuthCookies() {
   });
 }
 
-export function getGoogleOAuthUrl() {
-  const redirect =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/auth/callback`
-      : "";
+export function getSafeRedirectPath(value: string | null | undefined) {
+  if (!value || typeof window === "undefined") return "/";
 
-  const params = new URLSearchParams();
-  if (redirect) {
-    params.set("redirect", redirect);
+  try {
+    const candidate = new URL(value, window.location.origin);
+    if (candidate.origin === window.location.origin) {
+      return `${candidate.pathname}${candidate.search}${candidate.hash}`;
+    }
+  } catch {
+    // Fall back to the app home page for malformed redirect values.
   }
 
-  const query = params.toString();
-  return `/api/auth/google${query ? `?${query}` : ""}`;
-}
-
-export function startGoogleOAuth() {
-  window.location.assign(getGoogleOAuthUrl());
+  return "/";
 }
