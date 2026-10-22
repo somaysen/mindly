@@ -137,12 +137,13 @@ export default function GoogleLoginButton() {
       </span>
 
       {/* Google authentication overlay */}
-      <div className="absolute inset-0 z-10 flex justify-start opacity-0">
+      <div className="absolute inset-0 z-10 flex justify-start opacity-[0.01]">
         <GoogleLogin
           onSuccess={(response) => void handleSuccess(response)}
           onError={() =>
             toast.error("Google sign in was cancelled or could not start.")
           }
+          use_fedcm_for_button
           shape="rectangular"
           theme="filled_black"
           size="large"
