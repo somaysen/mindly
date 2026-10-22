@@ -6,12 +6,22 @@ import type { CredentialResponse } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import api from "@/config/axios";
-import { persistAuthToken } from "@/lib/auth";
+import { getSafeRedirectPath, persistAuthToken } from "@/lib/auth";
+
+type GoogleAuthUser = {
+  id?: string | number;
+  _id?: string | number;
+  userId?: string | number;
+};
 
 type GoogleAuthResponse = {
   token?: string;
   accessToken?: string;
   access_token?: string;
+  id?: string | number;
+  _id?: string | number;
+  userId?: string | number;
+  user?: GoogleAuthUser;
   data?: GoogleAuthResponse;
 };
 
@@ -45,12 +55,31 @@ export default function GoogleLoginButton() {
         result?.token ??
         result?.accessToken ??
         result?.access_token;
+      const user =
+        result?.data?.user ??
+        result?.data?.data?.user ??
+        result?.user ??
+        result?.data?.data;
+      const userId =
+        user?.id ??
+        user?._id ??
+        user?.userId ??
+        result?.data?.userId ??
+        result?.data?.data?.userId ??
+        result?.userId ??
+        result?.id ??
+        result?._id;
 
       // Some backends return a token in JSON; others set an HttpOnly cookie.
       if (token) persistAuthToken(token);
 
       toast.success("Signed in with Google.");
-      router.replace("/onboarding/username");
+      if (userId === undefined || userId === null || String(userId).trim() === "") {
+        router.replace("/onboarding/username");
+      } else {
+        const requestedPath = new URLSearchParams(window.location.search).get("redirect");
+        router.replace(getSafeRedirectPath(requestedPath));
+      }
     } catch (error: unknown) {
       const requestError = error as {
         response?: { data?: { message?: string; error?: string } };
