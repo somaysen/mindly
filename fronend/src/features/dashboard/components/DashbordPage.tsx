@@ -7,6 +7,7 @@ import Topbar from "@/components/Navber/Topbar";
 import DashboardSidebar from "./DashboradSidbar";
 import DashbordCenter from "./DashbordCenter";
 import { useGetUserByAuthID } from "@/features/dashboard/hooks/useDashboard";
+import Loading from "@/app/loading";
 
 function getUserId(userInfo: unknown): string | null {
   if (!userInfo || typeof userInfo !== "object") return null;
@@ -58,7 +59,7 @@ export default function DashbordPage() {
   if (isLoading || isError || !userId) {
     return (
       <main className="grid min-h-screen place-items-center bg-[#0d0c1f] text-sm text-white/70">
-        Loading your dashboard...
+        <Loading/>
       </main>
     );
   }
