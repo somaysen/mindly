@@ -9,3 +9,12 @@ export const useUserInfo = () => {
     refetchOnWindowFocus: false,
   });
 };
+
+export const useGetUserByAuthID = () => {
+  return useQuery({
+    queryKey: ["getUserByAuthID"],
+    queryFn: api.getUserByAuthID,
+    retry: 0,
+    refetchOnWindowFocus: false,
+  });
+};
