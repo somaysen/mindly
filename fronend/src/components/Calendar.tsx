@@ -4,7 +4,9 @@ import { useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CreateTaskModal from "@/features/tasks/components/CreateTaskModal";
+import TaskModel from "@/features/tasks/components/taskModel";
 import { useTaskGet } from "@/features/tasks/hooks/useTesk";
+import type { Task } from "@/types/task";
 import "react-day-picker/style.css";
 import "./calendar.css";
 
@@ -33,6 +35,7 @@ export default function Calendar() {
     new Date(today.getFullYear(), today.getMonth(), 1),
   );
   const [modalDate, setModalDate] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const taskDates = (tasksQuery.data?.data ?? []).flatMap((task) => {
     const key = taskDateKey(task.dueDate);
     if (!key) return [];
@@ -49,7 +52,23 @@ export default function Calendar() {
         onSelect={(date) => {
           if (!date) return;
           setSelected(date);
-          setModalDate(dateKey(date));
+          if (tasksQuery.isLoading) {
+            setSelectedTask(null);
+            setModalDate(null);
+            return;
+          }
+          const selectedDateKey = dateKey(date);
+          const taskOnDate = (tasksQuery.data?.data ?? []).find(
+            (task) => taskDateKey(task.dueDate) === selectedDateKey,
+          );
+
+          if (taskOnDate) {
+            setModalDate(null);
+            setSelectedTask(taskOnDate);
+          } else {
+            setSelectedTask(null);
+            setModalDate(selectedDateKey);
+          }
         }}
         month={month}
         onMonthChange={setMonth}
@@ -89,6 +108,15 @@ export default function Calendar() {
         <CreateTaskModal
           dueDate={modalDate}
           onClose={() => setModalDate(null)}
+        />
+      )}
+      {selectedTask && (
+        <TaskModel
+          key={selectedTask._id}
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onUpdated={() => setSelectedTask(null)}
+          onDeleted={() => setSelectedTask(null)}
         />
       )}
     </div>

@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useTaskGet } from "@/features/tasks/hooks/useTesk";
 import type { Task } from "@/types/task";
 import CreateTaskModal from "@/features/tasks/components/CreateTaskModal";
+import TaskModel from "@/features/tasks/components/taskModel";
 import "./calender.css";
 
 type CalendarView = "month" | "week" | "day";
@@ -34,6 +35,7 @@ const formatTime = (value: string | null) => {
 function CalendarComponent({ selectedDate, onDateSelect, showTasks }: { selectedDate: Date; onDateSelect: (date: Date | ((current: Date) => Date)) => void; showTasks: boolean }) {
   const [view, setView] = useState<CalendarView>("week");
   const [createTask, setCreateTask] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const { data, isLoading, isError } = useTaskGet();
   const tasks = useMemo(() => {
     const allTasks = data?.data ?? [];
@@ -79,6 +81,16 @@ function CalendarComponent({ selectedDate, onDateSelect, showTasks }: { selected
     return dueDate ? sameDate(dueDate, day) : false;
   });
 
+  const selectDay = (day: Date, openDayWhenEmpty = false) => {
+    onDateSelect(day);
+    const taskOnDay = tasksForDay(day)[0];
+    if (taskOnDay) {
+      setSelectedTask(taskOnDay);
+    } else if (openDayWhenEmpty) {
+      setView("day");
+    }
+  };
+
   return (
     <div className="mindly-calendar-panel">
       <header className="mindly-calendar-toolbar">
@@ -108,7 +120,7 @@ function CalendarComponent({ selectedDate, onDateSelect, showTasks }: { selected
           {visibleDays.slice(0, 7).map((day, index) => <div key={index} className="mindly-month-weekday">{day.toLocaleDateString("en-US", { weekday: "short" })}</div>)}
           {visibleDays.map((day) => {
             const dayTasks = tasksForDay(day);
-            return <button key={dateKey(day)} type="button" onClick={() => { onDateSelect(day); setView("day"); }} className={`mindly-month-cell ${day.getMonth() !== selectedDate.getMonth() ? "outside" : ""} ${sameDate(day, new Date()) ? "today" : ""}`}>
+            return <button key={dateKey(day)} type="button" onClick={() => selectDay(day, true)} className={`mindly-month-cell ${day.getMonth() !== selectedDate.getMonth() ? "outside" : ""} ${sameDate(day, new Date()) ? "today" : ""}`}>
               <span className="mindly-month-number">{day.getDate()}</span>
               <span className="mindly-month-items">{dayTasks.slice(0, 3).map((task) => <span key={task._id} className={`mindly-task-chip ${task.priority} ${task.status === "completed" ? "completed" : ""}`} title={task.taskName}>{task.taskName}</span>)}{dayTasks.length > 3 && <span className="mindly-more-count">+{dayTasks.length - 3} more</span>}</span>
             </button>;
@@ -117,7 +129,7 @@ function CalendarComponent({ selectedDate, onDateSelect, showTasks }: { selected
       ) : (
         <div className="mindly-agenda-scroll">
           <div className={`mindly-agenda ${view === "day" ? "single-day" : ""}`} style={{ "--day-count": visibleDays.length } as CSSProperties}>
-            <div className="mindly-agenda-days"><div className="mindly-time-spacer" />{visibleDays.map((day) => <button key={dateKey(day)} type="button" className={`mindly-agenda-day ${sameDate(day, selectedDate) ? "selected" : ""} ${sameDate(day, new Date()) ? "today" : ""}`} onClick={() => onDateSelect(day)}><span>{day.toLocaleDateString("en-US", { weekday: "short" })}</span><strong>{day.getDate()}</strong></button>)}</div>
+            <div className="mindly-agenda-days"><div className="mindly-time-spacer" />{visibleDays.map((day) => <button key={dateKey(day)} type="button" className={`mindly-agenda-day ${sameDate(day, selectedDate) ? "selected" : ""} ${sameDate(day, new Date()) ? "today" : ""}`} onClick={() => selectDay(day)}><span>{day.toLocaleDateString("en-US", { weekday: "short" })}</span><strong>{day.getDate()}</strong></button>)}</div>
             <div className="mindly-agenda-body">
               <div className="mindly-time-labels">{Array.from({ length: 13 }, (_, index) => <div key={index}>{index + 7 > 12 ? `${index - 5} pm` : `${index + 7} am`}</div>)}</div>
               <div className="mindly-agenda-columns">{visibleDays.map((day) => {
@@ -125,9 +137,9 @@ function CalendarComponent({ selectedDate, onDateSelect, showTasks }: { selected
                 const timed = dayTasks.filter((task) => task.dueTime);
                 const anytime = dayTasks.filter((task) => !task.dueTime);
                 return <div key={dateKey(day)} className="mindly-agenda-column">
-                  <div className="mindly-all-day-tasks">{anytime.map((task) => <TaskCard key={task._id} task={task} onClick={() => { onDateSelect(day); setView("day"); }} />)}</div>
+                  <div className="mindly-all-day-tasks">{anytime.map((task) => <TaskCard key={task._id} task={task} onClick={() => setSelectedTask(task)} />)}</div>
                   <div className="mindly-hour-lines">{Array.from({ length: 13 }, (_, index) => <div key={index} />)}</div>
-                  {timed.map((task) => <TimedTask key={task._id} task={task} onClick={() => { onDateSelect(day); setView("day"); }} />)}
+                  {timed.map((task) => <TimedTask key={task._id} task={task} onClick={() => setSelectedTask(task)} />)}
                 </div>;
               })}</div>
             </div>
@@ -136,6 +148,7 @@ function CalendarComponent({ selectedDate, onDateSelect, showTasks }: { selected
       )}
       {!isLoading && !isError && tasks.length === 0 && <div className="mindly-calendar-empty">No upcoming tasks to show. Add a task or turn on Daily tasks.</div>}
       {createTask && <CreateTaskModal dueDate={dateKey(selectedDate)} onClose={() => setCreateTask(false)} />}
+      {selectedTask && <TaskModel key={selectedTask._id} task={selectedTask} onClose={() => setSelectedTask(null)} onUpdated={() => setSelectedTask(null)} onDeleted={() => setSelectedTask(null)} />}
     </div>
   );
 }

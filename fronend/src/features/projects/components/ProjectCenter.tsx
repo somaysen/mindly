@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ProjectCard from "./ProjectCard";
@@ -121,6 +121,14 @@ function ProjectCenter() {
   const [search, setSearch] = useState("");
   const { data, isLoading, isError, error, refetch } = useGetProjects();
   const createProject = useCreateProject();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get("create") !== "1") return;
+
+    setIsModalOpen(true);
+    router.replace("/projects", { scroll: false });
+  }, [router]);
 
   const projects = useMemo(
     () => getProjectList(data).map((project) => toProjectRecord(project)),

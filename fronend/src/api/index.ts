@@ -13,8 +13,10 @@ export * from "./users/getUserByAuthID"
  
 /* ===================task================= */
 export * from "./tasks/creatingTask";
+export * from "./tasks/deleteTaskById";
 export * from "./tasks/getTask";
-export * from "./tasks/updateTask"
+export * from "./tasks/getTaskById";
+export * from "./tasks/updateTaskById";
 
 
 /* ==================== Notification =============== */

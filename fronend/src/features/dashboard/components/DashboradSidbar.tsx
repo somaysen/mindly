@@ -2,8 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 import { House, Sun, Moon, Check, Plus } from "lucide-react";
 import Sidebar from "@/components/Navber/Sidebar";
+import { useGetProjects } from "@/features/projects/hooks/useProject";
+
+interface ApiProject {
+  id?: string | number;
+  projectId?: string | number;
+  projectID?: string | number;
+  project_id?: string | number;
+  _id?: string | number;
+  name?: string;
+  projectName?: string;
+  projectTitle?: string;
+  title?: string;
+}
+
+interface ProjectLink {
+  id: string;
+  name: string;
+}
+
+function getProjects(response: unknown, depth = 0): ApiProject[] {
+  if (depth > 5 || !response) return [];
+  if (Array.isArray(response)) return response as ApiProject[];
+  if (typeof response !== "object") return [];
+
+  const record = response as Record<string, unknown>;
+  for (const key of ["data", "projects", "projectList", "items", "result"]) {
+    const projects = getProjects(record[key], depth + 1);
+    if (projects.length > 0) return projects;
+  }
+  return [];
+}
+
+function toProjectLink(project: ApiProject): ProjectLink | null {
+  const id = project.id ?? project.projectId ?? project.projectID ?? project.project_id ?? project._id;
+  const name = project.projectName ?? project.projectTitle ?? project.name ?? project.title;
+  if (id == null || typeof name !== "string" || !name.trim()) return null;
+  return { id: String(id), name: name.trim() };
+}
+
+const projectColors = [
+  "bg-[#f7b26a]",
+  "bg-[#93d7c7]",
+  "bg-[#f5d970]",
+  "bg-[#9a9cff]",
+  "bg-[#ee8ec6]",
+];
 
 const views = [
   {
@@ -28,26 +75,14 @@ const views = [
   },
 ];
 
-const projects = [
-  {
-    href: "/projects/design-class",
-    label: "Design class",
-    color: "bg-[#f7b26a]",
-  },
-  {
-    href: "/projects/internship-prep",
-    label: "Internship prep",
-    color: "bg-[#93d7c7]",
-  },
-  {
-    href: "/projects/personal",
-    label: "Personal",
-    color: "bg-[#f5d970]",
-  },
-];
 
 export default function DashboardSidebar() {
   const pathname = usePathname();
+  const { data: projectData, isLoading, isError } = useGetProjects();
+  const projects = useMemo(
+    () => getProjects(projectData).map(toProjectLink).filter((project): project is ProjectLink => project !== null),
+    [projectData],
+  );
 
   return (
     <main
@@ -159,40 +194,29 @@ export default function DashboardSidebar() {
           </p>
 
           <div className="flex flex-col gap-[15px]">
-            {projects.map((project) => (
-              <Link
-                key={project.href}
-                href={project.href}
-                className="
-                  flex
-                  items-center
-                  gap-[10px]
-                  px-[9px]
-                  text-[18px]
-                  font-normal
-                  tracking-wide
-                  text-white/85
-                  transition
-                  hover:text-white
-                "
-              >
-                <span
-                  className={`
-                    h-[10px]
-                    w-[10px]
-                    shrink-0
-                    rounded-full
-                    ${project.color}
-                  `}
-                />
+            {isLoading && <p className="px-[9px] text-xs text-white/40">Loading projects...</p>}
+            {isError && <p role="alert" className="px-[9px] text-xs text-rose-300">Could not load projects.</p>}
+            {!isLoading && !isError && projects.length === 0 && <p className="px-[9px] text-xs text-white/40">No projects yet.</p>}
+            {projects.map((project, index) => {
+              const href = `/projects/details/${encodeURIComponent(project.id)}`;
+              const isActive = pathname.startsWith(href);
 
-                <span className="truncate">{project.label}</span>
-              </Link>
-            ))}
+              return (
+                <Link
+                  key={project.id}
+                  href={href}
+                  title={project.name}
+                  className={`flex items-center gap-[10px] rounded-lg px-[9px] text-[14px] font-normal tracking-wide transition hover:text-white ${isActive ? "text-white" : "text-white/75"}`}
+                >
+                  <span className={`h-[10px] w-[10px] shrink-0 rounded-full ${projectColors[index % projectColors.length]}`} />
+                  <span className="truncate">{project.name}</span>
+                </Link>
+              );
+            })}
 
             {/* Add Project */}
-            <button
-              type="button"
+            <Link
+              href="/projects?create=1"
               className="
                 flex
                 items-center
@@ -208,7 +232,7 @@ export default function DashboardSidebar() {
               <Plus size={18} strokeWidth={1.8} />
 
               <span>Add Project</span>
-            </button>
+            </Link>
           </div>
         </section>
       </aside>

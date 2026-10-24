@@ -1,77 +1,79 @@
 import * as api from "@/api";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
-// ===============================
 // CREATE TASK
-// ===============================
-
 export const useTaskCreate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ["taskCreating"],
-
-    mutationFn: async (data: FormData) => {
-      return await api.createTask(data);
-    },
-
+    mutationFn: (data: FormData) => api.createTask(data),
     retry: 0,
-
-    onSuccess: async () => {
-      // Refresh task list after successful creation
-      await queryClient.invalidateQueries({
-        queryKey: ["getTasks"],
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getTasks"] });
     },
   });
 };
 
-// ===============================
 // UPDATE TASK
-// ===============================
-
 export const useTaskUpdate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ["taskUpdating"],
-
-    mutationFn: async ({
+    mutationFn: ({
       taskId,
       data,
     }: {
       taskId: string;
       data: FormData;
-    }) => {
-      return await api.updateTask(taskId, data);
-    },
-
+    }) => api.updateTaskById(taskId, data),
     retry: 0,
-
-    onSuccess: async () => {
-      // Refresh task list after successful update
-      await queryClient.invalidateQueries({
-        queryKey: ["getTasks"],
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["getTasks"] });
+      queryClient.invalidateQueries({
+        queryKey: ["getTaskById", variables.taskId],
       });
     },
   });
 };
 
-// ===============================
-// GET TASKS
-// ===============================
-
+// GET ALL TASKS
 export const useTaskGet = (date?: string) => {
   return useQuery({
     queryKey: ["getTasks", date],
-
-    queryFn: async () => {
-      return await api.getTask(date);
-    },
-
+    queryFn: () => api.getTask(date),
     retry: 0,
+  });
+};
 
-    enabled: true,
+// GET TASK BY ID
+export const useTaskGetById = (taskId?: string) => {
+  return useQuery({
+    queryKey: ["getTaskById", taskId],
+    queryFn: () => api.getTaskById(taskId!),
+    enabled: Boolean(taskId),
+    retry: 0,
+  });
+};
+
+// DELETE TASK BY ID
+export const useTaskDeleteById = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["deleteTaskById"],
+    mutationFn: (taskId: string) => api.deleteTaskById(taskId),
+    retry: 0,
+    onSuccess: (_, taskId) => {
+      queryClient.invalidateQueries({ queryKey: ["getTasks"] });
+      queryClient.invalidateQueries({
+        queryKey: ["getTaskById", taskId],
+      });
+    },
   });
 };
