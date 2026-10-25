@@ -52,31 +52,38 @@ const projectColors = [
   "bg-[#ee8ec6]",
 ];
 
-const views = [
+export type DashboardView = "home" | "today" | "upcoming" | "completed";
+
+const views: { id: DashboardView; label: string; icon: typeof House }[] = [
   {
-    href: "/",
+    id: "home",
     label: "Home",
     icon: House,
   },
   {
-    href: "/today",
+    id: "today",
     label: "Today",
     icon: Sun,
   },
   {
-    href: "/upcoming",
+    id: "upcoming",
     label: "Upcoming",
     icon: Moon,
   },
   {
-    href: "/completed",
+    id: "completed",
     label: "Completed",
     icon: Check,
   },
 ];
 
 
-export default function DashboardSidebar() {
+interface DashboardSidebarProps {
+  activeView: DashboardView;
+  onViewChange: (view: DashboardView) => void;
+}
+
+export default function DashboardSidebar({ activeView, onViewChange }: DashboardSidebarProps) {
   const pathname = usePathname();
   const { data: projectData, isLoading, isError } = useGetProjects();
   const projects = useMemo(
@@ -140,15 +147,13 @@ export default function DashboardSidebar() {
             {views.map((item) => {
               const Icon = item.icon;
 
-              const isActive =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href);
+              const isActive = activeView === item.id;
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onViewChange(item.id)}
                   className={[
                     `
                     flex
@@ -171,7 +176,7 @@ export default function DashboardSidebar() {
                   <Icon size={18} strokeWidth={isActive ? 2.4 : 1.8} />
 
                   <span>{item.label}</span>
-                </Link>
+                </button>
               );
             })}
           </nav>

@@ -6,9 +6,13 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useTaskCreate, useTaskGet } from "@/features/tasks/hooks/useTesk";
 import { useUserInfo } from "@/features/dashboard/hooks/useDashboard";
+import type { DashboardView } from "./DashboradSidbar";
 
 import DashbordFocus from "./DashbordFocus";
 import DashbordRightbar from "./DashbordRightbar";
+import DashbordToday from "./DashbordToday";
+import DashBoradUpcoming from "./DashBoradUpcoming";
+import DeshboradCompleted from "./DeshboradCompleted";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -17,7 +21,7 @@ function getGreeting() {
   return "Good evening";
 }
 
-function DashbordCenter() {
+function DashbordCenter({ activeView }: { activeView: DashboardView }) {
   const queryClient = useQueryClient();
   const [thought, setThought] = useState("");
   const [isThoughtExpanded, setIsThoughtExpanded] = useState(true);
@@ -87,7 +91,15 @@ function DashbordCenter() {
   // =====================================================
   return (
     <div className="grid gap-4 pb-8 pt-2 xl:grid-cols-[minmax(0,1fr)_292px]">
-      <section className="min-w-0">
+      
+      {activeView === "today" ? (
+        <DashbordToday />
+      ) : activeView === "upcoming" ? (
+        <DashBoradUpcoming />
+      ) : activeView === "completed" ? (
+        <DeshboradCompleted />
+      ) : (
+        <section className="min-w-0">
         {/* HERO */}
         <div className="flex min-h-[205px] items-center justify-between gap-6 px-1 sm:px-5">
           <div className="min-w-0">
@@ -196,7 +208,8 @@ function DashbordCenter() {
           isCreateError={isCreateError}
           createError={createError}
         />
-      </section>
+        </section>
+      )}
 
       <DashbordRightbar />
     </div>

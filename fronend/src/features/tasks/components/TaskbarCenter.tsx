@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import {
   ArrowDownUp,
   CalendarDays,
+  Check,
   FilePenLine,
   Flag,
   Plus,
@@ -12,11 +13,12 @@ import {
 } from "lucide-react";
 
 import Calendar from "@/components/Calendar";
-import { useTaskGet } from "@/features/tasks/hooks/useTesk";
+import { useTaskGet, useTaskUpdate } from "@/features/tasks/hooks/useTesk";
 import type { Task } from "@/types/task";
 import TaskSchedule from "./TaskSchedule";
 import CreateTaskModal from "./CreateTaskModal";
 import TaskModel from "./taskModel";
+import { toast } from "react-toastify";
 
 type EditableTask = {
   _id: string;
@@ -85,6 +87,18 @@ function TaskbarCenter() {
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
   const { data, isLoading, isError } = useTaskGet();
+  const { mutateAsync: updateTask, isPending: isUpdatingTask } = useTaskUpdate();
+
+  const toggleTaskCompletion = async (task: Task) => {
+    const formData = new FormData();
+    formData.append("status", task.status === "completed" ? "todo" : "completed");
+
+    try {
+      await updateTask({ taskId: task._id, data: formData });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not update task status.");
+    }
+  };
 
   const tasks = useMemo(() => {
     const allTasks = Array.isArray(data?.data) ? data.data : [];
@@ -184,13 +198,28 @@ function TaskbarCenter() {
                   {visibleTasks.map((task: Task) => (
                     <article key={task._id} className="rounded-xl border border-[#30304D] bg-[#191832] p-4 transition hover:border-[#4d4b78]">
                       <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <h3 className="truncate text-[15px] font-medium text-white">{task.taskName}</h3>
-                          {task.description && <p className="mt-1 line-clamp-2 text-[12px] leading-5 text-[#A6A6BD]">{task.description}</p>}
-                          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-[#A6A6BD]">
-                            <span className="inline-flex items-center gap-1.5"><CalendarDays size={13} />{formatDueDate(task.dueDate)}</span>
-                            {task.dueTime && <span>{task.dueTime}</span>}
-                            {task.priority && <span className="inline-flex items-center gap-1 capitalize"><Flag size={12} />{task.priority} priority</span>}
+                        <div className="flex min-w-0 items-start gap-3">
+                          <button
+                            type="button"
+                            role="checkbox"
+                            aria-checked={task.status === "completed"}
+                            aria-label={`${task.status === "completed" ? "Mark as incomplete" : "Mark as complete"}: ${task.taskName}`}
+                            disabled={isUpdatingTask}
+                            onClick={() => void toggleTaskCompletion(task)}
+                            className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded border transition disabled:cursor-wait disabled:opacity-60 ${task.status === "completed" ? "border-[#6468F2] bg-[#5559ED] text-white" : "border-[#62617F] text-transparent hover:border-[#8588FA]"}`}
+                          >
+                            <Check size={13} strokeWidth={3} />
+                          </button>
+                          <div className="min-w-0">
+                            <h3 className={`truncate text-[15px] font-medium ${task.status === "completed" ? "text-[#A6A6BD] line-through" : "text-white"}`}>
+                              {task.taskName}
+                            </h3>
+                            {task.description && <p className="mt-1 line-clamp-2 text-[12px] leading-5 text-[#A6A6BD]">{task.description}</p>}
+                            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-[#A6A6BD]">
+                              <span className="inline-flex items-center gap-1.5"><CalendarDays size={13} />{formatDueDate(task.dueDate)}</span>
+                              {task.dueTime && <span>{task.dueTime}</span>}
+                              {task.priority && <span className="inline-flex items-center gap-1 capitalize"><Flag size={12} />{task.priority} priority</span>}
+                            </div>
                           </div>
                         </div>
                         <button

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Topbar from "@/components/Navber/Topbar";
 import DashboardSidebar from "./DashboradSidbar";
+import type { DashboardView } from "./DashboradSidbar";
 import DashbordCenter from "./DashbordCenter";
 import { useGetUserByAuthID } from "@/features/dashboard/hooks/useDashboard";
 import Loading from "@/app/loading";
@@ -38,6 +39,7 @@ function getUserId(userInfo: unknown): string | null {
 
 export default function DashbordPage() {
   const router = useRouter();
+  const [activeView, setActiveView] = useState<DashboardView>("home");
 
   const {
     data: userInfo,
@@ -68,7 +70,7 @@ export default function DashbordPage() {
   return (
     <div className="h-screen w-full overflow-hidden bg-[#0d0c1f]">
       <aside className="fixed left-8 top-5 z-50 h-screen w-[260px]">
-        <DashboardSidebar />
+        <DashboardSidebar activeView={activeView} onViewChange={setActiveView} />
       </aside>
 
       <div className="ml-[260px] h-screen">
@@ -79,7 +81,7 @@ export default function DashbordPage() {
 
         {/* Scrollable Content */}
         <main className="ml-[90px] mr-[18px] h-screen overflow-y-auto pt-[130px] scrollbar-hide">
-          <DashbordCenter />
+          <DashbordCenter activeView={activeView} />
         </main>
       </div>
     </div>
