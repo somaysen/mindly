@@ -1,5 +1,10 @@
-import Calendar from "@/components/Calendar";
-import React from "react";
+import dynamic from "next/dynamic";
+
+const LazyCalendar = dynamic(() => import("@/components/Calendar"), {
+  loading: () => (
+    <div className="h-[300px] animate-pulse rounded-2xl border border-[#383653] bg-[#191832]/70" />
+  ),
+});
 
 function DashbordRightbar() {
   return (
@@ -22,7 +27,7 @@ function DashbordRightbar() {
 
         {/* CALENDAR */}
 
-        <Calendar />
+        <LazyCalendar />
       </aside>
     </div>
   );

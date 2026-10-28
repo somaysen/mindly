@@ -1,23 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
-import { CalendarDays, Check, Clock3, ListTodo } from "lucide-react";
+import { ListTodo } from "lucide-react";
 
 import { useTaskGet } from "@/features/tasks/hooks/useTesk";
+import TaskCard from "@/features/tasks/components/TaskCard";
 import type { Task } from "@/types/task";
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
 function getLocalDateKey(date: Date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-
-function formatTime(value: string | null) {
-  if (!value) return "Any time";
-  const [hourText, minuteText = "00"] = value.split(":");
-  const hour = Number(hourText);
-  if (Number.isNaN(hour)) return value;
-  return `${hour % 12 || 12}:${minuteText.slice(0, 2)} ${hour >= 12 ? "pm" : "am"}`;
 }
 
 function DashbordToday() {
@@ -76,44 +69,7 @@ function DashbordToday() {
       ) : (
         <div className="space-y-3">
           {tasks.map((task) => (
-            <article key={task._id} className="rounded-2xl border border-[#383653] bg-[#191832]/90 p-4 sm:p-5">
-              <div className="flex items-start gap-3">
-                <span
-                  aria-label={task.status === "completed" ? "Completed" : "Not completed"}
-                  className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-md border ${
-                    task.status === "completed"
-                      ? "border-[#7779f2] bg-[#6669ef] text-white"
-                      : "border-[#5a587e] text-transparent"
-                  }`}
-                >
-                  {task.status === "completed" && <Check size={13} strokeWidth={2.5} />}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className={`min-w-0 flex-1 text-sm font-medium ${task.status === "completed" ? "text-[#aaa8c7] line-through" : "text-[#f1f0ff]"}`}>
-                      {task.taskName || "Untitled task"}
-                    </h2>
-                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-white/55">
-                      {task.status.replace("-", " ")}
-                    </span>
-                  </div>
-                  {task.description && (
-                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#a3a1bd]">{task.description}</p>
-                  )}
-                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-[#9291b3]">
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays size={13} className="text-[#8587ef]" /> Today
-                    </span>
-                    {task.dueTime && (
-                      <span className="inline-flex items-center gap-1.5">
-                        <Clock3 size={13} className="text-[#8587ef]" /> {formatTime(task.dueTime)}
-                      </span>
-                    )}
-                    <span className="capitalize">{task.priority} priority</span>
-                  </div>
-                </div>
-              </div>
-            </article>
+            <TaskCard key={task._id} task={task} className="rounded-2xl border border-[#383653] bg-[#191832]/90 p-4 transition hover:border-[#5b5884] sm:p-5" />
           ))}
         </div>
       )}

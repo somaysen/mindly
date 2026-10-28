@@ -3,46 +3,18 @@
 import React, { useMemo, useState } from "react";
 import {
   ArrowDownUp,
-  CalendarDays,
-  Check,
   FilePenLine,
-  Flag,
   Plus,
   Search,
   SlidersHorizontal,
 } from "lucide-react";
 
 import Calendar from "@/components/Calendar";
-import { useTaskGet, useTaskUpdate } from "@/features/tasks/hooks/useTesk";
+import { useTaskGet } from "@/features/tasks/hooks/useTesk";
 import type { Task } from "@/types/task";
 import TaskSchedule from "./TaskSchedule";
 import CreateTaskModal from "./CreateTaskModal";
-import TaskModel from "./taskModel";
-import { toast } from "react-toastify";
-
-type EditableTask = {
-  _id: string;
-  taskName: string;
-  description?: string;
-  dueDate?: string;
-  dueTime?: string;
-  priority?: string;
-  checklist?: string[];
-  project?: string;
-};
-
-const formatDueDate = (value: string | null) => {
-  if (!value) return "No due date";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
-  });
-};
+import TaskCard from "./TaskCard";
 
 const getTodayInputDate = () => {
   const today = new Date();
@@ -51,54 +23,11 @@ const getTodayInputDate = () => {
   return `${today.getFullYear()}-${month}-${day}`;
 };
 
-function toEditableTask(task: Task): EditableTask {
-  const linkedProject = (task as Task & { project?: unknown }).project;
-  const projectId =
-    typeof linkedProject === "string" || typeof linkedProject === "number"
-      ? String(linkedProject)
-      : linkedProject && typeof linkedProject === "object"
-        ? String(
-            (linkedProject as Record<string, unknown>).id ??
-              (linkedProject as Record<string, unknown>).projectId ??
-              (linkedProject as Record<string, unknown>).projectID ??
-              (linkedProject as Record<string, unknown>).project_id ??
-              (linkedProject as Record<string, unknown>)._id ??
-              "",
-          )
-        : "";
-
-  return {
-    _id: task._id,
-    taskName: task.taskName,
-    description: task.description,
-    dueDate: task.dueDate ?? undefined,
-    dueTime: task.dueTime ?? undefined,
-    priority: task.priority,
-    checklist: Array.isArray(task.checklist)
-      ? task.checklist.filter((item): item is string => typeof item === "string")
-      : [],
-    project: projectId,
-  };
-}
-
 function TaskbarCenter() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<EditableTask | null>(null);
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
   const { data, isLoading, isError } = useTaskGet();
-  const { mutateAsync: updateTask, isPending: isUpdatingTask } = useTaskUpdate();
-
-  const toggleTaskCompletion = async (task: Task) => {
-    const formData = new FormData();
-    formData.append("status", task.status === "completed" ? "todo" : "completed");
-
-    try {
-      await updateTask({ taskId: task._id, data: formData });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not update task status.");
-    }
-  };
 
   const tasks = useMemo(() => {
     const allTasks = Array.isArray(data?.data) ? data.data : [];
@@ -196,42 +125,7 @@ function TaskbarCenter() {
               ) : (
                 <div className="space-y-3">
                   {visibleTasks.map((task: Task) => (
-                    <article key={task._id} className="rounded-xl border border-[#30304D] bg-[#191832] p-4 transition hover:border-[#4d4b78]">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex min-w-0 items-start gap-3">
-                          <button
-                            type="button"
-                            role="checkbox"
-                            aria-checked={task.status === "completed"}
-                            aria-label={`${task.status === "completed" ? "Mark as incomplete" : "Mark as complete"}: ${task.taskName}`}
-                            disabled={isUpdatingTask}
-                            onClick={() => void toggleTaskCompletion(task)}
-                            className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded border transition disabled:cursor-wait disabled:opacity-60 ${task.status === "completed" ? "border-[#6468F2] bg-[#5559ED] text-white" : "border-[#62617F] text-transparent hover:border-[#8588FA]"}`}
-                          >
-                            <Check size={13} strokeWidth={3} />
-                          </button>
-                          <div className="min-w-0">
-                            <h3 className={`truncate text-[15px] font-medium ${task.status === "completed" ? "text-[#A6A6BD] line-through" : "text-white"}`}>
-                              {task.taskName}
-                            </h3>
-                            {task.description && <p className="mt-1 line-clamp-2 text-[12px] leading-5 text-[#A6A6BD]">{task.description}</p>}
-                            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-[#A6A6BD]">
-                              <span className="inline-flex items-center gap-1.5"><CalendarDays size={13} />{formatDueDate(task.dueDate)}</span>
-                              {task.dueTime && <span>{task.dueTime}</span>}
-                              {task.priority && <span className="inline-flex items-center gap-1 capitalize"><Flag size={12} />{task.priority} priority</span>}
-                            </div>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setEditingTask(toEditableTask(task))}
-                          aria-label={`Edit ${task.taskName}`}
-                          className="shrink-0 rounded-full border border-[#393858] p-2 text-[#A9AAC8] transition hover:border-[#6468F2] hover:text-white"
-                        >
-                          <FilePenLine size={16} />
-                        </button>
-                      </div>
-                    </article>
+                    <TaskCard key={task._id} task={{ ...task, project: (task as Task & { project?: unknown }).project }} />
                   ))}
                 </div>
               )}
@@ -246,14 +140,6 @@ function TaskbarCenter() {
       </div>
 
       {isCreateOpen && <CreateTaskModal dueDate={getTodayInputDate()} onClose={() => setIsCreateOpen(false)} />}
-      {editingTask && (
-        <TaskModel
-          task={editingTask}
-          onClose={() => setEditingTask(null)}
-          onUpdated={() => setEditingTask(null)}
-          onDeleted={() => setEditingTask(null)}
-        />
-      )}
     </main>
   );
 }

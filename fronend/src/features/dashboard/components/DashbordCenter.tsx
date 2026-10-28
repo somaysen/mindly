@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { ChevronUp, Lightbulb, Mic, Paperclip } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -10,9 +11,10 @@ import type { DashboardView } from "./DashboradSidbar";
 
 import DashbordFocus from "./DashbordFocus";
 import DashbordRightbar from "./DashbordRightbar";
-import DashbordToday from "./DashbordToday";
-import DashBoradUpcoming from "./DashBoradUpcoming";
-import DeshboradCompleted from "./DeshboradCompleted";
+
+const DashbordToday = dynamic(() => import("./DashbordToday"));
+const DashBoradUpcoming = dynamic(() => import("./DashBoradUpcoming"));
+const DeshboradCompleted = dynamic(() => import("./DeshboradCompleted"));
 
 function getGreeting() {
   const h = new Date().getHours();

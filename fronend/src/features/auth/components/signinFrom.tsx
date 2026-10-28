@@ -8,7 +8,7 @@ import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLogin } from "@/features/auth/hooks/useAuthApi";
-import { persistAuthToken } from "@/lib/auth";
+import { getSafeRedirectPath, persistAuthToken } from "@/lib/auth";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import { toast } from "react-toastify";
 
@@ -160,7 +160,8 @@ function SigninForm() {
            */
           persistAuthToken(token);
           toast.success("Welcome back!");
-          router.push("/");
+          const redirect = new URLSearchParams(window.location.search).get("redirect");
+          router.replace(getSafeRedirectPath(redirect));
 
           return;
         }

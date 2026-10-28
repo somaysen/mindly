@@ -35,9 +35,16 @@ export default function PlanningPage() {
   useEffect(() => {
     if (!selectedPlanning) return;
 
-    // FIX 1: Safely handle the 'string | null' return type from localStorage
-    const storedData = localStorage.getItem(STORAGE_KEY);
-    const existingData = storedData ? JSON.parse(storedData) : {};
+    let existingData: Record<string, unknown> = {};
+    try {
+      const storedData = localStorage.getItem(STORAGE_KEY);
+      const parsedData: unknown = storedData ? JSON.parse(storedData) : null;
+      if (parsedData && typeof parsedData === "object" && !Array.isArray(parsedData)) {
+        existingData = parsedData as Record<string, unknown>;
+      }
+    } catch {
+      // Start fresh if saved onboarding data is malformed.
+    }
 
     localStorage.setItem(
       STORAGE_KEY,

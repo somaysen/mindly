@@ -1,5 +1,5 @@
 import React from 'react'
-import SiginupFrom from '../.../../../../features/auth/components/siginupFrom'
+import SiginupFrom from "@/features/auth/components/siginupFrom";
 
 function page() {
   return (

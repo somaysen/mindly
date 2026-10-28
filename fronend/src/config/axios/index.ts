@@ -7,7 +7,6 @@ const isPublicRoute = (path: string) =>
 const api = axios.create({
   // Keep browser requests on this origin; the Next.js route proxies /api.
   baseURL: "",
-  headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
 
@@ -17,6 +16,8 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const responseData = error.response?.data;
     const originalRequest = error.config;
+    const requestPath = originalRequest?.url?.split("?")[0];
+    const isRefreshRequest = requestPath === "/api/auth/refresh";
     const currentPath =
       typeof window !== "undefined" ? window.location.pathname : "";
 
@@ -33,7 +34,13 @@ api.interceptors.response.use(
 
     const publicRoute = isPublicRoute(currentPath);
 
-    if (!publicRoute && status === 401 && originalRequest && !originalRequest._retry) {
+    if (
+      !publicRoute &&
+      !isRefreshRequest &&
+      status === 401 &&
+      originalRequest &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -50,6 +57,7 @@ api.interceptors.response.use(
 
     if (
       !publicRoute &&
+      !isRefreshRequest &&
       (status === 403 ||
         message.toLowerCase().includes("unauthorized") ||
         message.toLowerCase().includes("unauthenticated") ||

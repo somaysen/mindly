@@ -17,7 +17,8 @@ export * from "./tasks/deleteTaskById";
 export * from "./tasks/getTask";
 export * from "./tasks/getTaskById";
 export * from "./tasks/updateTaskById";
-
+export * from "./tasks/completeTask";
+export * from "./tasks/getCompletedTask";
 
 /* ==================== Notification =============== */
 export * from "./notification/createNotification"

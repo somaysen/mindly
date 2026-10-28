@@ -15,6 +15,7 @@ export const useTaskCreate = () => {
     retry: 0,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getTasks"] });
+      queryClient.invalidateQueries({ queryKey: ["getCompleteTasks"] });
     },
   });
 };
@@ -35,6 +36,7 @@ export const useTaskUpdate = () => {
     retry: 0,
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["getTasks"] });
+      queryClient.invalidateQueries({ queryKey: ["getCompleteTasks"] });
       queryClient.invalidateQueries({
         queryKey: ["getTaskById", variables.taskId],
       });
@@ -43,10 +45,11 @@ export const useTaskUpdate = () => {
 };
 
 // GET ALL TASKS
-export const useTaskGet = (date?: string) => {
+export const useTaskGet = (date?: string, enabled = true) => {
   return useQuery({
     queryKey: ["getTasks", date],
     queryFn: () => api.getTask(date),
+    enabled,
     retry: 0,
   });
 };
@@ -71,8 +74,32 @@ export const useTaskDeleteById = () => {
     retry: 0,
     onSuccess: (_, taskId) => {
       queryClient.invalidateQueries({ queryKey: ["getTasks"] });
+      queryClient.invalidateQueries({ queryKey: ["getCompleteTasks"] });
       queryClient.invalidateQueries({
         queryKey: ["getTaskById", taskId],
+      });
+    },
+  });
+};
+
+export const useTaskComplete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["taskCompleted"],
+    mutationFn: ({
+      taskId,
+      data,
+    }: {
+      taskId: string;
+      data: FormData;
+    }) => api.completeTaskById(taskId, data),
+    retry: 0,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["getTasks"] });
+      queryClient.invalidateQueries({ queryKey: ["getCompleteTasks"] });
+      queryClient.invalidateQueries({
+        queryKey: ["getTaskById", variables.taskId],
       });
     },
   });
