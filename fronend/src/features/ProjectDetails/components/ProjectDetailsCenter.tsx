@@ -14,6 +14,7 @@ import {
 } from "@/features/projects/hooks/useProject";
 import { useGetProjectDetails } from "@/features/ProjectDetails/hooks/useProjectDetails";
 import FileSection from "@/features/ProjectDetails/components/fileSection";
+import { getApiErrorMessage } from "@/lib/apiError";
 
 type ProjectDetailsRecord = {
   id?: string | number;
@@ -107,23 +108,6 @@ function getProjectId(project: ProjectDetailsRecord) {
   );
 }
 
-function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (
-      error as {
-        response?: {
-          data?: { message?: string; error?: string };
-        };
-      }
-    ).response;
-
-    if (response?.data?.message) return response.data.message;
-    if (response?.data?.error) return response.data.error;
-  }
-
-  return error instanceof Error ? error.message : "Please try again.";
-}
-
 export default function ProjectDetailsCenter({
   projectId,
 }: {
@@ -163,7 +147,7 @@ export default function ProjectDetailsCenter({
 
         <p className="mt-2 max-w-lg text-sm text-[#c5c3d3]">
           {isError
-            ? getErrorMessage(error)
+            ? getApiErrorMessage(error)
             : "The project details were not found."}
         </p>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { ListTodo } from "lucide-react";
+import { ListTodo, Plus } from "lucide-react";
 
 import { useTaskGet } from "@/features/tasks/hooks/useTesk";
 import TaskCard from "@/features/tasks/components/TaskCard";
@@ -13,7 +13,7 @@ function getLocalDateKey(date: Date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-function DashbordToday() {
+function DashbordToday({ onAddTask }: { onAddTask?: () => void }) {
   const { data, isLoading, isError } = useTaskGet();
   const tasks = useMemo(() => {
     const allTasks: Task[] = Array.isArray(data?.data) ? data.data : [];
@@ -42,12 +42,23 @@ function DashbordToday() {
             })}
           </p>
         </div>
-        {!isLoading && !isError && (
+        <div className="flex items-center gap-3">
+          {!isLoading && !isError && (
           <p className="text-sm text-white/55">
             <span className="font-medium text-white">{openCount}</span> left
             {completedCount > 0 && <> · {completedCount} completed</>}
           </p>
-        )}
+          )}
+          {onAddTask && (
+            <button
+              type="button"
+              onClick={onAddTask}
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-full bg-[#6265ed] px-4 text-sm font-medium text-white transition hover:bg-[#7375f4]"
+            >
+              <Plus size={16} /> Add task
+            </button>
+          )}
+        </div>
       </header>
 
       {isLoading ? (

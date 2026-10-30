@@ -50,13 +50,16 @@ function SigninForm() {
     setServerError("");
 
     const email = formData.email.trim().toLowerCase();
+    const password = formData.password;
 
-    const data = new FormData();
+    if (!email || !password) {
+      const message = "Email and password are required.";
+      setServerError(message);
+      toast.error(message);
+      return;
+    }
 
-    data.append("email", email);
-    data.append("password", formData.password);
-
-    loginUser(data, {
+    loginUser({ email, password }, {
       onSuccess: (res: any) => {
         /*
          * Get user from all possible response structures

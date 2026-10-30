@@ -5,6 +5,7 @@ import { Pencil, LogOut, X, AlertTriangle } from "lucide-react";
 import ProfileRight from "./profileRight";
 import { useProfileInfo, useLogOut } from "../hooks/useProfile";
 import { clearAuthCookies } from "@/lib/auth";
+import { getApiErrorMessage } from "@/lib/apiError";
 
 function ProfileCenter() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -45,9 +46,7 @@ function ProfileCenter() {
 
         setShowLogoutModal(false);
 
-        window.alert(
-          "Unable to log out right now. Please try again."
-        );
+        window.alert(getApiErrorMessage(error, "Unable to log out right now. Please try again."));
       },
     });
   };

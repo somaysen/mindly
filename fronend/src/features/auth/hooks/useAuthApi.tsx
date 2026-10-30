@@ -1,4 +1,5 @@
 import * as api from "@/api";
+import type { LoginCredentials } from "@/api/auth/login";
 import { useMutation } from "@tanstack/react-query";
 
 export const useRegister = () => {
@@ -12,7 +13,7 @@ export const useRegister = () => {
 export const useLogin = () => {
   return useMutation({
     mutationKey: ["login"],
-    mutationFn: (data: FormData) => api.login(data),
+    mutationFn: (data: LoginCredentials) => api.login(data),
     retry: 0,
   });
 };

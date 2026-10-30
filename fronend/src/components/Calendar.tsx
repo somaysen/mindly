@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import CreateTaskModal from "@/features/tasks/components/CreateTaskModal";
-import TaskModel from "@/features/tasks/components/taskModel";
+import CreateTaskModal from "@/features/tasks/components/TaskCreteModel";
+import TaskModel from "@/features/tasks/components/TaskModel";
 import { useTaskGet } from "@/features/tasks/hooks/useTesk";
 import type { Task } from "@/types/task";
 import "react-day-picker/style.css";

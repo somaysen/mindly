@@ -9,6 +9,7 @@ import {
   useCreateProject,
   useGetProjects,
 } from "@/features/projects/hooks/useProject";
+import { getApiErrorMessage } from "@/lib/apiError";
 
 type ProjectRecord = {
   id: string;
@@ -102,19 +103,6 @@ function getCreatedProjectId(response: unknown): string | null {
   );
 }
 
-function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (
-      error as { response?: { data?: { message?: string; error?: string } } }
-    ).response;
-    if (response?.data?.message) return response.data.message;
-    if (response?.data?.error) return response.data.error;
-  }
-  return error instanceof Error
-    ? error.message
-    : "Something went wrong. Please try again.";
-}
-
 function ProjectCenter() {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -199,7 +187,7 @@ function ProjectCenter() {
 
       {createProject.isError && (
         <p className="mt-4 text-sm text-red-300" role="alert">
-          Couldn’t create the project. {getErrorMessage(createProject.error)}
+          Couldn’t create the project. {getApiErrorMessage(createProject.error)}
         </p>
       )}
 
@@ -213,7 +201,7 @@ function ProjectCenter() {
       ) : isError ? (
         <section className="flex min-h-[calc(100vh-180px)] flex-col items-center justify-center text-center">
           <p className="text-sm text-red-300">
-            Couldn’t load projects. {getErrorMessage(error)}
+            Couldn’t load projects. {getApiErrorMessage(error)}
           </p>
           <button
             type="button"

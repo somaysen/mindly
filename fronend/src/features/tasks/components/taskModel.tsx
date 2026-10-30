@@ -37,9 +37,7 @@ const dateForInput = (value?: string | null) => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
 
   const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? ""
-    : date.toISOString().slice(0, 10);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
 };
 
 const timeForInput = (value?: string | null) => {
@@ -47,15 +45,10 @@ const timeForInput = (value?: string | null) => {
   if (/^\d{2}:\d{2}/.test(value)) return value.slice(0, 5);
 
   const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? ""
-    : date.toTimeString().slice(0, 5);
+  return Number.isNaN(date.getTime()) ? "" : date.toTimeString().slice(0, 5);
 };
 
-function getProjectOptions(
-  response: unknown,
-  depth = 0,
-): ProjectOption[] {
+function getProjectOptions(response: unknown, depth = 0): ProjectOption[] {
   if (depth > 5 || !response) return [];
 
   if (Array.isArray(response)) {
@@ -126,22 +119,22 @@ export default function TaskModel({
   const [projectId, setProjectId] = useState(initialProject);
   const [checklist, setChecklist] = useState<string[]>(
     Array.isArray(task.checklist)
-      ? task.checklist.filter((item): item is string => typeof item === "string")
+      ? task.checklist.filter(
+          (item): item is string => typeof item === "string",
+        )
       : [],
   );
   const [newChecklistItem, setNewChecklistItem] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const { data: projectsData, isLoading: isProjectsLoading } =
-    useGetProjects();
+  const { data: projectsData, isLoading: isProjectsLoading } = useGetProjects();
 
   const projects = useMemo(
     () => getProjectOptions(projectsData),
     [projectsData],
   );
 
-  const { mutateAsync: updateTask, isPending: isUpdating } =
-    useTaskUpdate();
+  const { mutateAsync: updateTask, isPending: isUpdating } = useTaskUpdate();
 
   const { mutateAsync: deleteTask, isPending: isDeleting } =
     useTaskDeleteById();
@@ -173,9 +166,7 @@ export default function TaskModel({
       onClose();
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Could not update task.",
+        error instanceof Error ? error.message : "Could not update task.",
       );
     }
   };
@@ -188,9 +179,7 @@ export default function TaskModel({
       onClose();
     } catch (error) {
       toast.error(
-        error instanceof Error
-          ? error.message
-          : "Could not delete task.",
+        error instanceof Error ? error.message : "Could not delete task.",
       );
     }
   };
@@ -223,10 +212,7 @@ export default function TaskModel({
         {/* Header */}
         <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
           <div>
-            <h2
-              id="task-model-title"
-              className="text-base font-semibold"
-            >
+            <h2 id="task-model-title" className="text-base font-semibold">
               Edit task
             </h2>
             <p className="mt-0.5 text-xs text-white/50">
@@ -266,10 +252,7 @@ export default function TaskModel({
 
           {/* Description */}
           <div>
-            <label
-              htmlFor="task-model-description"
-              className={labelClass}
-            >
+            <label htmlFor="task-model-description" className={labelClass}>
               Description
             </label>
 
@@ -381,9 +364,7 @@ export default function TaskModel({
             </select>
 
             {isProjectsLoading && (
-              <p className="mt-1 text-xs text-white/45">
-                Loading projects...
-              </p>
+              <p className="mt-1 text-xs text-white/45">Loading projects...</p>
             )}
 
             {!isProjectsLoading && projects.length === 0 && (
@@ -421,9 +402,7 @@ export default function TaskModel({
                       disabled={isPending}
                       onClick={() =>
                         setChecklist((current) =>
-                          current.filter(
-                            (_, itemIndex) => itemIndex !== index,
-                          ),
+                          current.filter((_, itemIndex) => itemIndex !== index),
                         )
                       }
                       className="shrink-0 rounded p-1 text-white/45 hover:bg-white/10 hover:text-white disabled:opacity-50"
@@ -439,9 +418,7 @@ export default function TaskModel({
               <input
                 id="task-model-checklist"
                 value={newChecklistItem}
-                onChange={(event) =>
-                  setNewChecklistItem(event.target.value)
-                }
+                onChange={(event) => setNewChecklistItem(event.target.value)}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
                     event.preventDefault();

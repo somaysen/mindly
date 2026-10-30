@@ -48,30 +48,37 @@ const projectColors = [
   "bg-[#ee8ec6]",
 ];
 
-const views = [
+export type TaskView = "all" | "today" | "upcoming" | "completed";
+
+const views: { id: TaskView; label: string; icon: typeof House }[] = [
   {
-    href: "/",
+    id: "all",
     label: "All Tasks",
     icon: House,
   },
   {
-    href: "/today",
+    id: "today",
     label: "Today",
     icon: SunDim,
   },
   {
-    href: "/upcoming",
-    label: "Important",
-    icon: Star,
-  },
-  {
-    href: "/completed",
+    id: "upcoming",
     label: "Upcoming",
     icon: ClockClockwise,
   },
+  {
+    id: "completed",
+    label: "Completed",
+    icon: Star,
+  },
 ];
 
-export default function taskSidebar() {
+interface TaskSidebarProps {
+  activeView: TaskView | null;
+  onViewChange: (view: TaskView) => void;
+}
+
+export default function taskSidebar({ activeView, onViewChange }: TaskSidebarProps) {
   const pathname = usePathname();
   const { data: projectData, isLoading, isError } = useGetProjects();
   const projects = useMemo(
@@ -141,16 +148,13 @@ export default function taskSidebar() {
           <nav className="flex flex-col gap-[7px]">
             {views.map((item) => {
               const Icon = item.icon;
-
-              const isActive =
-                item.href === "/"
-                  ? pathname === "/"
-                  : pathname.startsWith(item.href);
+              const isActive = activeView === item.id;
 
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onViewChange(item.id)}
                   className={[
                     `
                     flex
@@ -176,7 +180,7 @@ export default function taskSidebar() {
                   />
 
                   <span>{item.label}</span>
-                </Link>
+                </button>
               );
             })}
           </nav>

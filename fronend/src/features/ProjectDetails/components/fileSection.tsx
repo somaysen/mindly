@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { fileToBase64DataUri } from "@/lib/fileToBase64DataUri";
+import { getApiErrorMessage } from "@/lib/apiError";
 import {
   Plus,
   FolderPlus,
@@ -59,15 +60,6 @@ function getProjectFiles(response: unknown, depth = 0): ProjectFile[] {
     if (files.length) return files;
   }
   return [];
-}
-
-function getErrorMessage(error: unknown) {
-  if (error && typeof error === "object" && "response" in error) {
-    const response = (error as { response?: { data?: { message?: string; error?: string } } }).response;
-    if (response?.data?.message) return response.data.message;
-    if (response?.data?.error) return response.data.error;
-  }
-  return error instanceof Error ? error.message : "Please try again.";
 }
 
 type FileSectionProps = {
@@ -145,7 +137,7 @@ export default function FileSection({
       }
       closeModal();
     } catch (uploadError) {
-      setError(getErrorMessage(uploadError));
+      setError(getApiErrorMessage(uploadError));
     }
   }
 
@@ -195,7 +187,7 @@ export default function FileSection({
     try {
       await deleteFile.mutateAsync(id);
     } catch (deleteError) {
-      setError(getErrorMessage(deleteError));
+      setError(getApiErrorMessage(deleteError));
     }
   }
 
@@ -211,7 +203,7 @@ export default function FileSection({
           </p>
         ) : filesQuery.isError ? (
           <div className="py-6 text-center text-sm text-red-300">
-            <p>{getErrorMessage(filesQuery.error)}</p>
+            <p>{getApiErrorMessage(filesQuery.error)}</p>
             <button type="button" onClick={() => void filesQuery.refetch()} className="mt-3 underline">Try again</button>
           </div>
         ) : files.length === 0 ? (
