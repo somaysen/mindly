@@ -1,5 +1,9 @@
 import axios from "axios";
-import { clearAuthCookies, isPublicPath } from "@/lib/auth";
+import {
+  clearAuthCookies,
+  getAccessToken,
+  isPublicPath,
+} from "@/lib/auth";
 
 const isPublicRoute = (path: string) =>
   Boolean(path) && (isPublicPath(path) || path.includes("/user-verification"));
@@ -8,6 +12,15 @@ const api = axios.create({
   // Keep browser requests on this origin; the Next.js route proxies /api.
   baseURL: "",
   withCredentials: true,
+});
+
+api.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  return config;
 });
 
 api.interceptors.response.use(

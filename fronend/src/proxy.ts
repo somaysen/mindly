@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isPublicPath } from "@/lib/auth-routes";
-
-const ACCESS_TOKEN_COOKIE_NAMES = ["token", "accessToken", "access_token", "jwt"];
+import {
+  ACCESS_TOKEN_COOKIE_NAMES,
+  isPublicPath,
+} from "@/lib/auth-routes";
 
 const PUBLIC_ROUTES = [
   "/",
@@ -18,7 +19,7 @@ const PUBLIC_ROUTES = [
   "/auth/callback",
 ];
 
-function hasCookie(request: NextRequest, names: string[]) {
+function hasCookie(request: NextRequest, names: readonly string[]) {
   return names.some((name) => Boolean(request.cookies.get(name)?.value));
 }
 

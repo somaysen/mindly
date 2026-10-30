@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getAccessToken } from "@/lib/auth";
 
 const apiClient = axios.create({
   // Keep browser requests on this origin; next.config.ts proxies /api to the backend.
@@ -12,7 +13,11 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config) => {
-    // Authentication via cookie "token" (withCredentials: true) is now the single source of truth.
+    const token = getAccessToken();
+    if (token) {
+      config.headers.set("Authorization", `Bearer ${token}`);
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

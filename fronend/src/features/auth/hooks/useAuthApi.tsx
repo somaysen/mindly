@@ -49,7 +49,7 @@ export const useResendVerification = () => {
 export const useLogOut = () => {
   return useMutation({
     mutationKey: ["logout"],
-    mutationFn: () => api.logout(new FormData()),
+    mutationFn: () => api.logout(),
     retry: 0,
   });
 };

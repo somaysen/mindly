@@ -1,5 +1,8 @@
 import Cookies from "js-cookie";
-import { AUTH_COOKIE_NAMES } from "@/lib/auth-routes";
+import {
+  ACCESS_TOKEN_COOKIE_NAMES,
+  AUTH_COOKIE_NAMES,
+} from "@/lib/auth-routes";
 
 export {
   AUTH_COOKIE_NAMES,
@@ -10,6 +13,12 @@ export {
 
 export function hasClientAuthCookie() {
   return AUTH_COOKIE_NAMES.some((name) => Boolean(Cookies.get(name)));
+}
+
+export function getAccessToken() {
+  return ACCESS_TOKEN_COOKIE_NAMES
+    .map((name) => Cookies.get(name))
+    .find((token) => Boolean(token));
 }
 
 export function persistAuthToken(token?: string | null) {
