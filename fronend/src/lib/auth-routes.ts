@@ -1,3 +1,10 @@
+export const ACCESS_TOKEN_COOKIE_NAMES = [
+  "token",
+  "accessToken",
+  "access_token",
+  "jwt",
+] as const;
+
 export const AUTH_COOKIE_NAMES = [
   "token",
   "accessToken",

@@ -15,7 +15,7 @@ export const useProfileInfo = () => {
 export const useLogOut = () => {
   return useMutation({
     mutationKey: ["logout"],
-    mutationFn: () => api.logout(new FormData()),
+    mutationFn: () => api.logout(),
     retry: 0,
   });
 };

@@ -2,7 +2,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## API configuration
 
-For local development, set `NEXT_PUBLIC_API_BASE_URL` or `API_BASE_URL` to your backend origin (for example, `http://localhost:9000`). Production defaults to `https://mindly-backend-omega.vercel.app`; set `API_BASE_URL` in Vercel only if you use a different backend. Browser API calls use the app's `/api` route and Next.js proxies them to this backend, so the browser does not make cross-origin API requests. Production builds reject insecure or localhost API overrides.
+For local development, set `NEXT_PUBLIC_API_BASE_URL` or `API_BASE_URL` to your backend origin (for example, `http://localhost:9000`). Production defaults to `https://mindly-backend-omega.vercel.app`; set `API_BASE_URL` in Vercel only if you use a different backend. Browser API calls use the app's `/api` route and Next.js proxies them to this backend, so the browser does not make cross-origin API requests. Authenticated requests forward the app's access-token cookie as a Bearer `Authorization` header. Production builds reject insecure or localhost API overrides.
 
 ## Google sign in
 
@@ -42,4 +42,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
