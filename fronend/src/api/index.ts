@@ -10,6 +10,11 @@ export * from "./auth/logout"
 export * from "./users/userInfo"
 export * from "./users/getUserInfo"
 export * from "./users/getUserByAuthID"
+
+/* =================== Files =================== */
+export * from "./file/uploadProjectFile";
+export * from "./file/getfile";
+export * from "./file/deleteProjectFile";
  
 /* ===================task================= */
 export * from "./tasks/creatingTask";

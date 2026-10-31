@@ -153,10 +153,12 @@ export default function TaskModel({
 
     formData.append("taskName", name);
     formData.append("description", description.trim());
-    formData.append("dueDate", dueDate);
-    formData.append("dueTime", dueTime);
-    formData.append("priority", priority);
-    formData.append("project", projectId);
+    // Empty optional values can fail backend validation (especially an empty
+    // project ID, which may be cast to a Mongo ObjectId).
+    if (dueDate) formData.append("dueDate", dueDate);
+    if (dueTime) formData.append("dueTime", dueTime);
+    if (priority) formData.append("priority", priority);
+    if (projectId) formData.append("project", projectId);
     formData.append("checklist", JSON.stringify(checklist));
 
     try {
