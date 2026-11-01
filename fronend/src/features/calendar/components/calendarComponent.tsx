@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useTaskGet } from "@/features/tasks/hooks/useTesk";
 import type { Task } from "@/types/task";
 import CreateTaskModal from "@/features/tasks/components/TaskCreteModel";
-import TaskModel from "@/features/tasks/components/TaskModel";
+import TaskModel from "@/features/tasks/components/taskModel";
 import "./calender.css";
 
 type CalendarView = "month" | "week" | "day";

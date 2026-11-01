@@ -9,7 +9,7 @@ import AllTask from "./AllTask";
 import CreateTaskModal from "./TaskCreteModel";
 import TaskPageCenter from "./TaskPageCenter";
 import TaskSchedule from "./TaskSchedule";
-import type { TaskView } from "./TaskSidebar";
+import type { TaskView } from "./taskSidebar";
 
 const getTodayInputDate = () => {
   const today = new Date();
@@ -23,7 +23,7 @@ function TaskbarCenter({ activeView }: { activeView: TaskView | null }) {
   const openCreateTask = () => setIsCreateOpen(true);
 
   return (
-    <main className="h-full min-w-0 overflow-y-auto overflow-x-hidden px-4 pb-6 pt-16 text-white sm:px-6">
+    <main className="min-h-full min-w-0 overflow-x-hidden px-4 pb-6 pt-4 text-white sm:px-6 sm:pt-6">
       <div className="mx-auto w-full max-w-[1400px]">
         <div className="grid w-full grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_285px]">
           {activeView === null ? (

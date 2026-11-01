@@ -39,7 +39,7 @@ export default function TaskPageCenter({ onAddTask, showAllTasks = false }: Task
   return (
     <section className="min-w-0">
       <div className="relative flex min-h-[175px] items-center justify-between overflow-hidden rounded-2xl border border-[#30304D] bg-gradient-to-r from-[#191832] to-[#25234b] px-5 py-5 sm:px-7">
-        <div className="relative z-10 max-w-[58%]">
+        <div className="relative z-10 max-w-[62%] sm:max-w-[56%]">
           <h1 className="text-xl font-semibold sm:text-[25px]">
             {isLoading ? "Loading your tasks..." : taskCount ? "Your plans, in one place" : "Nothing planned yet"}
           </h1>
@@ -52,7 +52,7 @@ export default function TaskPageCenter({ onAddTask, showAllTasks = false }: Task
         <img
           src="/images/girl laptop 02 1.png"
           alt="Person planning tasks on a laptop"
-          className="pointer-events-none absolute bottom-0 right-0 h-full max-w-[48%] object-contain object-bottom"
+          className="pointer-events-none absolute bottom-0 right-0 h-full max-w-[36%] object-contain object-bottom sm:max-w-[42%]"
         />
       </div>
 

@@ -26,7 +26,7 @@ function thoughtSpacesCenter() {
   const hasSpaces = Spaces.length > 0;
 
   return (
-    <main className="min-h-screen w-full overflow-hidden bg-[#0d0c1f] px-10 py-8 text-white">
+    <main className="min-h-full w-full bg-[#0d0c1f] px-4 py-5 text-white sm:px-6 sm:py-7 lg:px-10 lg:py-8">
       {/* Header */}
       <section>
         <h1 className="text-[25px] font-semibold tracking-tight">
@@ -56,7 +56,7 @@ function thoughtSpacesCenter() {
       {!hasSpaces ? (
         <section className="flex min-h-[calc(100vh-130px)] flex-col items-center justify-center pb-16">
           {/* Illustration */}
-          <div className="mb-4 flex h-[235px] w-[330px] items-center justify-center">
+          <div className="mb-4 flex h-[190px] w-full max-w-[330px] items-center justify-center sm:h-[235px]">
             <img
               src="/images/Group.png"
               alt="No projects"

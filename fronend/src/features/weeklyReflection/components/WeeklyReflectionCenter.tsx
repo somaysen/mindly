@@ -10,9 +10,9 @@ import {
 
 function WeeklyReflectionCenter() {
   return (
-    <div className="min-h-screen w-full px-1 pb-8 text-white">
+    <div className="min-h-full w-full px-1 pb-8 text-white">
       {/* Header */}
-      <div className="flex items-start justify-between pt-1">
+      <div className="flex flex-col items-start justify-between gap-3 pt-1 sm:flex-row sm:gap-5">
         <div>
           <h1 className="text-[22px] font-bold leading-none">
             Weekly Reflection
@@ -38,7 +38,7 @@ function WeeklyReflectionCenter() {
 
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
           {/* Tasks Completed */}
-          <div className="relative h-[126px] overflow-hidden rounded-2xl border border-[#45436d] bg-gradient-to-r from-[#202047] via-[#343276] to-[#1e1c42]">
+          <div className="relative min-h-[126px] overflow-hidden rounded-2xl border border-[#45436d] bg-gradient-to-r from-[#202047] via-[#343276] to-[#1e1c42]">
             {/* Glow */}
             <div className="absolute -left-10 -top-16 h-40 w-56 rounded-full bg-[#716eff] opacity-50 blur-3xl" />
 
@@ -68,7 +68,7 @@ function WeeklyReflectionCenter() {
               </div>
 
               {/* Illustration placeholder */}
-              <div className="flex h-full w-[45%] items-end justify-center">
+              <div className="flex h-full w-[40%] items-end justify-center sm:w-[45%]">
                 <div className="relative mb-[-8px] h-[100px] w-[115px] rotate-6 border-2 border-[#8583ff] bg-[#e7e7ff] shadow-[0_0_30px_rgba(113,110,255,0.6)]">
                   <div className="absolute left-4 top-4 space-y-3">
                     <div className="h-1 w-12 rounded bg-[#4e4a91]" />
@@ -86,7 +86,7 @@ function WeeklyReflectionCenter() {
           </div>
 
           {/* Focus Time */}
-          <div className="relative h-[126px] rounded-2xl bg-[#a9e6ce] p-4 text-[#29483f]">
+          <div className="relative min-h-[126px] rounded-2xl bg-[#a9e6ce] p-4 text-[#29483f]">
             <div className="flex items-start justify-between">
               <Clock3 size={21} className="text-[#57947e]" />
 
@@ -105,7 +105,7 @@ function WeeklyReflectionCenter() {
           </div>
 
           {/* Thoughts Captured */}
-          <div className="relative h-[126px] rounded-2xl bg-[#7271e6] p-4 text-[#22234d]">
+          <div className="relative min-h-[126px] rounded-2xl bg-[#7271e6] p-4 text-[#22234d]">
             <div className="flex items-start justify-between">
               <Lightbulb
                 size={22}
@@ -129,7 +129,7 @@ function WeeklyReflectionCenter() {
 
       {/* Small Wins */}
       <section className="mt-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-[17px] font-medium">Small Wins</h2>
 
           <p className="text-[11px] text-gray-300">

@@ -144,7 +144,7 @@ export default function Notepad() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black text-white selection:bg-white/20 selection:text-white">
+    <main className="relative min-h-screen overflow-hidden bg-black pb-24 text-white selection:bg-white/20 selection:text-white xl:pb-0">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_15%_0%,rgba(255,255,255,0.06),transparent),radial-gradient(ellipse_50%_35%_at_90%_25%,rgba(255,255,255,0.04),transparent)]"

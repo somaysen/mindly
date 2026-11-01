@@ -5,14 +5,14 @@ import { Bell } from "lucide-react";
 
 function NotificationCenter() {
   return (
-    <main className="min-h-[calc(100vh-82px)] w-full px-8 pb-10">
+    <main className="min-h-full w-full px-4 pb-8 sm:px-6 lg:px-8">
       {/* ================= HEADER ================= */}
       <div className="mb-7">
-        <h1 className="text-[32px] font-semibold leading-tight text-[#e8e7f5]">
+        <h1 className="text-2xl font-semibold leading-tight text-[#e8e7f5] sm:text-[32px]">
           Notifications
         </h1>
 
-        <p className="mt-2 text-[17px] text-[#8582a8]">
+        <p className="mt-2 text-sm text-[#8582a8] sm:text-[17px]">
           Reminders pulled from your tasks, events and thoughts.
         </p>
       </div>

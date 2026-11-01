@@ -53,7 +53,7 @@ function ProfileCenter() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full px-8 py-6 text-white">
+      <div className="min-h-full w-full px-4 py-5 text-white sm:px-8 sm:py-6">
         <h1 className="mb-8 text-3xl font-semibold">
           Settings
         </h1>
@@ -65,7 +65,7 @@ function ProfileCenter() {
 
   if (isError || !profile) {
     return (
-      <div className="min-h-screen w-full px-8 py-6 text-white">
+      <div className="min-h-full w-full px-4 py-5 text-white sm:px-8 sm:py-6">
         <h1 className="mb-8 text-3xl font-semibold">
           Settings
         </h1>
@@ -87,7 +87,7 @@ function ProfileCenter() {
 
   return (
     <>
-      <div className="min-h-screen w-full px-8 py-6 text-white">
+      <div className="min-h-full w-full px-4 py-5 text-white sm:px-8 sm:py-6">
         {/* Header */}
         <h1 className="mb-8 text-3xl font-semibold">
           Settings
@@ -105,8 +105,8 @@ function ProfileCenter() {
             </h2>
 
             {/* Profile Card */}
-            <div className="flex min-h-[140px] w-full items-center justify-between rounded-2xl bg-[#1a1938] p-6">
-              <div className="flex items-center gap-5">
+            <div className="flex min-h-[140px] w-full flex-wrap items-center justify-between gap-4 rounded-2xl bg-[#1a1938] p-4 sm:p-6">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-5">
 
                 {/* Avatar */}
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#294c3c] text-2xl font-semibold text-white">
@@ -127,7 +127,7 @@ function ProfileCenter() {
                     {profile.name}
                   </h3>
 
-                  <p className="text-sm text-[#8885a8]">
+                  <p className="break-all text-sm text-[#8885a8]">
                     {profile.auth?.email}
                   </p>
 
@@ -140,7 +140,7 @@ function ProfileCenter() {
               {/* Edit */}
               <button
                 type="button"
-                className="flex shrink-0 items-center gap-2 rounded-full border border-[#34335d] px-5 py-2 text-sm transition hover:bg-[#292751]"
+                className="flex shrink-0 items-center gap-2 rounded-full border border-[#34335d] px-4 py-2 text-sm transition hover:bg-[#292751] sm:px-5"
               >
                 <Pencil size={15} />
                 Edit
@@ -148,9 +148,9 @@ function ProfileCenter() {
             </div>
 
             {/* Stats */}
-            <div className="mt-3 grid w-full grid-cols-3 gap-3">
+            <div className="mt-3 grid w-full grid-cols-1 gap-3 min-[440px]:grid-cols-3">
 
-              <div className="rounded-2xl bg-[#1a1938] p-5">
+              <div className="rounded-2xl bg-[#1a1938] p-4 sm:p-5">
                 <h3 className="text-2xl font-semibold">
                   2
                 </h3>
@@ -160,7 +160,7 @@ function ProfileCenter() {
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-[#1a1938] p-5">
+              <div className="rounded-2xl bg-[#1a1938] p-4 sm:p-5">
                 <h3 className="text-2xl font-semibold">
                   1
                 </h3>
@@ -170,7 +170,7 @@ function ProfileCenter() {
                 </p>
               </div>
 
-              <div className="rounded-2xl bg-[#1a1938] p-5">
+              <div className="rounded-2xl bg-[#1a1938] p-4 sm:p-5">
                 <h3 className="text-2xl font-semibold">
                   0
                 </h3>

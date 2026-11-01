@@ -1,4 +1,4 @@
-import TasksPage from '@/features/tasks/components/TasksPage'
+import TasksPage from '@/features/tasks/components/tasksPage'
 
 function page() {
   return (

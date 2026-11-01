@@ -4,23 +4,23 @@ import WeeklyReflectionCenter from "./WeeklyReflectionCenter";
 
 function WeeklyReflection() {
   return (
-    <div className="flex h-screen w-full absolute overflow-hidden bg-[#0d0c1f]">
+    <div className="absolute flex h-dvh w-full overflow-hidden bg-[#0d0c1f]">
       {/* Global Navigation Sidebar */}
-      <aside className="w-[100px] shrink-0 z-50 flex items-start justify-center pt-[28px]">
-        <div className="h-[calc(113vh-160px)] ml-[55px]">
+      <aside className="z-50 hidden w-[100px] shrink-0 items-start justify-center pt-[28px] xl:flex">
+        <div className="ml-[55px] h-[calc(100dvh-56px)]">
           <Sidebar />
         </div>
       </aside>
 
       {/* Main Container */}
-      <div className="flex flex-col flex-1 min-w-0 h-screen">
+      <div className="flex h-full min-w-0 flex-1 flex-col">
         {/* Topbar */}
-        <header className="h-[112px] shrink-0 px-6 flex items-center ml-5 z-40">
+        <header className="z-40 flex h-[72px] shrink-0 items-center px-3 sm:h-[88px] sm:px-5 lg:h-[112px] lg:px-6 lg:pl-11">
           <Topbar />
         </header>
 
         {/* Scrollable Main Content */}
-        <main className="flex-1 ml-12 pr-5 overflow-y-auto scrollbar-hide">
+        <main className="min-h-0 flex-1 overflow-y-auto px-4 pb-24 scrollbar-hide xl:px-0 xl:pb-0 xl:pl-12 xl:pr-5">
           <WeeklyReflectionCenter />
         </main>
       </div>

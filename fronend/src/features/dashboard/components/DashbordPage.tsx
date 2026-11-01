@@ -68,19 +68,19 @@ export default function DashbordPage() {
 
   // User exists: show dashboard
   return (
-    <div className="h-screen w-full overflow-hidden bg-[#0d0c1f]">
-      <aside className="fixed left-8 top-5 z-50 h-screen w-[260px]">
+    <div className="h-dvh w-full overflow-hidden bg-[#0d0c1f]">
+      <aside className="fixed left-8 top-5 z-50 hidden h-screen w-[291px] xl:block">
         <DashboardSidebar activeView={activeView} onViewChange={setActiveView} />
       </aside>
 
-      <div className="ml-[260px] h-screen">
+      <div className="h-full xl:ml-[291px]">
         {/* Fixed Topbar */}
-        <div className="fixed left-[350px] right-5 top-2 z-50">
+        <div className="fixed left-3 right-3 top-0 z-50 xl:left-[350px] xl:right-5 xl:top-2">
           <Topbar />
         </div>
 
         {/* Scrollable Content */}
-        <main className="ml-[90px] mr-[18px] h-screen overflow-y-auto pt-[130px] scrollbar-hide">
+        <main className="h-full overflow-y-auto px-3 pb-24 pt-[88px] scrollbar-hide sm:px-5 sm:pt-[100px] xl:ml-[90px] xl:mr-[18px] xl:px-0 xl:pb-6 xl:pt-[130px]">
           <DashbordCenter activeView={activeView} />
         </main>
       </div>

@@ -22,7 +22,7 @@ function Topbar() {
   };
 
   return (
-    <header className="flex h-[82px] w-full items-center px-0">
+    <header className="flex h-[72px] w-full items-center px-0 sm:h-[82px]">
       <div className="flex w-full items-center justify-between">
         {/* LEFT SECTION */}
         <div className="flex min-w-0 items-center gap-2">
@@ -37,7 +37,7 @@ function Topbar() {
 
           {/* Search */}
           {pathname === "/" && (
-            <div className="relative w-[min(360px,40vw)]">
+            <div className="relative hidden w-[min(360px,40vw)] sm:block">
               <Search
                 size={18}
                 strokeWidth={2}
@@ -78,7 +78,7 @@ function Topbar() {
             className="flex h-10 cursor-pointer items-center gap-1.5 rounded-full bg-gradient-to-r from-[#5264e8] to-[#6f7df0] px-4 text-sm font-medium text-white shadow-lg shadow-[#5968e8]/20 transition-all hover:opacity-90"
           >
             <Sparkles size={17} strokeWidth={1.8} />
-            <span>Calm Mode</span>
+            <span className="hidden sm:inline">Calm Mode</span>
           </button>
         </div>
       </div>

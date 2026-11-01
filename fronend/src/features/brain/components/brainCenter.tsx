@@ -130,15 +130,15 @@ function BrainCenter() {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#0c0b1d]">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#0c0b1d]">
       <header className="h-[82px] w-full shrink-0">
         <div className="mx-auto h-full w-full max-w-[1600px] px-3">
           <Topbar />
         </div>
       </header>
 
-      <main className="relative top-15 min-h-0 flex-1 overflow-y-auto scrollbar-none">
-        <div className="mx-auto w-full max-w-[1600px] px-3 pb-10">
+      <main className="min-h-0 flex-1 overflow-y-auto scrollbar-none">
+        <div className="mx-auto w-full max-w-[1600px] px-3 pb-24 sm:px-5 sm:pb-10">
           <section className="pt-6">
             <h1 className="text-3xl font-semibold text-white">Brain Dump</h1>
             <p className="mt-2 text-sm text-gray-300">

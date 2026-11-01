@@ -3,6 +3,7 @@ import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { bricolageGrotesque } from "@/lib/fonts";
 import Providers from "./providers";
+import MobileNavigation from "@/components/Navber/MobileNavigation";
 
 
 export const metadata: Metadata = {
@@ -28,7 +29,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <div className="relative z-10 flex min-h-full flex-1 flex-col">
-          <Providers>{children}</Providers>
+          <Providers>
+            {children}
+            <MobileNavigation />
+          </Providers>
         </div>
       </body>
     </html>

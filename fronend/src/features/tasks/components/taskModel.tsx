@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { CalendarDays, Clock3, Flag, Plus, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
 import {
@@ -114,6 +114,7 @@ export default function TaskModel({
   const [taskName, setTaskName] = useState(task.taskName ?? "");
   const [description, setDescription] = useState(task.description ?? "");
   const [dueDate, setDueDate] = useState(dateForInput(task.dueDate));
+  const dueDateInputRef = useRef<HTMLInputElement>(null);
   const [dueTime, setDueTime] = useState(timeForInput(task.dueTime));
   const [priority, setPriority] = useState(task.priority ?? "");
   const [projectId, setProjectId] = useState(initialProject);
@@ -140,6 +141,18 @@ export default function TaskModel({
     useTaskDeleteById();
 
   const isPending = isUpdating || isDeleting;
+
+  const openDueDatePicker = () => {
+    const input = dueDateInputRef.current;
+    if (!input) return;
+
+    try {
+      if (typeof input.showPicker === "function") input.showPicker();
+      else input.focus();
+    } catch {
+      input.focus();
+    }
+  };
 
   const handleUpdate = async () => {
     const name = taskName.trim();
@@ -270,25 +283,24 @@ export default function TaskModel({
           </div>
 
           {/* Date & Time */}
-          <div className="grid grid-cols-2 gap-3">
-            <label>
-              <span className={labelClass}>Due date</span>
-
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label htmlFor="task-model-due-date" className={labelClass}>Due date</label>
               <div className="relative">
-                <CalendarDays
-                  size={15}
-                  className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40"
-                />
-
                 <input
+                  ref={dueDateInputRef}
+                  id="task-model-due-date"
                   type="date"
                   value={dueDate}
                   onChange={(event) => setDueDate(event.target.value)}
                   disabled={isPending}
-                  className={`${inputClass} pl-8 pr-1 text-xs`}
+                  className={`${inputClass} cursor-pointer pl-9 pr-1 text-xs`}
                 />
+                <button type="button" aria-label="Choose due date" onClick={openDueDatePicker} disabled={isPending} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/50 transition hover:text-white disabled:opacity-50">
+                  <CalendarDays size={15} aria-hidden="true" />
+                </button>
               </div>
-            </label>
+            </div>
 
             <label>
               <span className={labelClass}>Due time</span>

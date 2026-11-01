@@ -44,8 +44,8 @@ const SettingItem = ({
   children,
 }: SettingItemProps) => {
   return (
-    <div className="flex min-h-[82px] items-center justify-between gap-4 rounded-2xl bg-[#1a1938] px-5 py-4 transition-colors hover:bg-[#201f42]">
-      <div className="flex min-w-0 items-center gap-5">
+    <div className="flex min-h-[82px] items-center justify-between gap-3 rounded-2xl bg-[#1a1938] px-3 py-4 transition-colors hover:bg-[#201f42] sm:gap-4 sm:px-5">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-5">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#242348]">
           {icon}
         </div>

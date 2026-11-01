@@ -100,7 +100,7 @@ export default function DashboardSidebar({ activeView, onViewChange }: Dashboard
         self-start
         flex
         h-[calc(100vh-40px)]
-        w-[290px]
+        w-[291px]
         items-stretch
         gap-[1px]
         overflow-hidden

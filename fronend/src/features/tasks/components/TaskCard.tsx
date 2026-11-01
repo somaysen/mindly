@@ -5,7 +5,7 @@ import { CalendarDays, Check, FilePenLine, Flag, Pin } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { useTaskComplete } from "@/features/tasks/hooks/useTesk";
-import TaskModel from "./TaskModel";
+import TaskModel from "./taskModel";
 
 export interface TaskCardTask {
   _id: string;

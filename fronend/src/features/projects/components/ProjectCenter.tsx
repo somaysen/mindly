@@ -163,7 +163,7 @@ function ProjectCenter() {
   const showEmptyState = !isLoading && !isError && projects.length === 0;
 
   return (
-    <main className="min-h-screen w-full overflow-hidden bg-[#0d0c1f] px-6 py-8 text-white md:px-10">
+    <main className="min-h-full w-full bg-[#0d0c1f] px-4 py-5 text-white sm:px-6 sm:py-7 md:px-10 md:py-8">
       <section>
         <h1 className="text-[25px] font-semibold tracking-tight">Projects</h1>
         <p className="mt-2 text-[13px] text-[#c5c3d3]">
