@@ -13,9 +13,11 @@ export const useTaskCreate = () => {
     mutationKey: ["taskCreating"],
     mutationFn: (data: FormData) => api.createTask(data),
     retry: 0,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getTasks"] });
-      queryClient.invalidateQueries({ queryKey: ["getCompleteTasks"] });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["getTasks"] }),
+        queryClient.invalidateQueries({ queryKey: ["getCompleteTasks"] }),
+      ]);
     },
   });
 };
@@ -104,3 +106,5 @@ export const useTaskComplete = () => {
     },
   });
 };
+
+

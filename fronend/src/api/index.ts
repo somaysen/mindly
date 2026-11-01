@@ -41,3 +41,8 @@ export * from "./ideas/deleteIdeaById";
 export * from "./ideas/getIdea";
 export * from "./ideas/getIdeaById";
 export * from "./ideas/updateIdeaById";
+
+
+/* =============Schedule=============== */ 
+
+export * from "./Schedule/getSchedule"

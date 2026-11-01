@@ -1,284 +1,221 @@
+﻿"use client";
 
-"use client";
+import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { CalendarDays, Clock3, Plus, X } from "lucide-react";
+import { toast } from "react-toastify";
 
-import { useState } from "react";
-import { Check, Clock3, X } from "lucide-react";
+import { useTaskCreate } from "@/features/tasks/hooks/useTesk";
+import { useGetProjects } from "@/features/projects/hooks/useProject";
 
-interface TimePickerProps {
-  value: string;
-  onChange: (value: string) => void;
-  disabled?: boolean;
+interface CreateTaskModalProps {
+  dueDate: string;
+  onClose: () => void;
 }
 
-export default function TimePicker({
-  value,
-  onChange,
-  disabled = false,
-}: TimePickerProps) {
-  const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"hour" | "minute">("hour");
+interface ProjectOption {
+  id: string;
+  name: string;
+}
 
-  const getInitial = () => {
-    const [h, m] = value ? value.split(":").map(Number) : [9, 0];
-    return {
-      hour: h % 12 || 12,
-      minute: m,
-      period: h >= 12 ? "PM" as const : "AM" as const,
-    };
+const inputClass =
+  "h-10 w-full rounded-lg border border-[#3b3a63] bg-[#1b1a3b] px-3 text-sm text-white outline-none transition focus:border-[#7375f4] disabled:opacity-60";
+const labelClass = "mb-1 block text-xs font-medium text-white/70";
+
+function getProjectOptions(response: unknown, depth = 0): ProjectOption[] {
+  if (depth > 5 || !response) return [];
+  if (Array.isArray(response)) {
+    return response.flatMap((item) => {
+      if (!item || typeof item !== "object") return [];
+      const project = item as Record<string, unknown>;
+      const id = project.id ?? project.projectId ?? project.projectID ?? project.project_id ?? project._id;
+      const name = project.projectName ?? project.projectTitle ?? project.name ?? project.title;
+      return id != null && typeof name === "string" ? [{ id: String(id), name }] : [];
+    });
+  }
+  if (typeof response !== "object") return [];
+
+  const record = response as Record<string, unknown>;
+  for (const key of ["data", "projects", "projectList", "items", "result"]) {
+    const projects = getProjectOptions(record[key], depth + 1);
+    if (projects.length) return projects;
+  }
+  return [];
+}
+
+export default function CreateTaskModal({ dueDate, onClose }: CreateTaskModalProps) {
+  const [taskName, setTaskName] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueTime, setDueTime] = useState("");
+  const [projectId, setProjectId] = useState("");
+  const [checklist, setChecklist] = useState<string[]>([]);
+  const [newChecklistItem, setNewChecklistItem] = useState("");
+
+  const { mutateAsync: createTask, isPending } = useTaskCreate();
+  const { data: projectsData, isLoading: isProjectsLoading } = useGetProjects();
+  const projects = useMemo(() => getProjectOptions(projectsData), [projectsData]);
+
+  const addChecklistItem = () => {
+    const item = newChecklistItem.trim();
+    if (!item) return;
+    setChecklist((current) => [...current, item]);
+    setNewChecklistItem("");
   };
 
-  const initial = getInitial();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const name = taskName.trim();
+    if (!name || isPending) return;
 
-  const [hour, setHour] = useState(initial.hour);
-  const [minute, setMinute] = useState(initial.minute);
-  const [period, setPeriod] = useState<"AM" | "PM">(initial.period);
+    const formData = new FormData();
+    formData.append("taskName", name);
+    formData.append("description", description.trim());
+    formData.append("dueDate", dueDate);
+    formData.append("dueTime", dueTime);
+    formData.append("priority", "medium");
+    formData.append("status", "todo");
+    formData.append("project", projectId);
+    formData.append("checklist", JSON.stringify(checklist));
 
-  const displayTime = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-
-  const outputTime = `${String(period === "PM" ? hour % 12 + 12 : hour % 12).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
-
-  const openPicker = () => {
-    const [h, m] = value ? value.split(":").map(Number) : [9, 0];
-    setHour(h % 12 || 12);
-    setMinute(m);
-    setPeriod(h >= 12 ? "PM" : "AM");
-    setMode("hour");
-    setOpen(true);
-  };
-
-  const numbers =
-    mode === "hour"
-      ? Array.from({ length: 12 }, (_, i) => i + 1)
-      : Array.from({ length: 12 }, (_, i) => i * 5);
-
-  const selected = mode === "hour" ? hour : minute;
-  const angle = mode === "hour" ? (hour % 12) * 30 : minute * 6;
-
-  const save = () => {
-    onChange(outputTime);
-    setOpen(false);
+    try {
+      await createTask(formData);
+      toast.success("Task created successfully.");
+      onClose();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to create task.";
+      toast.error(message);
+    }
   };
 
   return (
-    <>
-      {/* Input */}
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4">
       <button
         type="button"
-        disabled={disabled}
-        onClick={openPicker}
-        className="flex h-11 w-full items-center justify-between rounded-xl border border-[#3b3a63] bg-[#1b1a3b] px-3 transition hover:border-[#7779ff] disabled:opacity-50"
+        aria-label="Close create task dialog"
+        className="absolute inset-0 cursor-default bg-[#080719]/75 backdrop-blur-[4px]"
+        onClick={isPending ? undefined : onClose}
+      />
+
+      <form
+        onSubmit={handleSubmit}
+        className="relative z-10 flex max-h-[90dvh] w-full max-w-[460px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#252452] text-white shadow-2xl"
       >
-        <span className="flex items-center gap-2 text-sm text-white">
-          <Clock3 size={17} className="text-[#9294ff]" />
-          {value
-            ? `${displayTime} ${period}`
-            : "Select time"}
-        </span>
-        <span className="text-xs text-[#9294ff]">Change</span>
-      </button>
+        <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
+          <div>
+            <h2 className="text-base font-semibold">Create task</h2>
+            <p className="mt-0.5 text-xs text-white/50">Add a task for this date.</p>
+          </div>
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            disabled={isPending}
+            className="rounded-lg p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+          >
+            <X size={18} />
+          </button>
+        </header>
 
-      {open && (
-        <div className="fixed inset-0 z-[11000] flex items-center justify-center bg-[#080719]/80 p-3 backdrop-blur-sm">
-          <div className="w-full max-w-[350px] overflow-hidden rounded-[24px] border border-white/10 bg-[#24234b] shadow-[0_25px_80px_#0009]">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+          <div>
+            <label className={labelClass} htmlFor="calendar-task-name">Task name</label>
+            <input
+              id="calendar-task-name"
+              autoFocus
+              required
+              value={taskName}
+              onChange={(event) => setTaskName(event.target.value)}
+              placeholder="What needs to be done?"
+              disabled={isPending}
+              className={inputClass}
+            />
+          </div>
 
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-              <div>
-                <p className="text-[10px] font-semibold tracking-[2px] text-[#9294ff]">
-                  TASK SCHEDULER
-                </p>
-                <h3 className="mt-1 text-base font-semibold text-white">
-                  Select due time
-                </h3>
+          <div>
+            <label className={labelClass} htmlFor="calendar-task-description">Description</label>
+            <textarea
+              id="calendar-task-description"
+              rows={2}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Add details (optional)"
+              disabled={isPending}
+              className={`${inputClass} h-16 resize-none py-2`}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <label>
+              <span className={labelClass}>Due date</span>
+              <div className="relative">
+                <CalendarDays size={15} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40" />
+                <input type="date" value={dueDate} readOnly disabled={isPending} className={`${inputClass} pl-8 pr-1 text-xs`} />
               </div>
-
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="rounded-full bg-white/5 p-2 text-white/60 hover:bg-white/10"
-              >
-                <X size={17} />
-              </button>
-            </div>
-
-            <div className="p-5">
-
-              {/* Digital display */}
-              <div className="mb-6 flex items-center justify-center gap-3 rounded-2xl border border-[#7779ff]/20 bg-[#19183a] px-4 py-5">
-                <button
-                  type="button"
-                  onClick={() => setMode("hour")}
-                  className={`text-5xl font-bold tracking-tight tabular-nums transition ${
-                    mode === "hour" ? "text-[#a5a7ff]" : "text-white/50"
-                  }`}
-                >
-                  {String(hour).padStart(2, "0")}
-                </button>
-
-                <span className="animate-pulse text-4xl text-white/30">:</span>
-
-                <button
-                  type="button"
-                  onClick={() => setMode("minute")}
-                  className={`text-5xl font-bold tracking-tight tabular-nums transition ${
-                    mode === "minute" ? "text-[#a5a7ff]" : "text-white/50"
-                  }`}
-                >
-                  {String(minute).padStart(2, "0")}
-                </button>
-
-                <div className="ml-2 flex flex-col gap-2">
-                  {(["AM", "PM"] as const).map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setPeriod(p)}
-                      className={`rounded-md px-2.5 py-1.5 text-[11px] font-bold transition ${
-                        period === p
-                          ? "bg-[#686af0] text-white shadow-lg"
-                          : "bg-white/5 text-white/40"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
+            </label>
+            <label>
+              <span className={labelClass}>Due time</span>
+              <div className="relative">
+                <Clock3 size={15} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40" />
+                <input type="time" value={dueTime} onChange={(event) => setDueTime(event.target.value)} disabled={isPending} className={`${inputClass} pl-8 pr-1 text-xs`} />
               </div>
+            </label>
+          </div>
 
-              {/* Mode selector */}
-              <div className="mb-4 flex items-center justify-between">
-                <span className="text-xs font-medium text-white/50">
-                  {mode === "hour" ? "SELECT HOUR" : "SELECT MINUTES"}
-                </span>
+          <div>
+            <label className={labelClass} htmlFor="create-task-project">Link to project</label>
+            <select
+              id="create-task-project"
+              value={projectId}
+              onChange={(event) => setProjectId(event.target.value)}
+              disabled={isProjectsLoading || isPending}
+              className={inputClass}
+            >
+              <option value="" className="bg-[#1b1a3b]">No project</option>
+              {projects.map((project) => <option key={project.id} value={project.id} className="bg-[#1b1a3b]">{project.name}</option>)}
+            </select>
+            {isProjectsLoading && <p className="mt-1 text-xs text-white/45">Loading projects...</p>}
+            {!isProjectsLoading && projects.length === 0 && <p className="mt-1 text-xs text-white/45">No projects available.</p>}
+          </div>
 
-                <div className="flex rounded-lg bg-[#19183a] p-1">
-                  <button
-                    type="button"
-                    onClick={() => setMode("hour")}
-                    className={`rounded-md px-3 py-1.5 text-[11px] font-semibold ${
-                      mode === "hour"
-                        ? "bg-[#686af0] text-white"
-                        : "text-white/50"
-                    }`}
-                  >
-                    Hour
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setMode("minute")}
-                    className={`rounded-md px-3 py-1.5 text-[11px] font-semibold ${
-                      mode === "minute"
-                        ? "bg-[#686af0] text-white"
-                        : "text-white/50"
-                    }`}
-                  >
-                    Minute
-                  </button>
-                </div>
-              </div>
-
-              {/* Analog clock */}
-              <div className="flex justify-center">
-                <div className="relative aspect-square w-full max-w-[270px] rounded-full border border-[#7779ff]/20 bg-[radial-gradient(circle,#302f60_0%,#1b1a3b_72%)] shadow-[inset_0_0_35px_#08071980]">
-
-                  {/* Dial markings */}
-                  {Array.from({ length: 60 }, (_, i) => (
-                    <div
-                      key={i}
-                      className={`absolute left-1/2 top-1/2 ${
-                        i % 5 === 0
-                          ? "h-2 w-[2px] bg-[#9294ff]/70"
-                          : "h-1 w-px bg-white/15"
-                      }`}
-                      style={{
-                        transform: `translate(-50%, -50%) rotate(${i * 6}deg) translateY(-121px)`,
-                      }}
-                    />
-                  ))}
-
-                  {/* Clock hand */}
-                  <div
-                    className="absolute left-1/2 top-1/2 z-10 h-[90px] w-[2px] origin-bottom rounded-full bg-gradient-to-t from-[#9294ff] to-[#c5c6ff] transition-transform duration-300"
-                    style={{
-                      transform: `translate(-50%, -100%) rotate(${angle}deg)`,
-                    }}
-                  />
-
-                  {/* Clock center */}
-                  <div className="absolute left-1/2 top-1/2 z-30 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-[#c0c1ff] bg-[#686af0] shadow-[0_0_15px_#7779ff]" />
-
-                  {/* Numbers */}
-                  {numbers.map((n, index) => {
-                    const radians = (index * 30 - 90) * Math.PI / 180;
-                    const radius = 105;
-
-                    const x = 135 + Math.cos(radians) * radius;
-                    const y = 135 + Math.sin(radians) * radius;
-
-                    const active = selected === n;
-
-                    return (
-                      <button
-                        key={n}
-                        type="button"
-                        onClick={() => {
-                          if (mode === "hour") {
-                            setHour(n);
-                            setMode("minute");
-                          } else {
-                            setMinute(n);
-                          }
-                        }}
-                        style={{
-                          left: x,
-                          top: y,
-                          transform: "translate(-50%, -50%)",
-                        }}
-                        className={`absolute z-20 flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold transition-all duration-200 ${
-                          active
-                            ? "scale-110 bg-[#7779ff] text-white shadow-[0_0_20px_#7779ff99]"
-                            : "text-white/75 hover:bg-white/10"
-                        }`}
-                      >
-                        {mode === "minute"
-                          ? String(n).padStart(2, "0")
-                          : n}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <p className="mt-4 text-center text-[11px] text-white/40">
-                {mode === "hour"
-                  ? "Tap an hour to continue"
-                  : "Tap a minute to set your time"}
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center gap-3 border-t border-white/10 bg-[#1e1d40] p-4">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="h-11 flex-1 rounded-xl border border-white/10 text-xs font-semibold text-white/65 transition hover:bg-white/5"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={save}
-                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#6265ed] to-[#8587ff] text-xs font-bold text-white shadow-lg shadow-[#6265ed]/20 transition hover:brightness-110"
-              >
-                <Check size={15} />
-                Confirm {outputTime}
-              </button>
+          <div>
+            <label className={labelClass} htmlFor="create-task-checklist">Checklist</label>
+            {checklist.length > 0 && (
+              <ul className="mb-2 max-h-28 space-y-1.5 overflow-y-auto">
+                {checklist.map((item, index) => (
+                  <li key={`${item}-${index}`} className="flex items-center gap-2 rounded-lg border border-[#3b3a63] bg-[#1b1a3b] px-2.5 py-1.5">
+                    <span aria-hidden="true" className="h-3.5 w-3.5 shrink-0 rounded border border-[#5b5983]" />
+                    <span className="min-w-0 flex-1 break-words text-xs text-white/80">{item}</span>
+                    <button type="button" aria-label={`Remove ${item}`} disabled={isPending} onClick={() => setChecklist((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="shrink-0 rounded p-1 text-white/45 hover:bg-white/10 hover:text-white disabled:opacity-50"><X size={14} /></button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="flex gap-2">
+              <input
+                id="create-task-checklist"
+                value={newChecklistItem}
+                onChange={(event) => setNewChecklistItem(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    addChecklistItem();
+                  }
+                }}
+                placeholder="Add checklist item"
+                disabled={isPending}
+                className={`${inputClass} min-w-0 flex-1`}
+              />
+              <button type="button" onClick={addChecklistItem} disabled={!newChecklistItem.trim() || isPending} aria-label="Add checklist item" className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#6265ed] transition hover:bg-[#7375f4] disabled:opacity-50"><Plus size={17} /></button>
             </div>
           </div>
         </div>
-      )}
-    </>
+
+        <footer className="flex shrink-0 items-center justify-end gap-2 border-t border-white/10 bg-[#252452] px-4 py-3">
+          <button type="button" onClick={onClose} disabled={isPending} className="h-9 rounded-lg border border-white/15 px-3 text-xs text-white/75 transition hover:bg-white/5 disabled:opacity-50">Cancel</button>
+          <button type="submit" disabled={!taskName.trim() || isPending} className="h-9 rounded-lg bg-[#6265ed] px-4 text-xs font-semibold transition hover:bg-[#7375f4] disabled:cursor-not-allowed disabled:opacity-50">{isPending ? "Creating..." : "Create task"}</button>
+        </footer>
+      </form>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { CalendarDays, Clock3, Flag, Plus, Trash2, X } from "lucide-react";
+import { CalendarDays, Flag, Plus, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
 import {
   useTaskDeleteById,
@@ -38,14 +38,6 @@ const dateForInput = (value?: string | null) => {
 
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
-};
-
-const timeForInput = (value?: string | null) => {
-  if (!value) return "";
-  if (/^\d{2}:\d{2}/.test(value)) return value.slice(0, 5);
-
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "" : date.toTimeString().slice(0, 5);
 };
 
 function getProjectOptions(response: unknown, depth = 0): ProjectOption[] {
@@ -115,7 +107,6 @@ export default function TaskModel({
   const [description, setDescription] = useState(task.description ?? "");
   const [dueDate, setDueDate] = useState(dateForInput(task.dueDate));
   const dueDateInputRef = useRef<HTMLInputElement>(null);
-  const [dueTime, setDueTime] = useState(timeForInput(task.dueTime));
   const [priority, setPriority] = useState(task.priority ?? "");
   const [projectId, setProjectId] = useState(initialProject);
   const [checklist, setChecklist] = useState<string[]>(
@@ -169,7 +160,6 @@ export default function TaskModel({
     // Empty optional values can fail backend validation (especially an empty
     // project ID, which may be cast to a Mongo ObjectId).
     if (dueDate) formData.append("dueDate", dueDate);
-    if (dueTime) formData.append("dueTime", dueTime);
     if (priority) formData.append("priority", priority);
     if (projectId) formData.append("project", projectId);
     formData.append("checklist", JSON.stringify(checklist));
@@ -283,7 +273,7 @@ export default function TaskModel({
           </div>
 
           {/* Date & Time */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
             <div>
               <label htmlFor="task-model-due-date" className={labelClass}>Due date</label>
               <div className="relative">
@@ -302,24 +292,6 @@ export default function TaskModel({
               </div>
             </div>
 
-            <label>
-              <span className={labelClass}>Due time</span>
-
-              <div className="relative">
-                <Clock3
-                  size={15}
-                  className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40"
-                />
-
-                <input
-                  type="time"
-                  value={dueTime}
-                  onChange={(event) => setDueTime(event.target.value)}
-                  disabled={isPending}
-                  className={`${inputClass} pl-8 pr-1 text-xs`}
-                />
-              </div>
-            </label>
           </div>
 
           {/* Priority */}

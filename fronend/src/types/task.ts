@@ -40,6 +40,14 @@ export interface TaskResponse {
   data: Task[];
 }
 
+export interface ScheduleResponse {
+  success: boolean;
+  message: string;
+  data: {
+    tasks: Pick<Task, "_id" | "taskName" | "description" | "dueTime">[];
+  };
+}
+
 export interface TaskItemResponse {
   success?: boolean;
   data: Task | { task?: Task };
