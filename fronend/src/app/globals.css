@@ -1,4 +1,3 @@
-
 @import "tailwindcss";
 
 :root {
@@ -230,7 +229,7 @@ body {
   min-height: 52vh;
   padding: 0 !important;
   background: transparent !important;
-  color: #e1dff2;
+  color: #ffffff;
   caret-color: #aaa7ff;
 }
 
@@ -241,4 +240,25 @@ body {
 
 .mindly-notepad-editor .bn-inline-content:focus {
   outline: none;
+}
+
+/* Thought Spaces tldraw theme */
+.mindly-tldraw .tl-theme__dark {
+  --tl-color-background: #000000;
+  --tl-color-grid: hsl(257, 18%, 20%);
+  --tl-color-low: #11101f;
+  --tl-color-low-border: #292644;
+  --tl-color-divider: #292644;
+  --tl-color-panel: #17162d;
+  --tl-color-panel-contrast: #252247;
+  --tl-color-panel-overlay: hsl(246, 26%, 12%, 92%);
+  --tl-color-selected: #7468ed;
+  --tl-color-selected-contrast: #ffffff;
+  --tl-color-focus: #a99fff;
+  --tl-color-primary: #9b8cff;
+  --tl-color-text: #f4f2ff;
+  --tl-color-text-0: #e5e2f5;
+  --tl-color-text-1: #c5c1df;
+  --tl-color-text-3: #918da9;
+  --tl-color-text-disabled: #77738d;
 }
