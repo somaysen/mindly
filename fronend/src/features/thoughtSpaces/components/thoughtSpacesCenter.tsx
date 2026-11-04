@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Clock3,
@@ -13,6 +13,20 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import {
+  useCreateCanvas,
+  useDeleteCanvas,
+  useGetCanvases,
+  useUpdateCanvas,
+} from "@/features/canvas/hooks/useCanvas";
+import {
+  getCanvasDate,
+  getCanvasId,
+  getCanvasList,
+  getCanvasRecord,
+  getCanvasTitle,
+} from "@/features/canvas/utils/canvasAdapter";
+import { getApiErrorMessage } from "@/lib/apiError";
 
 type ThoughtSpace = {
   id: string;
@@ -21,52 +35,43 @@ type ThoughtSpace = {
   updatedAt: string;
 };
 
-const STORAGE_KEY = "mindly-thought-spaces-v1";
-
-function readSpaces(): ThoughtSpace[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
-    const parsed: unknown = JSON.parse(stored);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (space): space is ThoughtSpace =>
-        Boolean(space) &&
-        typeof space === "object" &&
-        typeof space.id === "string" &&
-        typeof space.title === "string" &&
-        typeof space.createdAt === "string" &&
-        typeof space.updatedAt === "string",
-    );
-  } catch {
-    return [];
-  }
-}
-
 function formatUpdated(date: string) {
   const parsed = new Date(date);
   return Number.isNaN(parsed.getTime())
     ? "Recently updated"
-    : `Last opened ${parsed.toLocaleDateString()}`;
+    : `Updated ${parsed.toLocaleDateString()}`;
 }
 
 export default function ThoughtSpacesCenter() {
   const router = useRouter();
-  const [spaces, setSpaces] = useState<ThoughtSpace[]>([]);
-  const [isReady, setIsReady] = useState(false);
   const [search, setSearch] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setSpaces(readSpaces());
-    setIsReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (isReady) localStorage.setItem(STORAGE_KEY, JSON.stringify(spaces));
-  }, [isReady, spaces]);
+  const [operationError, setOperationError] = useState<string | null>(null);
+  const canvasesQuery = useGetCanvases();
+  const createCanvas = useCreateCanvas();
+  const updateCanvas = useUpdateCanvas();
+  const deleteCanvas = useDeleteCanvas();
+  const spaces = useMemo(
+    () =>
+      getCanvasList(canvasesQuery.data)
+        .map((canvas): ThoughtSpace | null => {
+          const id = getCanvasId(canvas);
+          if (!id) return null;
+          const createdAt = getCanvasDate(canvas, "createdAt");
+          const updatedAt =
+            getCanvasDate(canvas, "updatedAt") || createdAt;
+          return {
+            id,
+            title: getCanvasTitle(canvas),
+            createdAt,
+            updatedAt,
+          };
+        })
+        .filter((space): space is ThoughtSpace => space !== null),
+    [canvasesQuery.data],
+  );
 
   const visibleSpaces = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
@@ -76,64 +81,78 @@ export default function ThoughtSpacesCenter() {
   }, [search, spaces]);
 
   const openCreate = () => {
+    setOperationError(null);
     setEditingSpaceId(null);
     setSpaceName("");
     setIsCreateOpen(true);
   };
 
   const openRename = (space: ThoughtSpace) => {
+    setOperationError(null);
     setEditingSpaceId(space.id);
     setSpaceName(space.title);
     setIsCreateOpen(true);
   };
 
   const openSpace = (space: ThoughtSpace) => {
-    const now = new Date().toISOString();
-    const updatedSpaces = spaces.map((item) =>
-      item.id === space.id ? { ...item, updatedAt: now } : item,
-    );
-    setSpaces(updatedSpaces);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSpaces));
     router.push(`/canvas/${encodeURIComponent(space.id)}`);
   };
 
-  const saveSpace = (event: FormEvent<HTMLFormElement>) => {
+  const saveSpace = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const title = spaceName.trim();
     if (!title) return;
 
-    const now = new Date().toISOString();
-    if (editingSpaceId) {
-      setSpaces((current) =>
-        current.map((space) =>
-          space.id === editingSpaceId
-            ? { ...space, title, updatedAt: now }
-            : space,
-        ),
+    setOperationError(null);
+    try {
+      if (editingSpaceId) {
+        await updateCanvas.mutateAsync({
+          canvasId: editingSpaceId,
+          data: { title },
+        });
+      } else {
+        const response = await createCanvas.mutateAsync({ title });
+        let canvasId = getCanvasId(getCanvasRecord(response) ?? {});
+
+        if (!canvasId) {
+          const refreshed = await canvasesQuery.refetch();
+          const createdCanvas = getCanvasList(refreshed.data).find(
+            (canvas) => getCanvasTitle(canvas) === title,
+          );
+          canvasId = createdCanvas ? getCanvasId(createdCanvas) : null;
+        }
+
+        if (!canvasId) {
+          throw new Error("The server created the canvas but did not return its ID.");
+        }
+
+        setIsCreateOpen(false);
+        setSpaceName("");
+        setEditingSpaceId(null);
+        router.push(`/canvas/${encodeURIComponent(canvasId)}`);
+        return;
+      }
+
+      setIsCreateOpen(false);
+      setSpaceName("");
+      setEditingSpaceId(null);
+    } catch (error) {
+      setOperationError(
+        getApiErrorMessage(error, "Could not save this canvas."),
       );
-    } else {
-      const space: ThoughtSpace = {
-        id: crypto.randomUUID(),
-        title,
-        createdAt: now,
-        updatedAt: now,
-      };
-      const updatedSpaces = [space, ...spaces];
-      setSpaces(updatedSpaces);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSpaces));
-      router.push(`/canvas/${encodeURIComponent(space.id)}`);
     }
-    setIsCreateOpen(false);
-    setSpaceName("");
-    setEditingSpaceId(null);
   };
 
-  const deleteSpace = (space: ThoughtSpace) => {
+  const deleteSpace = async (space: ThoughtSpace) => {
     if (!window.confirm(`Delete "${space.title}" and its canvas? This cannot be undone.`)) return;
-    setSpaces((current) => current.filter((item) => item.id !== space.id));
-    // Remove any canvas data from the previous editor and tldraw's IndexedDB document.
-    localStorage.removeItem(`mindly-canvas-${space.id}`);
-    indexedDB.deleteDatabase(`TLDRAW_DOCUMENT_v2mindly-canvas-${space.id}`);
+    setOperationError(null);
+    try {
+      await deleteCanvas.mutateAsync(space.id);
+    } catch (error) {
+      setOperationError(
+        getApiErrorMessage(error, "Could not delete this canvas."),
+      );
+    }
   };
 
   return (
@@ -163,6 +182,15 @@ export default function ThoughtSpacesCenter() {
         </div>
       </section>
 
+      {operationError && (
+        <p
+          role="alert"
+          className="mt-4 rounded-xl border border-red-300/20 bg-red-950/30 px-4 py-3 text-sm text-red-100"
+        >
+          {operationError}
+        </p>
+      )}
+
       <section className="mt-8 sm:mt-10">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -186,9 +214,20 @@ export default function ThoughtSpacesCenter() {
           )}
         </div>
 
-        {!isReady ? (
+        {canvasesQuery.isLoading ? (
           <div className="rounded-2xl border border-[#34315f] bg-[#17162f] p-8 text-center text-sm text-[#aaa7c5]">
             Loading your spaces...
+          </div>
+        ) : canvasesQuery.isError ? (
+          <div className="rounded-2xl border border-red-300/20 bg-[#17162f] p-8 text-center text-sm text-red-100">
+            <p>Could not load your spaces. {getApiErrorMessage(canvasesQuery.error)}</p>
+            <button
+              type="button"
+              onClick={() => void canvasesQuery.refetch()}
+              className="mt-4 rounded-lg border border-white/20 px-4 py-2 text-white hover:bg-white/10"
+            >
+              Try again
+            </button>
           </div>
         ) : visibleSpaces.length === 0 ? (
           <div className="flex min-h-[360px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#45427c] bg-[#17162f]/70 px-5 py-10 text-center">
@@ -259,7 +298,7 @@ export default function ThoughtSpacesCenter() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => deleteSpace(space)}
+                      onClick={() => void deleteSpace(space)}
                       aria-label={`Delete ${space.title}`}
                       className="rounded-lg p-2 text-[#aaa7c5] hover:bg-red-400/10 hover:text-red-300"
                     >
@@ -276,8 +315,13 @@ export default function ThoughtSpacesCenter() {
         isOpen={isCreateOpen}
         title={spaceName}
         isEditing={Boolean(editingSpaceId)}
+        isPending={createCanvas.isPending || updateCanvas.isPending}
         onChange={setSpaceName}
-        onClose={() => setIsCreateOpen(false)}
+        onClose={() => {
+          if (!createCanvas.isPending && !updateCanvas.isPending) {
+            setIsCreateOpen(false);
+          }
+        }}
         onSubmit={saveSpace}
       />
     </main>
@@ -288,6 +332,7 @@ type SpaceDialogProps = {
   isOpen: boolean;
   title: string;
   isEditing: boolean;
+  isPending: boolean;
   onChange: (title: string) => void;
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -297,6 +342,7 @@ function SpaceDialog({
   isOpen,
   title,
   isEditing,
+  isPending,
   onChange,
   onClose,
   onSubmit,
@@ -325,7 +371,7 @@ function SpaceDialog({
               Give your canvas a name you&apos;ll recognize.
             </p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-1 text-[#aaa7c5] hover:bg-white/10 hover:text-white">
+          <button type="button" onClick={onClose} disabled={isPending} aria-label="Close" className="rounded-lg p-1 text-[#aaa7c5] hover:bg-white/10 hover:text-white disabled:opacity-50">
             <X size={18} />
           </button>
         </div>
@@ -341,9 +387,9 @@ function SpaceDialog({
           className="mt-2 h-11 w-full rounded-xl border border-[#39365f] bg-[#0d0c1f] px-3 text-sm outline-none placeholder:text-[#777493] focus:border-[#7777ff]"
         />
         <div className="mt-6 flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="h-10 rounded-full border border-[#45427c] px-4 text-xs text-[#d0cde5] hover:bg-white/5">Cancel</button>
-          <button type="submit" disabled={!title.trim()} className="h-10 rounded-full bg-[#5757ed] px-5 text-xs font-medium hover:bg-[#6868f5] disabled:cursor-not-allowed disabled:opacity-50">
-            {isEditing ? "Save name" : "Create space"}
+          <button type="button" onClick={onClose} disabled={isPending} className="h-10 rounded-full border border-[#45427c] px-4 text-xs text-[#d0cde5] hover:bg-white/5 disabled:opacity-50">Cancel</button>
+          <button type="submit" disabled={!title.trim() || isPending} className="h-10 rounded-full bg-[#5757ed] px-5 text-xs font-medium hover:bg-[#6868f5] disabled:cursor-not-allowed disabled:opacity-50">
+            {isPending ? "Saving..." : isEditing ? "Save name" : "Create space"}
           </button>
         </div>
       </form>

@@ -1,30 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import MindlyCanvas from "./MindlyCanvas";
 import Topbar from "@/components/Navber/Topbar";
-
-type ThoughtSpace = {
-  id: string;
-  title: string;
-};
-
-const SPACES_STORAGE_KEY = "mindly-thought-spaces-v1";
+import { useGetCanvasById } from "@/features/canvas/hooks/useCanvas";
+import {
+  getCanvasRecord,
+  getCanvasSnapshot,
+  getCanvasTitle,
+} from "@/features/canvas/utils/canvasAdapter";
+import { getApiErrorMessage } from "@/lib/apiError";
 
 export default function Canvas({ projectId }: { projectId: string }) {
-  const [title, setTitle] = useState("Thought Space");
-
-  useEffect(() => {
-    try {
-      const spaces = JSON.parse(
-        localStorage.getItem(SPACES_STORAGE_KEY) ?? "[]",
-      ) as ThoughtSpace[];
-      const space = spaces.find((item) => item.id === projectId);
-      if (space?.title) setTitle(space.title);
-    } catch {
-      // Keep the fallback title if saved space metadata is unavailable.
-    }
-  }, [projectId]);
+  const canvasQuery = useGetCanvasById(projectId);
+  const canvas = useMemo(
+    () => getCanvasRecord(canvasQuery.data),
+    [canvasQuery.data],
+  );
+  const title = canvas ? getCanvasTitle(canvas) : "Thought Space";
 
   return (
     <main className="fixed inset-0 z-[100] flex h-dvh w-full flex-col overflow-hidden bg-black text-white">
@@ -37,7 +30,35 @@ export default function Canvas({ projectId }: { projectId: string }) {
           <div className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-blue-500/[0.03] blur-[100px]" />
         </div>
         <div className="relative z-10 h-full overflow-hidden rounded-xl border border-white/10 bg-black shadow-[0_0_0_1px_rgba(0,0,0,0.4)]">
-          <MindlyCanvas projectId={projectId} />
+          {canvasQuery.isLoading ? (
+            <div className="flex h-full items-center justify-center text-sm text-white/60">
+              Loading canvas...
+            </div>
+          ) : canvasQuery.isError ? (
+            <div className="flex h-full flex-col items-center justify-center gap-3 px-5 text-center">
+              <p className="text-sm text-red-200">
+                Could not load this canvas.{" "}
+                {getApiErrorMessage(canvasQuery.error)}
+              </p>
+              <button
+                type="button"
+                onClick={() => void canvasQuery.refetch()}
+                className="rounded-lg border border-white/20 px-4 py-2 text-sm hover:bg-white/10"
+              >
+                Try again
+              </button>
+            </div>
+          ) : !canvas ? (
+            <div className="flex h-full items-center justify-center px-5 text-center text-sm text-white/60">
+              This canvas was not returned by the server.
+            </div>
+          ) : (
+            <MindlyCanvas
+              projectId={projectId}
+              title={title}
+              snapshot={getCanvasSnapshot(canvas)}
+            />
+          )}
         </div>
       </section>
     </main>

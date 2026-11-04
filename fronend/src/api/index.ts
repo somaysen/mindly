@@ -46,3 +46,12 @@ export * from "./ideas/updateIdeaById";
 /* =============Schedule=============== */ 
 
 export * from "./Schedule/getSchedule"
+
+/* =================== Canvas =================== */
+
+export * from "./canvas/createCanvas";
+export * from "./canvas/createCanvasSyncTicket";
+export * from "./canvas/deleteCanvas";
+export * from "./canvas/getCanvasById";
+export * from "./canvas/getCanvases";
+export * from "./canvas/updateCanvas";
