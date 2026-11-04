@@ -1,97 +1,117 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useSync } from "@tldraw/sync";
+import { Loader2, RotateCw } from "lucide-react";
 import { Tldraw } from "tldraw";
-import type { Editor, TLStoreSnapshot } from "tldraw";
+import type { Editor, TLAssetStore } from "tldraw";
 import "tldraw/tldraw.css";
-import { useUpdateCanvas } from "@/features/canvas/hooks/useCanvas";
-import type { CanvasSnapshot } from "@/features/canvas/utils/canvasAdapter";
+import { createCanvasSyncTicket } from "@/api/canvas/createCanvasSyncTicket";
+import type { CanvasRole } from "@/types/canvas";
 import { getApiErrorMessage } from "@/lib/apiError";
+import { getCanvasSyncUrl } from "@/features/canvas/utils/canvasSyncUrl";
+import { fileToBase64DataUri } from "@/lib/fileToBase64DataUri";
+
+const canvasAssetStore: TLAssetStore = {
+  upload: async (_asset, file) => ({
+    src: await fileToBase64DataUri(file),
+  }),
+  resolve: (asset) => asset.props.src ?? null,
+};
 
 export default function MindlyCanvasEditor({
-  projectId,
-  title,
-  snapshot,
+  canvasId,
+  role,
 }: {
-  projectId: string;
-  title: string;
-  snapshot?: CanvasSnapshot;
+  canvasId: string;
+  role: CanvasRole | null;
 }) {
-  const updateCanvas = useUpdateCanvas();
-  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [connectionAttempt, setConnectionAttempt] = useState(0);
+
+  return (
+    <CanvasSyncSession
+      key={`${canvasId}:${connectionAttempt}`}
+      canvasId={canvasId}
+      role={role}
+      onRetry={() => setConnectionAttempt((attempt) => attempt + 1)}
+    />
+  );
+}
+
+function CanvasSyncSession({
+  canvasId,
+  role,
+  onRetry,
+}: {
+  canvasId: string;
+  role: CanvasRole | null;
+  onRetry: () => void;
+}) {
+  const remoteStore = useSync({
+    assets: canvasAssetStore,
+    uri: async () => {
+      const response = await createCanvasSyncTicket(canvasId);
+      const ticket = response?.data?.ticket;
+      if (typeof ticket !== "string" || !ticket) {
+        throw new Error("The server did not return a canvas sync ticket.");
+      }
+      return getCanvasSyncUrl(canvasId, ticket);
+    },
+  });
 
   const handleMount = useCallback(
     (editor: Editor) => {
-      let timeout: ReturnType<typeof setTimeout> | null = null;
-      let pendingSnapshot: TLStoreSnapshot | null = null;
-      let isMounted = true;
-      let saveQueue: Promise<void> = Promise.resolve();
-
-      const enqueueSave = (documentSnapshot: TLStoreSnapshot) => {
-        saveQueue = saveQueue
-          .then(async () => {
-            if (isMounted) setSaveStatus("Saving...");
-            await updateCanvas.mutateAsync({
-              canvasId: projectId,
-              data: { title, snapshot: documentSnapshot },
-            });
-            if (isMounted) setSaveStatus("Saved");
-          })
-          .catch((error: unknown) => {
-            if (isMounted) {
-              setSaveStatus(
-                `Save failed: ${getApiErrorMessage(error, "Please try again.")}`,
-              );
-            }
-          });
-      };
-
-      const unsubscribe = editor.store.listen(
-        () => {
-          pendingSnapshot = editor.store.getStoreSnapshot();
-          if (timeout) clearTimeout(timeout);
-          timeout = setTimeout(() => {
-            timeout = null;
-            if (pendingSnapshot) {
-              enqueueSave(pendingSnapshot);
-              pendingSnapshot = null;
-            }
-          }, 700);
-        },
-        { source: "user", scope: "document" },
-      );
-
-      return () => {
-        isMounted = false;
-        if (timeout) clearTimeout(timeout);
-        unsubscribe();
-        if (pendingSnapshot) enqueueSave(pendingSnapshot);
-      };
+      if (role === "viewer") {
+        editor.updateInstanceState({ isReadonly: true });
+      }
     },
-    [projectId, title, updateCanvas.mutateAsync],
+    [role],
   );
+
+  if (remoteStore.status === "loading") {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-white/65">
+        <Loader2 className="h-6 w-6 animate-spin text-violet-400" />
+        Connecting to the shared canvas...
+      </div>
+    );
+  }
+
+  if (remoteStore.status === "error") {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-3 px-5 text-center">
+        <p role="alert" className="max-w-lg text-sm text-red-200">
+          Could not connect to this canvas.{" "}
+          {getApiErrorMessage(remoteStore.error, "Check your connection and try again.")}
+        </p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="flex items-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-sm hover:bg-white/10"
+        >
+          <RotateCw size={15} />
+          Reconnect
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mindly-tldraw relative h-full w-full">
       <Tldraw
-        snapshot={snapshot}
+        store={remoteStore.store}
         colorScheme="dark"
         autoFocus
         onMount={handleMount}
       />
-      {saveStatus && (
-        <div
-          role="status"
-          aria-live="polite"
-          className={`pointer-events-none absolute bottom-3 right-3 z-10 rounded-lg border px-3 py-1.5 text-xs ${
-            saveStatus.startsWith("Save failed:")
-              ? "border-red-300/30 bg-red-950/90 text-red-100"
-              : "border-white/10 bg-black/75 text-white/75"
-          }`}
-        >
-          {saveStatus}
-        </div>
-      )}
+      <div
+        role="status"
+        aria-live="polite"
+        className="pointer-events-none absolute bottom-3 right-3 z-10 rounded-lg border border-white/10 bg-black/75 px-3 py-1.5 text-xs text-white/75"
+      >
+        Live collaboration · Changes auto-saved
+        {role === "viewer" ? " · View only" : ""}
+      </div>
     </div>
   );
 }

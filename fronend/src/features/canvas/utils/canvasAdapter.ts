@@ -1,4 +1,5 @@
 import type { TLEditorSnapshot, TLStoreSnapshot } from "tldraw";
+import type { CanvasRole } from "@/types/canvas";
 
 export type CanvasRecord = Record<string, unknown>;
 export type CanvasSnapshot = TLEditorSnapshot | TLStoreSnapshot;
@@ -82,6 +83,13 @@ export function getCanvasTitle(canvas: CanvasRecord): string {
     if (typeof title === "string" && title.trim()) return title.trim();
   }
   return "Untitled canvas";
+}
+
+export function getCanvasRole(canvas: CanvasRecord): CanvasRole | null {
+  const role = canvas.role;
+  return role === "owner" || role === "editor" || role === "viewer"
+    ? role
+    : null;
 }
 
 export function getCanvasSnapshot(canvas: CanvasRecord): CanvasSnapshot | undefined {

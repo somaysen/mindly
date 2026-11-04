@@ -3,7 +3,7 @@
 
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
-import type { CanvasSnapshot } from "@/features/canvas/utils/canvasAdapter";
+import type { CanvasRole } from "@/types/canvas";
 
 const TldrawEditor = dynamic(
   () => import("./MindlyCanvasEditor"),
@@ -18,17 +18,15 @@ const TldrawEditor = dynamic(
 );
 
 export default function MindlyCanvas({
-  projectId,
-  title,
-  snapshot,
+  canvasId,
+  role,
 }: {
-  projectId: string;
-  title: string;
-  snapshot?: CanvasSnapshot;
+  canvasId: string;
+  role: CanvasRole | null;
 }) {
   return (
     <div className="h-full w-full">
-      <TldrawEditor projectId={projectId} title={title} snapshot={snapshot} />
+      <TldrawEditor canvasId={canvasId} role={role} />
     </div>
   );
 }

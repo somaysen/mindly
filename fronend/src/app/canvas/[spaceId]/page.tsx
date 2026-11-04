@@ -6,5 +6,5 @@ export default async function ThoughtSpaceCanvasPage({
   params: Promise<{ spaceId: string }>;
 }) {
   const { spaceId } = await params;
-  return <Canvas projectId={spaceId} />;
+  return <Canvas canvasId={spaceId} />;
 }

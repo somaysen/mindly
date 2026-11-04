@@ -3,10 +3,24 @@ import {
   clearAuthCookies,
   getAccessToken,
   isPublicPath,
+  persistAuthToken,
 } from "@/lib/auth";
 
 const isPublicRoute = (path: string) =>
   Boolean(path) && (isPublicPath(path) || path.includes("/user-verification"));
+
+function getAccessTokenFromResponse(data: unknown): string | undefined {
+  let value = data;
+  while (value && typeof value === "object" && !Array.isArray(value)) {
+    const record = value as Record<string, unknown>;
+    for (const key of ["accessToken", "access_token", "token"]) {
+      const token = record[key];
+      if (typeof token === "string" && token.trim()) return token.trim();
+    }
+    value = record.data;
+  }
+  return undefined;
+}
 
 const api = axios.create({
   // Keep browser requests on this origin; the Next.js route proxies /api.
@@ -57,7 +71,11 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await api.post("/api/auth/refresh");
+        const refreshResponse = await api.post("/api/auth/refresh");
+        const accessToken = getAccessTokenFromResponse(refreshResponse.data);
+        if (accessToken) {
+          persistAuthToken(accessToken);
+        }
         return api(originalRequest);
       } catch (refreshError) {
         clearAuthCookies();

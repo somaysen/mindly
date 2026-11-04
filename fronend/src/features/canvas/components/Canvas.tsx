@@ -6,23 +6,37 @@ import Topbar from "@/components/Navber/Topbar";
 import { useGetCanvasById } from "@/features/canvas/hooks/useCanvas";
 import {
   getCanvasRecord,
-  getCanvasSnapshot,
+  getCanvasRole,
   getCanvasTitle,
 } from "@/features/canvas/utils/canvasAdapter";
 import { getApiErrorMessage } from "@/lib/apiError";
+import CanvasShareControl from "./CanvasShareControl";
 
-export default function Canvas({ projectId }: { projectId: string }) {
-  const canvasQuery = useGetCanvasById(projectId);
+export default function Canvas({ canvasId }: { canvasId: string }) {
+  const canvasQuery = useGetCanvasById(canvasId);
   const canvas = useMemo(
     () => getCanvasRecord(canvasQuery.data),
     [canvasQuery.data],
   );
   const title = canvas ? getCanvasTitle(canvas) : "Thought Space";
+  const role = canvas ? getCanvasRole(canvas) : null;
 
   return (
     <main className="fixed inset-0 z-[100] flex h-dvh w-full flex-col overflow-hidden bg-black text-white">
       <div className="relative z-20 shrink-0 border-b border-[#000000]/80 bg-[#000000]/95 px-1 shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:px-6">
-        <Topbar title={title} backHref="/thoughtSpaces" />
+        <Topbar
+          title={title}
+          backHref="/thoughtSpaces"
+          rightAction={
+            role === "owner" ? (
+              <CanvasShareControl canvasId={canvasId} />
+            ) : role ? (
+              <span className="rounded-full border border-white/10 px-3 py-1 text-xs capitalize text-white/60">
+                {role}
+              </span>
+            ) : null
+          }
+        />
       </div>
       <section className="relative min-h-0 flex-1 overflow-hidden bg-black p-2 sm:p-3">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -53,11 +67,7 @@ export default function Canvas({ projectId }: { projectId: string }) {
               This canvas was not returned by the server.
             </div>
           ) : (
-            <MindlyCanvas
-              projectId={projectId}
-              title={title}
-              snapshot={getCanvasSnapshot(canvas)}
-            />
+            <MindlyCanvas canvasId={canvasId} role={role} />
           )}
         </div>
       </section>

@@ -11,6 +11,8 @@ import {
 
 const canvasListQueryKey = ["canvases"] as const;
 const canvasQueryKey = (canvasId: string) => ["canvas", canvasId] as const;
+const canvasMembersQueryKey = (canvasId: string) =>
+  ["canvasMembers", canvasId] as const;
 
 function mergeCanvasUpdate(
   value: unknown,
@@ -117,3 +119,53 @@ export const useCreateCanvasSyncTicket = () =>
     mutationFn: api.createCanvasSyncTicket,
     retry: 0,
   });
+
+export const useGetCanvasMembers = (
+  canvasId: string,
+  enabled = true,
+) =>
+  useQuery({
+    queryKey: canvasMembersQueryKey(canvasId),
+    queryFn: () => api.getCanvasMembers(canvasId),
+    enabled: Boolean(canvasId) && enabled,
+    retry: 0,
+  });
+
+export const useInviteCanvasMember = (canvasId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.inviteCanvasMember,
+    retry: 0,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: canvasMembersQueryKey(canvasId),
+      });
+    },
+  });
+};
+
+export const useUpdateCanvasMemberRole = (canvasId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.updateCanvasMemberRole,
+    retry: 0,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: canvasMembersQueryKey(canvasId),
+      });
+    },
+  });
+};
+
+export const useRemoveCanvasMember = (canvasId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: api.removeCanvasMember,
+    retry: 0,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: canvasMembersQueryKey(canvasId),
+      });
+    },
+  });
+};

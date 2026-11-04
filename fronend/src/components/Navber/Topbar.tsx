@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   ArrowLeft,
@@ -12,9 +13,11 @@ import {
 function Topbar({
   title,
   backHref,
+  rightAction,
 }: {
   title?: string;
   backHref?: string;
+  rightAction?: ReactNode;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -70,6 +73,8 @@ function Topbar({
 
         {/* RIGHT SECTION */}
         <div className="flex shrink-0 items-center gap-2">
+          {rightAction}
+
           {/* Notifications */}
           <button
             onClick={handleNotifications}
