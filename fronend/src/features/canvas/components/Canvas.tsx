@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from "react";
@@ -14,10 +15,12 @@ import CanvasShareControl from "./CanvasShareControl";
 
 export default function Canvas({ canvasId }: { canvasId: string }) {
   const canvasQuery = useGetCanvasById(canvasId);
+
   const canvas = useMemo(
     () => getCanvasRecord(canvasQuery.data),
     [canvasQuery.data],
   );
+
   const title = canvas ? getCanvasTitle(canvas) : "Thought Space";
   const role = canvas ? getCanvasRole(canvas) : null;
 
@@ -29,7 +32,9 @@ export default function Canvas({ canvasId }: { canvasId: string }) {
           backHref="/thoughtSpaces"
           rightAction={
             role === "owner" ? (
-              <CanvasShareControl canvasId={canvasId} />
+              <div className="pt-2">
+                <CanvasShareControl canvasId={canvasId} />
+              </div>
             ) : role ? (
               <span className="rounded-full border border-white/10 px-3 py-1 text-xs capitalize text-white/60">
                 {role}
@@ -38,11 +43,13 @@ export default function Canvas({ canvasId }: { canvasId: string }) {
           }
         />
       </div>
+
       <section className="relative min-h-0 flex-1 overflow-hidden bg-black p-2 sm:p-3">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-violet-500/[0.04] blur-[100px]" />
           <div className="absolute -bottom-20 -right-20 h-64 w-64 rounded-full bg-blue-500/[0.03] blur-[100px]" />
         </div>
+
         <div className="relative z-10 h-full overflow-hidden rounded-xl border border-white/10 bg-black shadow-[0_0_0_1px_rgba(0,0,0,0.4)]">
           {canvasQuery.isLoading ? (
             <div className="flex h-full items-center justify-center text-sm text-white/60">
@@ -54,6 +61,7 @@ export default function Canvas({ canvasId }: { canvasId: string }) {
                 Could not load this canvas.{" "}
                 {getApiErrorMessage(canvasQuery.error)}
               </p>
+
               <button
                 type="button"
                 onClick={() => void canvasQuery.refetch()}
