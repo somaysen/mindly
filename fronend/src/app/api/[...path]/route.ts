@@ -33,8 +33,23 @@ async function proxyRequest(request: NextRequest, context: RouteContext) {
   }
 
   const { path } = await context.params;
+  const rewrittenPath = request.nextUrl.searchParams.get("nxtPpath");
+  const apiPath =
+    path.length > 0
+      ? path
+      : rewrittenPath?.split("/").filter(Boolean) ?? [];
+  if (apiPath.length === 0) {
+    return Response.json(
+      { success: false, message: "API endpoint not found." },
+      { status: 404 },
+    );
+  }
+
+  const searchParams = new URLSearchParams(request.nextUrl.searchParams);
+  searchParams.delete("nxtPpath");
+  const query = searchParams.size > 0 ? `?${searchParams.toString()}` : "";
   const targetUrl = new URL(
-    `/api/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`,
+    `/api/${apiPath.map(encodeURIComponent).join("/")}${query}`,
     getApiBaseUrl(),
   );
 
