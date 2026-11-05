@@ -11,6 +11,9 @@ export function getCanvasSyncUrl(canvasId: string, ticket: string) {
     throw new Error("NEXT_PUBLIC_SYNC_BASE_URL must use HTTP(S) or WS(S).");
   }
   url.pathname = `/api/canvas/${encodeURIComponent(canvasId)}/sync`;
-  url.searchParams.set("ticket", ticket);
+  // Browser WebSocket connections cannot use Axios' Authorization header.
+  // The sync endpoint reads its short-lived credential from the `token` query.
+  url.searchParams.delete("ticket");
+  url.searchParams.set("token", ticket);
   return url.toString();
 }
