@@ -12,7 +12,7 @@ export const useRegister = () => {
 
 export const useLogin = () => {
   return useMutation({
-    mutationKey: ["login"],
+    mutationKey: ["auth", "login"],
     mutationFn: (data: LoginCredentials) => api.login(data),
     retry: 0,
   });
