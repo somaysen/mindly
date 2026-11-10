@@ -79,7 +79,12 @@ async function proxyRequest(request: NextRequest, context: RouteContext) {
       statusText: upstream.statusText,
       headers: responseHeaders,
     });
-  } catch {
+  } catch (error) {
+    console.error("API proxy request failed.", {
+      method: request.method,
+      path: `/api/${apiPath.join("/")}`,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return Response.json(
       { success: false, message: "The API service is temporarily unavailable." },
       { status: 502 },

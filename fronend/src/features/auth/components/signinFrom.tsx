@@ -12,14 +12,112 @@ import { getSafeRedirectPath, persistAuthToken } from "@/lib/auth";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import { toast } from "react-toastify";
 
+type UnknownRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): UnknownRecord {
+  return typeof value === "object" && value !== null
+    ? (value as UnknownRecord)
+    : {};
+}
+
+function firstDefined(...values: unknown[]): unknown {
+  return values.find((value) => value !== undefined && value !== null);
+}
+
+function getLoginErrorMessage(error: unknown): string {
+  const root = asRecord(error);
+  const response = asRecord(root.response);
+  const data = asRecord(response.data);
+  const nestedData = asRecord(data.data);
+
+  const message = firstDefined(
+    data.message,
+    data.error,
+    nestedData.message,
+    nestedData.error,
+    root.message,
+  );
+
+  return typeof message === "string" && message.trim()
+    ? message
+    : "Unable to login. Please check your email and password.";
+}
+
+function getLoginResponse(response: unknown) {
+  const root = asRecord(response);
+  const rootData = asRecord(root.data);
+  const nestedData = asRecord(rootData.data);
+
+  const user = asRecord(
+    firstDefined(
+      rootData.user,
+      nestedData.user,
+      root.user,
+    ),
+  );
+
+  const tokenValue = firstDefined(
+    rootData.accessToken,
+    rootData.access_token,
+    rootData.token,
+    nestedData.accessToken,
+    nestedData.access_token,
+    nestedData.token,
+    root.accessToken,
+    root.access_token,
+    root.token,
+  );
+
+  const verifiedValue = firstDefined(
+    user.isEmailVerified,
+    user.isVerified,
+    user.emailVerified,
+    user.verified,
+    nestedData.isEmailVerified,
+    nestedData.isVerified,
+    nestedData.emailVerified,
+    nestedData.verified,
+    rootData.isEmailVerified,
+    rootData.emailVerified,
+    rootData.isVerified,
+    root.isEmailVerified,
+    root.emailVerified,
+    root.isVerified,
+    root.verified,
+  );
+
+  const userId = firstDefined(
+    user.id,
+    user._id,
+    rootData.userId,
+    nestedData.userId,
+    root.userId,
+  );
+
+  return {
+    token: typeof tokenValue === "string" ? tokenValue : null,
+    isVerified: verifiedValue,
+    userId: typeof userId === "string" ? userId : null,
+  };
+}
+
+function isEmailVerificationError(message: string): boolean {
+  const normalized = message.toLowerCase();
+
+  return (
+    normalized.includes("email") &&
+    (
+      normalized.includes("not verified") ||
+      normalized.includes("verify your email") ||
+      normalized.includes("verification required") ||
+      normalized.includes("unverified")
+    )
+  );
+}
+
 function SigninForm() {
   const router = useRouter();
-  const {
-    mutate: loginUser,
-    isPending,
-    isError,
-    error,
-  } = useLogin();
+  const { mutate: loginUser, isPending } = useLogin();
 
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
@@ -29,23 +127,31 @@ function SigninForm() {
     password: "",
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
     }));
 
     setServerError("");
   };
 
-  const handleSubmit = (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const redirectToEmailVerification = (email: string, userId?: string | null) => {
+    const params = new URLSearchParams({ email });
+
+    if (userId) {
+      params.set("userId", userId);
+    }
+
+    router.replace(`/verify-email?${params.toString()}`);
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (isPending) return;
 
     setServerError("");
 
@@ -59,172 +165,84 @@ function SigninForm() {
       return;
     }
 
-    loginUser({ email, password }, {
-      onSuccess: (res: any) => {
-        /*
-         * Get user from all possible response structures
-         */
-        const user =
-          res?.data?.user ??
-          res?.data?.data?.user ??
-          res?.user ??
-          res?.data?.data ??
-          null;
+    loginUser(
+      { email, password },
+      {
+        onSuccess: (response: unknown) => {
+          const { token, isVerified, userId } = getLoginResponse(response);
 
-        /*
-         * Get token
-         */
-        const token =
-          res?.data?.token ??
-          res?.data?.accessToken ??
-          res?.data?.data?.token ??
-          res?.data?.data?.accessToken ??
-          res?.token ??
-          res?.accessToken ??
-          null;
-
-        /*
-         * IMPORTANT
-         *
-         * Different backends use different names:
-         *
-         * isVerified
-         * isEmailVerified
-         * emailVerified
-         * verified
-         */
-        const isVerified =
-          user?.isVerified ??
-          user?.isEmailVerified ??
-          user?.emailVerified ??
-          user?.verified ??
-          res?.data?.isVerified ??
-          res?.data?.isEmailVerified ??
-          res?.isVerified ??
-          res?.isEmailVerified;
-
-        /*
-         * ==================================================
-         * EMAIL NOT VERIFIED
-         * ==================================================
-         *
-         * This MUST happen before saving the token.
-         */
-        if (
-          isVerified === false ||
-          isVerified === "false" ||
-          isVerified === 0
-        ) {
-          const verificationParams = new URLSearchParams({ email });
-          const userId = user?.id ?? user?._id ?? res?.data?.userId ?? res?.userId;
-          if (userId) verificationParams.set("userId", String(userId));
-          window.location.href = `/verify-email?${verificationParams.toString()}`;
-
-          return;
-        }
-
-        /*
-         * ==================================================
-         * NO VERIFICATION STATUS
-         * ==================================================
-         *
-         * If backend doesn't send verification status,
-         * don't blindly allow login.
-         */
-        if (
-          isVerified === undefined ||
-          isVerified === null
-        ) {
-          setServerError(
-            "Email verification status was not received from the server."
-          );
-          toast.error("Email verification status was not received from the server.");
-
-          return;
-        }
-
-        /*
-         * ==================================================
-         * EMAIL VERIFIED
-         * ==================================================
-         */
-        if (isVerified === true || isVerified === "true") {
-          if (!token) {
-            setServerError(
-              "Login successful but authentication token is missing."
-            );
-            toast.error("Login successful but authentication token is missing.");
-
+          // Do not create a frontend session unless verification is explicit.
+          if (isVerified === false || isVerified === "false" || isVerified === 0) {
+            redirectToEmailVerification(email, userId);
             return;
           }
 
-          /*
-           * Save token ONLY after email is verified
-           */
-          persistAuthToken(token);
+          if (isVerified !== true && isVerified !== "true" && isVerified !== 1) {
+            const message =
+              "The server did not return a valid email verification status. Please check the login API response.";
+            setServerError(message);
+            toast.error(message);
+            return;
+          }
+
+          if (!token || !token.trim()) {
+            const message =
+              "The login response did not contain an access token. Please check the backend login response.";
+            setServerError(message);
+            toast.error(message);
+            return;
+          }
+
+          try {
+            persistAuthToken(token);
+          } catch {
+            const message =
+              "Unable to save your login session. Please try again.";
+            setServerError(message);
+            toast.error(message);
+            return;
+          }
+
           toast.success("Welcome back!");
-          const redirect = new URLSearchParams(window.location.search).get("redirect");
+
+          const redirect = new URLSearchParams(window.location.search).get(
+            "redirect",
+          );
+
           router.replace(getSafeRedirectPath(redirect));
+        },
 
-          return;
-        }
+        onError: (error: unknown) => {
+          const message = getLoginErrorMessage(error);
 
-        /*
-         * Fallback
-         */
-        setServerError(
-          "Unable to verify your email. Please try again."
-        );
-        toast.error("Unable to verify your email. Please try again.");
+          if (isEmailVerificationError(message)) {
+            const root = asRecord(error);
+            const response = asRecord(root.response);
+            const data = asRecord(response.data);
+            const nestedData = asRecord(data.data);
+            const nestedUser = asRecord(nestedData.user);
+            const directUser = asRecord(data.user);
+
+            const userId = firstDefined(
+              nestedUser.id,
+              nestedUser._id,
+              directUser.id,
+              directUser._id,
+              data.userId,
+            );
+
+            redirectToEmailVerification(
+              email,
+              typeof userId === "string" ? userId : null,
+            );
+            return;
+          }
+
+          setServerError(message);
+          toast.error(message);
+        },
       },
-
-      onError: (err: any) => {
-        /*
-         * Get backend error message
-         */
-        const message = String(
-          err?.response?.data?.message ??
-            err?.response?.data?.error ??
-            err?.message ??
-            ""
-        );
-
-        /*
-         * If backend itself says email is not verified,
-         * send user to verification page.
-         */
-        const lowerMessage =
-          String(message).toLowerCase();
-
-        if (
-          lowerMessage.includes("email") &&
-          (
-            lowerMessage.includes("not verified") ||
-            lowerMessage.includes("verify your email") ||
-            lowerMessage.includes("verification required") ||
-            lowerMessage.includes("unverified")
-          )
-        ) {
-          const verificationParams = new URLSearchParams({ email });
-          const userId =
-            err?.response?.data?.data?.user?.id ??
-            err?.response?.data?.user?.id ??
-            err?.response?.data?.userId;
-          if (userId) verificationParams.set("userId", String(userId));
-          window.location.href = `/verify-email?${verificationParams.toString()}`;
-
-          return;
-        }
-
-        setServerError(
-          message ||
-            "Unable to login. Please check your email and password."
-        );
-        toast.error(
-          message || "Unable to login. Please check your email and password."
-        );
-      },
-    });
+    );
   };
 
   return (
@@ -264,7 +282,6 @@ function SigninForm() {
               "
             >
               <div className="space-y-5">
-
                 {/* LOGO */}
                 <div>
                   <img
@@ -298,10 +315,7 @@ function SigninForm() {
                 <div className="h-[3px] w-full rounded-full bg-[#3d40a1]" />
 
                 {/* FORM */}
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-3"
-                >
+                <form onSubmit={handleSubmit} className="space-y-3">
                   {/* EMAIL */}
                   <div className="relative">
                     <HiOutlineMail
@@ -354,11 +368,7 @@ function SigninForm() {
                     />
 
                     <input
-                      type={
-                        showPassword
-                          ? "text"
-                          : "password"
-                      }
+                      type={showPassword ? "text" : "password"}
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
@@ -387,11 +397,7 @@ function SigninForm() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowPassword(
-                          (prev) => !prev
-                        )
-                      }
+                      onClick={() => setShowPassword((prev) => !prev)}
                       className="
                         absolute right-4 top-1/2
                         -translate-y-1/2
@@ -400,16 +406,10 @@ function SigninForm() {
                         hover:text-white
                       "
                       aria-label={
-                        showPassword
-                          ? "Hide password"
-                          : "Show password"
+                        showPassword ? "Hide password" : "Show password"
                       }
                     >
-                      {showPassword ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
 
@@ -430,12 +430,13 @@ function SigninForm() {
                   </div>
 
                   {/* ERROR */}
-                  {(isError || serverError) && (
-                    <p className="text-center text-xs text-red-400">
-                      {serverError ||
-                        (error instanceof Error
-                          ? error.message
-                          : "Unable to login. Please try again.")}
+                  {serverError && (
+                    <p
+                      role="alert"
+                      aria-live="polite"
+                      className="text-center text-xs text-red-400"
+                    >
+                      {serverError}
                     </p>
                   )}
 
@@ -462,9 +463,7 @@ function SigninForm() {
                       disabled:opacity-60
                     "
                   >
-                    {isPending
-                      ? "Signing in..."
-                      : "Sign In"}
+                    {isPending ? "Signing in..." : "Sign In"}
                   </button>
                 </form>
 
@@ -480,7 +479,6 @@ function SigninForm() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-
                   {/* GOOGLE */}
                   <GoogleLoginButton />
 
@@ -525,7 +523,6 @@ function SigninForm() {
                     <HiOutlineMail className="text-[19px]" />
                     <span>Email</span>
                   </button>
-
                 </div>
 
                 {/* TERMS */}
@@ -570,7 +567,6 @@ function SigninForm() {
                     </Link>
                   </p>
                 </div>
-
               </div>
             </div>
           </section>

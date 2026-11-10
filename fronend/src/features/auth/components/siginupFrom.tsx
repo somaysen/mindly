@@ -8,7 +8,6 @@ import { IoLogoApple } from "react-icons/io5";
 import { HiOutlineMail } from "react-icons/hi";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
 import { useRegister } from "../hooks/useAuthApi";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import { toast } from "react-toastify";
@@ -17,6 +16,58 @@ type SignupFormData = {
   email: string;
   password: string;
 };
+
+type UnknownRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): UnknownRecord {
+  return typeof value === "object" && value !== null
+    ? (value as UnknownRecord)
+    : {};
+}
+
+function firstDefined(...values: unknown[]): unknown {
+  return values.find((value) => value !== undefined && value !== null);
+}
+
+function getRegisteredUserId(response: unknown): string | null {
+  const root = asRecord(response);
+  const rootData = asRecord(root.data);
+  const nestedData = asRecord(rootData.data);
+  const user = asRecord(
+    firstDefined(rootData.user, nestedData.user, root.user),
+  );
+
+  const id = firstDefined(
+    user.id,
+    user._id,
+    rootData.userId,
+    nestedData.userId,
+    root.userId,
+  );
+
+  return typeof id === "string" || typeof id === "number"
+    ? String(id)
+    : null;
+}
+
+function getApiErrorMessage(error: unknown): string {
+  const root = asRecord(error);
+  const response = asRecord(root.response);
+  const data = asRecord(response.data);
+  const nestedData = asRecord(data.data);
+
+  const message = firstDefined(
+    data.message,
+    data.error,
+    nestedData.message,
+    nestedData.error,
+    root.message,
+  );
+
+  return typeof message === "string" && message.trim()
+    ? message
+    : "Unable to create your account. Please try again.";
+}
 
 function SignupForm() {
   const router = useRouter();
@@ -27,41 +78,50 @@ function SignupForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignupFormData>();
+  } = useForm<SignupFormData>({
+    mode: "onTouched",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const { mutate: registerUser, isPending } = useRegister();
 
   const onSubmit = (data: SignupFormData) => {
+    if (isPending) return;
+
     setServerError(null);
 
-    const formData = new FormData();
+    const email = data.email.trim().toLowerCase();
+    const password = data.password;
 
-    formData.append("email", data.email.trim().toLowerCase());
-    formData.append("password", data.password);
+    if (!email || !password) {
+      const message = "Email and password are required.";
+      setServerError(message);
+      toast.error(message);
+      return;
+    }
 
-    registerUser(formData, {
-      onSuccess: (res) => {
-        toast.success("Account created. Check your email to verify it.");
-        const email = data.email.trim().toLowerCase();
-        const userId =
-          res?.data?.user?.id ??
-          res?.data?.data?.user?.id ??
-          res?.user?.id ??
-          res?.data?.userId ??
-          res?.userId;
+    const payload = new FormData();
+    payload.append("email", email);
+    payload.append("password", password);
+
+    registerUser(payload, {
+      onSuccess: (response: unknown) => {
+        const userId = getRegisteredUserId(response);
         const params = new URLSearchParams({ email });
-        if (userId) params.set("userId", String(userId));
-        router.push(`/verify-email?${params.toString()}`);
+
+        if (userId) {
+          params.set("userId", userId);
+        }
+
+        toast.success("Account created. Check your email to verify it.");
+        router.replace(`/verify-email?${params.toString()}`);
       },
 
-      onError: (error: any) => {
-        const message =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
-        // console.log(error,error?.message);
-          "Unable to create account. Please try again.";
-
+      onError: (error: unknown) => {
+        const message = getApiErrorMessage(error);
         setServerError(message);
         toast.error(message);
       },
@@ -363,6 +423,9 @@ function SignupForm() {
                   {/* APPLE */}
                   <button
                     type="button"
+                    disabled
+                    aria-label="Apple sign-in is not available yet"
+                    title="Apple sign-in is coming soon"
                     className="
                       flex
                       h-[43px]
@@ -382,6 +445,8 @@ function SignupForm() {
 
                       transition
                       hover:bg-white/5
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
                     "
                   >
                     <IoLogoApple className="text-[19px]" />
@@ -391,6 +456,9 @@ function SignupForm() {
                   {/* EMAIL */}
                   <button
                     type="button"
+                    disabled
+                    aria-label="Email sign-in is not available yet"
+                    title="Email sign-in is coming soon"
                     className="
                       flex
                       h-[43px]
@@ -410,6 +478,8 @@ function SignupForm() {
 
                       transition
                       hover:bg-white/5
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
                     "
                   >
                     <HiOutlineMail className="text-[19px]" />

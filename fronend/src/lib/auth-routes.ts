@@ -22,7 +22,7 @@ export const PUBLIC_PATHS = [
 ] as const;
 
 const DEVELOPMENT_API_BASE_URL = "http://localhost:9000";
-const PRODUCTION_API_BASE_URL = "https://mindly-backend-omega.vercel.app";
+const PRODUCTION_API_BASE_URL = "https://mindlybackend.onrender.com";
 
 export function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some(
