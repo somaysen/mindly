@@ -30,6 +30,7 @@ export default function GoogleLoginButton() {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const requestInProgress = useRef(false);
+  const isGoogleConfigured = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
   const handleSuccess = async (googleResponse: CredentialResponse) => {
     const credential = googleResponse.credential;
@@ -137,19 +138,28 @@ export default function GoogleLoginButton() {
       </span>
 
       {/* Google authentication overlay */}
-      <div className="absolute inset-0 z-10 flex justify-start opacity-[0.01]">
-        <GoogleLogin
-          onSuccess={(response) => void handleSuccess(response)}
-          onError={() =>
-            toast.error("Google sign in was cancelled or could not start.")
-          }
-          use_fedcm_for_button
-          shape="rectangular"
-          theme="filled_black"
-          size="large"
-          width="200"
-        />
-      </div>
+      {isGoogleConfigured ? (
+        <div className="absolute inset-0 z-10 flex justify-start opacity-[0.01]">
+          <GoogleLogin
+            onSuccess={(response) => void handleSuccess(response)}
+            onError={() =>
+              toast.error("Google sign in was cancelled or could not start.")
+            }
+            use_fedcm_for_button
+            shape="rectangular"
+            theme="filled_black"
+            size="large"
+            width="200"
+          />
+        </div>
+      ) : (
+        <div
+          role="status"
+          className="absolute inset-0 z-10 flex items-center justify-center bg-[#191b4d] text-xs text-white/70"
+        >
+          Google sign-in unavailable
+        </div>
+      )}
     </div>
   );
 }

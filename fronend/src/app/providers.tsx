@@ -11,14 +11,16 @@ export default function Providers({
 }) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-  if (!clientId) {
-    throw new Error("Google Client ID is missing. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID.");
-  }
-
-  return (
-    <GoogleOAuthProvider clientId={clientId}>
+  const app = (
+    <>
       <QueryProvider>{children}</QueryProvider>
       <ToastProvider />
-    </GoogleOAuthProvider>
+    </>
+  );
+
+  return clientId ? (
+    <GoogleOAuthProvider clientId={clientId}>{app}</GoogleOAuthProvider>
+  ) : (
+    app
   );
 }
