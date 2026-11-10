@@ -23,12 +23,45 @@ const HOP_BY_HOP_HEADERS = [
   "x-forwarded-proto",
 ];
 
+function isSameOriginRequest(request: NextRequest, origin: string) {
+  try {
+    const originUrl = new URL(origin);
+    if (originUrl.protocol !== "http:" && originUrl.protocol !== "https:") {
+      return false;
+    }
+
+    const hosts = [
+      request.nextUrl.host,
+      request.headers.get("host"),
+      request.headers.get("x-forwarded-host")?.split(",")[0].trim(),
+    ].filter((host): host is string => Boolean(host));
+    const protocols = [
+      request.nextUrl.protocol,
+      request.headers.get("x-forwarded-proto")?.split(",")[0].trim(),
+    ]
+      .filter((protocol): protocol is string => Boolean(protocol))
+      .map((protocol) => protocol.endsWith(":") ? protocol : `${protocol}:`);
+
+    return protocols.some((protocol) =>
+      hosts.some((host) => {
+        try {
+          return new URL(`${protocol}//${host}`).origin === originUrl.origin;
+        } catch {
+          return false;
+        }
+      }),
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function proxyRequest(request: NextRequest, context: RouteContext) {
   const origin = request.headers.get("origin");
 
-  // Keep browser requests same-origin before forwarding them to the backend.
-  // The backend uses Origin to check its own allowed frontend origins.
-  if (origin && origin !== request.nextUrl.origin) {
+  // Validate browser mutations against the public host; reverse proxies can
+  // expose a different internal origin through request.nextUrl.
+  if (origin && !isSameOriginRequest(request, origin)) {
     return Response.json({ success: false, message: "Origin is not allowed." }, { status: 403 });
   }
 
@@ -57,6 +90,9 @@ async function proxyRequest(request: NextRequest, context: RouteContext) {
   for (const header of HOP_BY_HOP_HEADERS) {
     requestHeaders.delete(header);
   }
+  // CORS does not apply to this server-to-server request. Forwarding a preview
+  // deployment's browser Origin can make a backend allowlist reject valid API calls.
+  requestHeaders.delete("origin");
 
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
 
