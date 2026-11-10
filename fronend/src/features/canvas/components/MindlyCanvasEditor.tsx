@@ -31,10 +31,61 @@ import { useProfileInfo } from "@/features/profile/hooks/useProfile";
 import { useGetCanvasMembers } from "@/features/canvas/hooks/useCanvas";
 import type { CanvasMember } from "@/types/canvas";
 
+const CANVAS_IMAGE_COMPRESSION_THRESHOLD = 512 * 1024;
+const CANVAS_IMAGE_MAX_DIMENSION = 1920;
+
+async function optimizeCanvasImage(file: File): Promise<File> {
+  if (
+    file.size < CANVAS_IMAGE_COMPRESSION_THRESHOLD ||
+    !file.type.startsWith("image/") ||
+    file.type === "image/gif" ||
+    file.type === "image/svg+xml" ||
+    typeof createImageBitmap !== "function"
+  ) {
+    return file;
+  }
+
+  let bitmap: ImageBitmap | undefined;
+
+  try {
+    bitmap = await createImageBitmap(file);
+    const scale = Math.min(
+      1,
+      CANVAS_IMAGE_MAX_DIMENSION / Math.max(bitmap.width, bitmap.height),
+    );
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+
+    const context = canvas.getContext("2d");
+    if (!context) return file;
+
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const compressed = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/webp", 0.82),
+    );
+
+    if (!compressed || compressed.size >= file.size || !compressed.type) return file;
+
+    const baseName = file.name.replace(/\.[^.]+$/, "") || "canvas-image";
+    const extension = compressed.type === "image/webp" ? "webp" : "png";
+    return new File([compressed], `${baseName}.${extension}`, {
+      type: compressed.type,
+      lastModified: file.lastModified,
+    });
+  } catch {
+    // Keep the original image when this browser cannot decode or encode it.
+    return file;
+  } finally {
+    bitmap?.close();
+  }
+}
+
 const canvasAssetStore: TLAssetStore = {
-  upload: async (_asset, file) => ({
-    src: await fileToBase64DataUri(file),
-  }),
+  upload: async (_asset, file) => {
+    const optimizedFile = await optimizeCanvasImage(file);
+    return { src: await fileToBase64DataUri(optimizedFile) };
+  },
   resolve: (asset) => asset.props.src ?? null,
 };
 
