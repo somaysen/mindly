@@ -89,8 +89,7 @@ api.interceptors.response.use(
     if (
       !publicRoute &&
       !isRefreshRequest &&
-      (status === 403 ||
-        message.toLowerCase().includes("unauthorized") ||
+      (message.toLowerCase().includes("unauthorized") ||
         message.toLowerCase().includes("unauthenticated") ||
         message.toLowerCase().includes("invalid token") ||
         message.toLowerCase().includes("token expired"))

@@ -9,11 +9,7 @@ function isRecord(value: unknown): value is CanvasRecord {
 }
 
 function isStoreSnapshot(value: unknown): value is TLStoreSnapshot {
-  return (
-    isRecord(value) &&
-    isRecord(value.schema) &&
-    isRecord(value.store)
-  );
+  return isRecord(value) && isRecord(value.schema) && isRecord(value.store);
 }
 
 function isEditorSnapshot(value: unknown): value is TLEditorSnapshot {
@@ -40,7 +36,10 @@ export function getCanvasList(response: unknown, depth = 0): CanvasRecord[] {
   return [];
 }
 
-export function getCanvasRecord(response: unknown, depth = 0): CanvasRecord | null {
+export function getCanvasRecord(
+  response: unknown,
+  depth = 0,
+): CanvasRecord | null {
   if (depth > 5 || !isRecord(response)) return null;
 
   const hasCanvasFields = [
@@ -92,7 +91,9 @@ export function getCanvasRole(canvas: CanvasRecord): CanvasRole | null {
     : null;
 }
 
-export function getCanvasSnapshot(canvas: CanvasRecord): CanvasSnapshot | undefined {
+export function getCanvasSnapshot(
+  canvas: CanvasRecord,
+): CanvasSnapshot | undefined {
   const candidate =
     canvas.snapshot ??
     canvas.document ??

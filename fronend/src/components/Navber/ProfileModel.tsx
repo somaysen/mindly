@@ -5,6 +5,50 @@ import { useQueryClient } from "@tanstack/react-query";
 import { X } from "@phosphor-icons/react";
 import { useProfileInfo } from "@/features/profile/hooks/useProfile";
 import { useUserInfo } from "@/features/onboarding/hooks/userOnbordingApi";
+import { getApiErrorMessage } from "@/lib/apiError";
+
+type ProfileRecord = {
+  name?: string;
+  avatar?: string;
+  avatarUrl?: string;
+  imageUrl?: string;
+};
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function getProfileRecord(response: unknown): ProfileRecord | null {
+  const root = asRecord(response);
+  const data = asRecord(root.data);
+  const nestedData = asRecord(data.data);
+  const candidates = [
+    data.user,
+    nestedData.user,
+    root.user,
+    nestedData,
+    data,
+    root,
+  ];
+  const profile = candidates.find((candidate) => {
+    const record = asRecord(candidate);
+    return ["name", "avatar", "avatarUrl", "imageUrl"].some(
+      (key) => key in record,
+    );
+  }) ?? candidates.find((candidate) => candidate && typeof candidate === "object");
+
+  return profile && typeof profile === "object"
+    ? (profile as ProfileRecord)
+    : null;
+}
+
+function firstNonEmptyString(...values: unknown[]): string | undefined {
+  return values.find(
+    (value): value is string => typeof value === "string" && value.trim().length > 0,
+  )?.trim();
+}
 
 interface ProfileModalProps {
   avatars: string[];
@@ -19,22 +63,24 @@ export default function ProfileModal({
   const [saveError, setSaveError] = useState("");
   const queryClient = useQueryClient();
   const { data: response } = useProfileInfo();
-  const profile = response?.data;
-  const profileAvatar = [profile?.avatar, profile?.avatarUrl, ...avatars].find(
-    (avatar): avatar is string =>
-      typeof avatar === "string" && avatar.trim().length > 0
+  const profile = getProfileRecord(response);
+  const profileAvatar = firstNonEmptyString(
+    profile?.avatar,
+    profile?.avatarUrl,
+    profile?.imageUrl,
+    ...avatars,
   );
   const saveProfile = useUserInfo();
 
   useEffect(() => {
     if (!showProfile) return;
 
-    const savedAvatar = profile?.avatar ?? profile?.avatarUrl;
-    setSelectedAvatar(
-      typeof savedAvatar === "string" && savedAvatar.trim()
-        ? savedAvatar.trim()
-        : (avatars.find((avatar) => avatar.trim()) ?? "")
+    const savedAvatar = firstNonEmptyString(
+      profile?.avatar,
+      profile?.avatarUrl,
+      profile?.imageUrl,
     );
+    setSelectedAvatar(savedAvatar ?? (avatars.find((avatar) => avatar.trim()) ?? ""));
     setDisplayName(profile?.name ?? "");
     setSaveError("");
   }, [showProfile, profile, avatars]);
@@ -51,8 +97,10 @@ export default function ProfileModal({
           await queryClient.invalidateQueries({ queryKey: ["userInfo"] });
           setShowProfile(false);
         },
-        onError: () => {
-          setSaveError("Could not save your profile. Please try again.");
+        onError: (error) => {
+          setSaveError(
+            getApiErrorMessage(error, "Could not save your profile. Please try again."),
+          );
         },
       }
     );

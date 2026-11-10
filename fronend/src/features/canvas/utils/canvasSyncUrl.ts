@@ -2,7 +2,10 @@ import { getApiBaseUrl } from "@/lib/auth";
 
 export function getCanvasSyncUrl(canvasId: string, ticket: string) {
   const configuredSyncBase = process.env.NEXT_PUBLIC_SYNC_BASE_URL?.trim();
-  const url = new URL(configuredSyncBase || getApiBaseUrl());
+  // API_BASE_URL is server-only, so use the public API origin for browser
+  // WebSocket connections when a separate sync origin is not configured.
+  const publicApiBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+  const url = new URL(configuredSyncBase || publicApiBase || getApiBaseUrl());
   if (url.protocol === "https:") {
     url.protocol = "wss:";
   } else if (url.protocol === "http:") {

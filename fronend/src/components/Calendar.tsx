@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DayPicker } from "react-day-picker";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CreateTaskModal from "@/features/tasks/components/TaskCreteModel";
@@ -30,6 +30,7 @@ const taskDateKey = (value: string | null) => {
 export default function Calendar() {
   const tasksQuery = useTaskGet();
   const today = new Date();
+  const [isMounted, setIsMounted] = useState(false);
   const [selected, setSelected] = useState<Date>(today);
   const [month, setMonth] = useState<Date>(
     new Date(today.getFullYear(), today.getMonth(), 1),
@@ -43,6 +44,14 @@ export default function Calendar() {
     const [year, month, day] = key.split("-").map(Number);
     return [new Date(year, month - 1, day)];
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <div className="min-h-[300px] w-full" aria-label="Loading calendar" />;
+  }
 
   return (
     <div className="mindly-calendar-wrapper">

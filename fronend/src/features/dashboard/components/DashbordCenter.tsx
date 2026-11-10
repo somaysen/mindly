@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { ChevronUp, Lightbulb, Mic, Paperclip } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,6 +27,11 @@ function DashbordCenter({ activeView }: { activeView: DashboardView }) {
   const queryClient = useQueryClient();
   const [thought, setThought] = useState("");
   const [isThoughtExpanded, setIsThoughtExpanded] = useState(true);
+  const [greeting, setGreeting] = useState("Hello");
+
+  useEffect(() => {
+    setGreeting(getGreeting());
+  }, []);
 
   // =====================================================
   // USER INFO
@@ -106,7 +111,7 @@ function DashbordCenter({ activeView }: { activeView: DashboardView }) {
         <div className="flex min-h-[205px] items-center justify-between gap-6 px-1 sm:px-5">
           <div className="min-w-0">
             <h1 className="font-[family-name:var(--font-bricolage-grotesque)] text-2xl font-semibold tracking-[-0.02em] sm:text-[28px]">
-              {getGreeting()},{" "}
+              {greeting},{" "}
               {isUserLoading ? "..." : userName}
             </h1>
 

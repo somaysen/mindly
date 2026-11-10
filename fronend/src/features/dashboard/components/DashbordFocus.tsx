@@ -52,6 +52,11 @@ function DashbordFocus({
 }: DashbordFocusProps) {
   const [pinnedTasks, setPinnedTasks] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
+  const [today, setToday] = useState<string | null>(null);
+
+  useEffect(() => {
+    setToday(getLocalDateKey(new Date()));
+  }, []);
 
   // Load pinned tasks
   useEffect(() => {
@@ -92,10 +97,8 @@ function DashbordFocus({
   };
 
   // Today's tasks
-  const today = getLocalDateKey(new Date());
-
   const todayTasks = tasks.filter(
-    (task) => task.dueDate?.slice(0, 10) === today
+    (task) => today !== null && task.dueDate?.slice(0, 10) === today
   );
 
   // Pinned tasks appear first
@@ -208,7 +211,8 @@ function DashbordFocus({
         )}
 
       {/* Empty State */}
-      {!isTasksLoading &&
+      {today !== null &&
+        !isTasksLoading &&
         !isTasksGetError &&
         todayTasks.length === 0 && (
           <div className="w-full rounded-2xl border border-dashed border-[#4b496f] bg-[#191832]/65 px-5 py-10 text-center">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronUp, Lightbulb, Mic, Paperclip } from "lucide-react";
 
@@ -32,8 +32,13 @@ function TaskbarCenter() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [thought, setThought] = useState("");
   const [isThoughtExpanded, setIsThoughtExpanded] = useState(true);
+  const [greeting, setGreeting] = useState("Hello");
   const { data: userData, isLoading: isUserLoading, isError: isUserError } = useUserInfo();
   const userName = userData?.data?.name ?? "User";
+
+  useEffect(() => {
+    setGreeting(getGreeting());
+  }, []);
   const {
     mutate: createTask,
     isPending: isCreatingTask,
@@ -72,7 +77,7 @@ function TaskbarCenter() {
                 <div className="mb-5 flex min-h-[150px] items-center justify-between gap-5 px-1 sm:px-5">
                   <div className="min-w-0">
                     <h1 className="font-[family-name:var(--font-bricolage-grotesque)] text-2xl font-semibold tracking-[-0.02em] sm:text-[28px]">
-                      {getGreeting()}, {isUserLoading ? "..." : userName}
+                      {greeting}, {isUserLoading ? "..." : userName}
                     </h1>
                     <p className="mt-3 text-sm text-white/60">
                       {isUserError ? "Unable to load your profile." : "Let’s start by clearing your mind."}

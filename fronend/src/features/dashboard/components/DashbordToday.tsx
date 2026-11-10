@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ListTodo, Plus } from "lucide-react";
 
 import { useTaskGet } from "@/features/tasks/hooks/useTesk";
@@ -15,14 +15,29 @@ function getLocalDateKey(date: Date) {
 
 function DashbordToday({ onAddTask }: { onAddTask?: () => void }) {
   const { data, isLoading, isError } = useTaskGet();
+  const [today, setToday] = useState<string | null>(null);
+  const [todayLabel, setTodayLabel] = useState("");
+
+  useEffect(() => {
+    const currentDate = new Date();
+    setToday(getLocalDateKey(currentDate));
+    setTodayLabel(
+      currentDate.toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      }),
+    );
+  }, []);
+
   const tasks = useMemo(() => {
     const allTasks: Task[] = Array.isArray(data?.data) ? data.data : [];
-    const today = getLocalDateKey(new Date());
+    if (!today) return [];
 
     return allTasks
       .filter((task) => task.dueDate?.slice(0, 10) === today)
       .sort((first, second) => (first.dueTime ?? "99:99").localeCompare(second.dueTime ?? "99:99"));
-  }, [data]);
+  }, [data, today]);
 
   const completedCount = tasks.filter((task) => task.status === "completed").length;
   const openCount = tasks.length - completedCount;
@@ -35,11 +50,7 @@ function DashbordToday({ onAddTask }: { onAddTask?: () => void }) {
             Today
           </h1>
           <p className="mt-2 text-sm text-white/55">
-            {new Date().toLocaleDateString(undefined, {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
+            {todayLabel}
           </p>
         </div>
         <div className="flex items-center gap-3">
