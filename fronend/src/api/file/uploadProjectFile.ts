@@ -6,11 +6,10 @@ export async function uploadProjectFile(
   fileData: string,
   fileName: string,
 ) {
-  const title = fileName.replace(/\.[^.]+$/, "");
-
   const response = await api.post(
     `/api/file/project/${encodeURIComponent(projectId)}/files`,
-    { fileData, title }
+    // Keep the extension so the project file list can recognize and open it.
+    { fileData, title: fileName }
   );
 
   return response.data;

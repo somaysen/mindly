@@ -12,6 +12,8 @@ type FileModalProps = {
   onUpload: (files: FileList | null) => Promise<void>;
 };
 
+const ACCEPTED_FILE_TYPES = ".txt,.md,.pdf,.docx";
+
 export default function FileModal({
   open,
   error,
@@ -119,7 +121,6 @@ export default function FileModal({
                 >
                   <option value=".txt">.txt</option>
                   <option value=".md">.md</option>
-                  <option value=".html">.html</option>
                 </select>
               </div>
             </div>
@@ -152,6 +153,7 @@ export default function FileModal({
             <input
               ref={fileInputRef}
               type="file"
+              accept={ACCEPTED_FILE_TYPES}
               multiple
               className="hidden"
               onChange={(event) => {

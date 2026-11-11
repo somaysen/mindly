@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { fileToBase64DataUri } from "@/lib/fileToBase64DataUri";
 import { getApiErrorMessage } from "@/lib/apiError";
 import {
@@ -29,6 +30,53 @@ type ProjectFile = {
   mimeType?: string;
 };
 
+const ACCEPTED_FILE_EXTENSIONS = [".txt", ".md", ".pdf", ".docx"] as const;
+
+function isSupportedFileName(fileName: string) {
+  const normalizedName = fileName.toLowerCase();
+  return ACCEPTED_FILE_EXTENSIONS.some((extension) =>
+    normalizedName.endsWith(extension),
+  );
+}
+
+function canOpenInNotepad(item: ProjectFile) {
+  return (
+    isSupportedFileName(item.name) &&
+    (Boolean(item.url) ||
+      (item.content !== undefined && /\.(?:txt|md)$/i.test(item.name)))
+  );
+}
+
+function addMissingFileExtension(
+  name: string,
+  mimeType: unknown,
+  url: unknown,
+) {
+  if (/\.(?:txt|md|pdf|docx)$/i.test(name)) return name;
+
+  const mimeExtensions: Record<string, string> = {
+    "text/plain": ".txt",
+    "text/markdown": ".md",
+    "application/pdf": ".pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+  };
+  const extension =
+    typeof mimeType === "string" ? mimeExtensions[mimeType] : undefined;
+
+  if (extension) return `${name}${extension}`;
+  if (typeof url === "string") {
+    try {
+      const urlExtension = new URL(url, "https://mindly.local").pathname.match(
+        /\.(txt|md|pdf|docx)$/i,
+      )?.[0];
+      if (urlExtension) return `${name}${urlExtension}`;
+    } catch {
+      // Leave unrecognized file names unchanged.
+    }
+  }
+  return name;
+}
+
 function getProjectFiles(response: unknown, depth = 0): ProjectFile[] {
   if (depth > 5 || response == null) return [];
   if (Array.isArray(response)) {
@@ -43,9 +91,10 @@ function getProjectFiles(response: unknown, depth = 0): ProjectFile[] {
       const url =
         file.downloadUrl ?? file.fileUrl ?? file.cloudinaryUrl ?? file.url;
       const mimeType = file.mimeType;
+      const normalizedName = addMissingFileExtension(name, mimeType, url);
       return [{
         id: String(id ?? index),
-        name,
+        name: normalizedName,
         size: Number.isFinite(size) ? size : 0,
         content,
         url: typeof url === "string" ? url : undefined,
@@ -122,6 +171,13 @@ export default function FileSection({
     if (!selectedFiles?.length) return;
 
     const incoming = Array.from(selectedFiles);
+    const unsupported = incoming.find((file) => !isSupportedFileName(file.name));
+
+    if (unsupported) {
+      setError(`${unsupported.name} is not supported. Choose a TXT, MD, PDF, or DOCX file.`);
+      return;
+    }
+
     const existingNames = new Set(files.map((item) => item.name));
     const duplicate = incoming.find((item) => existingNames.has(item.name));
 
@@ -164,22 +220,42 @@ export default function FileSection({
   }
 
   function openFileInNotepad(item: ProjectFile) {
-    if (!item.url) return;
+    if (!isSupportedFileName(item.name)) {
+      toast.error("Only TXT, MD, PDF, and DOCX files can be opened.");
+      return;
+    }
 
-    const params = new URLSearchParams({
-      projectId,
-      fileName: item.name,
-      fileUrl: item.url,
-    });
-    router.push(`/notepad?${params.toString()}`);
-  }
+    if (item.content !== undefined && /\.(?:txt|md)$/i.test(item.name)) {
+      const contentKey = `mindly-notepad-${crypto.randomUUID()}`;
+      sessionStorage.setItem(contentKey, item.content);
+      router.push(
+        `/notepad?projectId=${encodeURIComponent(projectId)}&fileName=${encodeURIComponent(item.name)}&contentKey=${encodeURIComponent(contentKey)}`,
+      );
+      return;
+    }
 
-  function canOpenInNotepad(item: ProjectFile) {
-    return Boolean(
-      item.url &&
-        (item.mimeType?.startsWith("text/") ||
-          item.mimeType === "application/octet-stream" ||
-          /\.(?:txt|md|html|csv|json)$/i.test(item.name)),
+    let url = item.url;
+
+    if (url) {
+      try {
+        const parsedUrl = new URL(url, window.location.origin);
+        if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+          throw new Error("This file link uses an unsupported protocol.");
+        }
+        url = parsedUrl.toString();
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "This file link is invalid.",
+        );
+        return;
+      }
+    } else {
+      toast.error("This file is not available to open in the notepad.");
+      return;
+    }
+
+    router.push(
+      `/notepad?projectId=${encodeURIComponent(projectId)}&fileName=${encodeURIComponent(item.name)}&fileUrl=${encodeURIComponent(url)}`,
     );
   }
 
@@ -236,7 +312,7 @@ export default function FileSection({
                     type="button"
                     disabled={!canOpenInNotepad(item)}
                     onClick={() => openFileInNotepad(item)}
-                    title={canOpenInNotepad(item) ? "Open in notepad" : "This file type cannot be opened in notepad"}
+                    title="Open file in notepad"
                     className="block max-w-full truncate text-left text-sm font-medium text-white transition hover:text-[#aaa7ff] disabled:cursor-default disabled:hover:text-white"
                   >
                     {item.name}
@@ -260,7 +336,7 @@ export default function FileSection({
                   onClick={() => openFileInNotepad(item)}
                   disabled={!canOpenInNotepad(item)}
                   aria-label={`Open ${item.name} in notepad`}
-                  title={canOpenInNotepad(item) ? "Open in notepad" : "This file type cannot be opened in notepad"}
+                  title="Open file in notepad"
                   className="rounded-lg p-2 text-[#aaa7c5] transition hover:bg-[#353260] hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
                 >
                   <ExternalLink size={17} />

@@ -127,14 +127,15 @@ function ProjectCenter() {
   );
 
   const handleCreateProject = async (project: ProjectFormData) => {
-    const formData = new FormData();
-    formData.append("projectName", project.name);
-    formData.append("description", project.description);
-    formData.append("useTasks", String(project.useTasks));
-    formData.append("useIdeas", String(project.useIdeas));
+    const payload = {
+      projectName: project.name,
+      description: project.description,
+      useTasks: project.useTasks,
+      useIdeas: project.useIdeas,
+    };
 
     try {
-      const response = await createProject.mutateAsync(formData);
+      const response = await createProject.mutateAsync(payload);
       setIsModalOpen(false);
       let projectId = getCreatedProjectId(response);
 

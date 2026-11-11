@@ -28,6 +28,8 @@ export default function Notepad() {
   const [charCount, setCharCount] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewType, setPreviewType] = useState<"pdf" | "docx" | null>(null);
 
   const [projectId, setProjectId] = useState("");
   const uploadFile = useUploadProjectFile(projectId);
@@ -43,19 +45,54 @@ export default function Notepad() {
     setProjectId(params.get("projectId") || "");
     setTitle(params.get("fileName") || "Untitled note");
 
+    const contentKey = params.get("contentKey");
+    if (contentKey) {
+      const content = sessionStorage.getItem(contentKey);
+      if (content) {
+        const blocks = editor.tryParseMarkdownToBlocks(content);
+        editor.replaceBlocks(editor.document, blocks);
+      }
+      return;
+    }
+
     const fileUrl = params.get("fileUrl");
     if (!fileUrl) return;
+
+    let safeFileUrl: string;
+    try {
+      const url = new URL(fileUrl);
+      if (url.protocol !== "https:" || url.hostname !== "res.cloudinary.com") {
+        throw new Error("This file cannot be opened from its current location.");
+      }
+      safeFileUrl = url.toString();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "This file link is invalid.",
+      );
+      return;
+    }
+
+    const fileName = params.get("fileName") || "";
+    if (/\.pdf$/i.test(fileName)) {
+      setPreviewUrl(safeFileUrl);
+      setPreviewType("pdf");
+      return;
+    }
+    if (/\.docx$/i.test(fileName)) {
+      setPreviewUrl(safeFileUrl);
+      setPreviewType("docx");
+      return;
+    }
+    if (!/\.(?:txt|md)$/i.test(fileName)) {
+      toast.error("Only TXT, MD, PDF, and DOCX files can be opened.");
+      return;
+    }
 
     let cancelled = false;
 
     const loadFile = async () => {
       try {
-        const url = new URL(fileUrl);
-        if (url.protocol !== "https:" || url.hostname !== "res.cloudinary.com") {
-          throw new Error("This file cannot be opened from its current location.");
-        }
-
-        const response = await fetch(url);
+        const response = await fetch(safeFileUrl);
         if (!response.ok) throw new Error("Could not load this file.");
 
         const content = await response.text();
@@ -109,7 +146,7 @@ export default function Notepad() {
     }
 
     const safeTitle = fileTitle.replace(/[\\/:*?"<>|]/g, "-");
-    const fileName = /\.(?:txt|md|html)$/i.test(safeTitle)
+    const fileName = /\.(?:txt|md)$/i.test(safeTitle)
       ? safeTitle
       : `${safeTitle}.txt`;
 
@@ -185,13 +222,32 @@ export default function Notepad() {
               <p className="text-[10px] font-bold uppercase tracking-wider text-white/40">
                 Format
               </p>
-              <p className="text-sm font-semibold text-white">Rich text</p>
+              <p className="text-sm font-semibold text-white">
+                {previewType ? previewType.toUpperCase() : "Rich text"}
+              </p>
             </div>
           </div>
         </div>
 
-        <section className="overflow-hidden rounded-2xl bg-black">
-          <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-950 px-3 py-2.5 sm:px-5">
+        {previewType ? (
+          <section className="overflow-hidden rounded-2xl bg-zinc-950 p-2 sm:p-4">
+            {previewType === "pdf" ? (
+              <iframe
+                title={title}
+                src={previewUrl}
+                className="h-[75vh] min-h-[500px] w-full rounded-xl bg-white"
+              />
+            ) : (
+              <iframe
+                title={title}
+                src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(previewUrl)}`}
+                className="h-[75vh] min-h-[500px] w-full rounded-xl bg-white"
+              />
+            )}
+          </section>
+        ) : (
+          <section className="overflow-hidden rounded-2xl bg-black">
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-950 px-3 py-2.5 sm:px-5">
             <div className="flex items-center gap-1 rounded-xl bg-black p-1">
               <ToolbarButton
                 label="Undo"
@@ -286,8 +342,9 @@ export default function Notepad() {
                 onChange={updateCountsAndStyles}
               />
             </div>
-          </div>
-        </section>
+            </div>
+          </section>
+        )}
 
         <footer className="mt-4 flex flex-wrap items-center justify-between gap-2 px-1 text-xs font-semibold text-white/30">
           <span className="flex items-center gap-2">
