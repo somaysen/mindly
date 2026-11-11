@@ -6,6 +6,10 @@ For local development, set `NEXT_PUBLIC_API_BASE_URL` or `API_BASE_URL` to your 
 
 Canvas collaboration uses a direct WebSocket connection to `/api/canvas/:canvasId/sync`; the HTTP API proxy does not proxy WebSocket upgrades. Set `NEXT_PUBLIC_SYNC_BASE_URL` to the backend origin when it differs from the API origin. HTTPS origins are upgraded to `wss://` automatically. The backend's Vercel deployment must route this endpoint through its WebSocket-enabled Node function and have Fluid Compute enabled. Vercel closes connections when the function reaches its duration limit, so clients must reconnect. Room state is currently held in process memory; Vercel may route collaborators to different instances, so reliable cross-instance collaboration requires shared room state or a dedicated sync service.
 
+## Canvas editor license
+
+Set `NEXT_PUBLIC_TLDRAW_LICENSE_KEY` in the deployment environment for production builds. The key must include the deployed hostname (including any preview hostnames where the canvas will be tested).
+
 ## Google sign in
 
 Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` to the OAuth 2.0 web client ID from Google Cloud Console, and add each app origin (for example, `http://localhost:3000` and the production domain) to that client's authorized JavaScript origins. Login and signup send Google's ID token credential to `POST /api/auth/google` through the same-origin API proxy. The backend must validate that credential with Google and return an auth token (`token`, `accessToken`, or `access_token`) or set the app's auth cookie.

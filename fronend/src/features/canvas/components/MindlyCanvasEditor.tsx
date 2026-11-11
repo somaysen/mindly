@@ -357,6 +357,7 @@ function CanvasSyncSession({
       <Tldraw
         store={remoteStore.store}
         components={canvasTldrawComponents}
+        licenseKey={process.env.NEXT_PUBLIC_TLDRAW_LICENSE_KEY}
         colorScheme="dark"
         autoFocus
         onMount={handleMount}
