@@ -1,3 +1,10 @@
+export interface NotificationSettings {
+  taskReminders: boolean;
+  focusSessions: boolean;
+  weeklyReflections: boolean;
+  notificationsEnabled: boolean;
+}
+
 export interface NotificationPayload {
   title?: string;
   message?: string;

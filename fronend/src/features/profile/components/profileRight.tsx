@@ -1,32 +1,67 @@
+
 "use client";
 
 import React from "react";
+import { Bell, CheckSquare, Focus, Waves } from "lucide-react";
+import { getApiErrorMessage } from "@/lib/apiError";
 import {
-  Bell,
-  ChevronRight,
-  CheckSquare,
-  Sun,
-  Waves,
-  Focus,
-} from "lucide-react";
+  useNotificationSettings,
+  useUpdateNotificationSettings,
+} from "../hooks/useNotificationSettings";
 
 type ToggleProps = {
   enabled: boolean;
+  label: string;
+  disabled: boolean;
+  onChange: () => void;
 };
 
-const Toggle = ({ enabled }: ToggleProps) => {
+const Toggle = ({
+  enabled,
+  label,
+  disabled,
+  onChange,
+}: ToggleProps) => {
   return (
-    <div
-      className={`relative h-7 w-12 shrink-0 rounded-full p-1 transition-colors ${
-        enabled ? "bg-[#5555e9]" : "bg-[#34344f]"
-      }`}
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      aria-label={label}
+      disabled={disabled}
+      onClick={onChange}
+      className={`
+        relative inline-flex h-7 w-[58px] shrink-0
+        items-center rounded-full p-1
+        transition-colors duration-300 ease-in-out
+        focus-visible:outline-none
+        focus-visible:ring-2 focus-visible:ring-blue-500
+        focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a1938]
+        disabled:cursor-not-allowed disabled:opacity-50
+        ${enabled ? "bg-blue-600" : "bg-[#45445f]"}
+      `}
     >
-      <div
-        className={`h-5 w-5 rounded-full bg-white shadow transition-transform ${
-          enabled ? "translate-x-5" : "translate-x-0"
-        }`}
+      {/* ON / OFF label */}
+      <span
+        className={`
+          absolute text-[9px] font-bold tracking-wide text-white
+          transition-opacity duration-200
+          ${enabled ? "left-2 opacity-100" : "right-2 opacity-100"}
+        `}
+      >
+        {enabled ? "ON" : "OFF"}
+      </span>
+
+      {/* Sliding circle */}
+      <span
+        className={`
+          absolute left-1 h-5 w-5 rounded-full
+          bg-white shadow-md
+          transition-transform duration-300 ease-in-out
+          ${enabled ? "translate-x-[30px]" : "translate-x-0"}
+        `}
       />
-    </div>
+    </button>
   );
 };
 
@@ -54,7 +89,6 @@ const SettingItem = ({
           <h3 className="text-[15px] font-medium text-white">
             {title}
           </h3>
-
           <p className="mt-1 text-sm leading-5 text-[#777493]">
             {description}
           </p>
@@ -67,9 +101,28 @@ const SettingItem = ({
 };
 
 function ProfileRight() {
+  const settingsQuery = useNotificationSettings();
+  const updateSettingsMutation = useUpdateNotificationSettings();
+
+  const settings = settingsQuery.data;
+  const isUpdating = updateSettingsMutation.isPending;
+
+  const toggleSetting = (
+    value: boolean,
+    label: string,
+    onChange: () => void,
+  ) => (
+    <Toggle
+      enabled={value}
+      label={label}
+      disabled={isUpdating}
+      onChange={onChange}
+    />
+  );
+
   return (
     <section className="w-full">
-      {/* Section Header */}
+      {/* Header */}
       <div className="mb-5">
         <h2 className="text-lg font-medium text-[#b5b2d0]">
           Notifications
@@ -80,61 +133,112 @@ function ProfileRight() {
         </p>
       </div>
 
-      {/* Settings */}
-      <div className="space-y-2">
-        {/* View Notifications */}
-        <SettingItem
-          icon={<Bell size={20} className="text-[#aaa7c4]" />}
-          title="View notifications"
-          description="Reminders from your tasks, events and thoughts"
-        >
+      {/* Loading */}
+      {settingsQuery.isLoading ? (
+        <div
+          className="h-[140px] animate-pulse rounded-2xl bg-[#1a1938]"
+          aria-label="Loading notification settings"
+        />
+      ) : settingsQuery.isError || !settings ? (
+        /* Error */
+        <div className="rounded-2xl bg-[#1a1938] p-4 text-sm text-[#8885a8]">
+          <p>
+            {getApiErrorMessage(
+              settingsQuery.error,
+              "Unable to load notification settings.",
+            )}
+          </p>
+
           <button
             type="button"
-            className="flex shrink-0 items-center justify-center rounded-lg p-2 transition-colors hover:bg-[#29274b]"
+            onClick={() => void settingsQuery.refetch()}
+            className="mt-3 text-white underline underline-offset-4"
           >
-            <ChevronRight
-              size={19}
-              className="text-[#777493]"
-            />
+            Try again
           </button>
-        </SettingItem>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-2">
+            {/* All Notifications */}
+            <SettingItem
+              icon={<Bell size={20} className="text-[#aaa7c4]" />}
+              title="Notifications"
+              description="Enable or disable all notifications"
+            >
+              {toggleSetting(
+                settings.notificationsEnabled,
+                "Notifications",
+                () =>
+                  updateSettingsMutation.mutate({
+                    notificationsEnabled: !settings.notificationsEnabled,
+                  }),
+              )}
+            </SettingItem>
 
-        {/* Task Reminders */}
-        <SettingItem
-          icon={<CheckSquare size={20} className="text-[#aaa7c4]" />}
-          title="Task Reminders"
-          description="Never miss a deadline"
-        >
-          <Toggle enabled={true} />
-        </SettingItem>
+            {/* Task Reminders */}
+            <SettingItem
+              icon={<CheckSquare size={20} className="text-[#aaa7c4]" />}
+              title="Task Reminders"
+              description="Never miss a deadline"
+            >
+              {toggleSetting(
+                settings.taskReminders,
+                "Task Reminders",
+                () =>
+                  updateSettingsMutation.mutate({
+                    taskReminders: !settings.taskReminders,
+                  }),
+              )}
+            </SettingItem>
 
-        {/* Daily Summary */}
-        <SettingItem
-          icon={<Sun size={21} className="text-[#aaa7c4]" />}
-          title="Daily Summary"
-          description="A morning look at your day"
-        >
-          <Toggle enabled={true} />
-        </SettingItem>
+            {/* Focus Sessions */}
+            <SettingItem
+              icon={<Focus size={20} className="text-[#aaa7c4]" />}
+              title="Focus Sessions"
+              description="Notifications for your focus sessions"
+            >
+              {toggleSetting(
+                settings.focusSessions,
+                "Focus Sessions",
+                () =>
+                  updateSettingsMutation.mutate({
+                    focusSessions: !settings.focusSessions,
+                  }),
+              )}
+            </SettingItem>
 
-        {/* Weekly Reflections */}
-        <SettingItem
-          icon={<Waves size={21} className="text-[#aaa7c4]" />}
-          title="Weekly Reflections"
-          description="Review your progress"
-        >
-          <Toggle enabled={false} />
-        </SettingItem>
+            {/* Weekly Reflections */}
+            <SettingItem
+              icon={<Waves size={21} className="text-[#aaa7c4]" />}
+              title="Weekly Reflections"
+              description="Review your progress"
+            >
+              {toggleSetting(
+                settings.weeklyReflections,
+                "Weekly Reflections",
+                () =>
+                  updateSettingsMutation.mutate({
+                    weeklyReflections: !settings.weeklyReflections,
+                  }),
+              )}
+            </SettingItem>
+          </div>
 
-        {/* Focus Session Nudges */}
-        <SettingItem
-          icon={<Focus size={21} className="text-[#aaa7c4]" />}
-          title="Focus Session Nudges"
-          description="Gentle check-ins during Calm Mode"
-        >
-          <Toggle enabled={false} />
-        </SettingItem>
-      </div>
+          {/* Update Error */}
+          {updateSettingsMutation.isError && (
+            <p
+              role="alert"
+              className="mt-3 text-sm text-[#ff8588]"
+            >
+              {getApiErrorMessage(
+                updateSettingsMutation.error,
+                "Unable to save notification settings. Please try again.",
+              )}
+            </p>
+          )}
+        </>
+      )}
     </section>
   );
 }

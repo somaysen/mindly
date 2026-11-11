@@ -6,6 +6,26 @@ import ProfileRight from "./profileRight";
 import { useProfileInfo, useLogOut } from "../hooks/useProfile";
 import { clearAuthCookies } from "@/lib/auth";
 import { getApiErrorMessage } from "@/lib/apiError";
+import { useTaskCompleteGet } from "@/features/tasks/hooks/useTaskCompleteGet";
+import { useIdeaGet } from "@/features/brain/hooks/useBrainApi";
+import { useGetCanvases } from "@/features/canvas/hooks/useCanvas";
+import { getCanvasList } from "@/features/canvas/utils/canvasAdapter";
+
+function getIdeaCount(response: unknown, depth = 0): number {
+  if (depth > 5 || !response) return 0;
+  if (Array.isArray(response)) {
+    return response.filter((item) => typeof item === "object" && item !== null).length;
+  }
+  if (typeof response !== "object") return 0;
+
+  const record = response as Record<string, unknown>;
+  if (record._id != null || record.id != null || record.ideaId != null) return 1;
+
+  for (const key of ["data", "ideas", "items", "result"]) {
+    if (record[key] !== undefined) return getIdeaCount(record[key], depth + 1);
+  }
+  return 0;
+}
 
 function ProfileCenter() {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -17,8 +37,11 @@ function ProfileCenter() {
   } = useProfileInfo();
 
   const logoutMutation = useLogOut();
+  const completedTasksQuery = useTaskCompleteGet();
+  const ideasQuery = useIdeaGet();
+  const canvasesQuery = useGetCanvases();
 
-  const profile = response?.data;
+  const profile = response?.data?.user ?? response?.data ?? response?.user;
 
   // Open logout popup
   const handleLogoutClick = () => {
@@ -85,6 +108,10 @@ function ProfileCenter() {
       })
     : "Recently";
 
+  const completedTasksCount = completedTasksQuery.data?.data?.length;
+  const thoughtsCount = getIdeaCount(ideasQuery.data);
+  const thoughtSpacesCount = getCanvasList(canvasesQuery.data).length;
+
   return (
     <>
       <div className="min-h-full w-full px-4 py-5 text-white sm:px-8 sm:py-6">
@@ -128,7 +155,7 @@ function ProfileCenter() {
                   </h3>
 
                   <p className="break-all text-sm text-[#8885a8]">
-                    {profile.auth?.email}
+                    {profile.auth?.email ?? profile.email ?? "Email unavailable"}
                   </p>
 
                   <p className="mt-1 text-sm text-[#8885a8]">
@@ -152,7 +179,11 @@ function ProfileCenter() {
 
               <div className="rounded-2xl bg-[#1a1938] p-4 sm:p-5">
                 <h3 className="text-2xl font-semibold">
-                  2
+                  {completedTasksQuery.isLoading
+                    ? "…"
+                    : completedTasksQuery.isError
+                      ? "—"
+                      : completedTasksCount ?? 0}
                 </h3>
 
                 <p className="mt-1 text-sm text-[#777493]">
@@ -162,7 +193,11 @@ function ProfileCenter() {
 
               <div className="rounded-2xl bg-[#1a1938] p-4 sm:p-5">
                 <h3 className="text-2xl font-semibold">
-                  1
+                  {ideasQuery.isLoading
+                    ? "…"
+                    : ideasQuery.isError
+                      ? "—"
+                      : thoughtsCount}
                 </h3>
 
                 <p className="mt-1 text-sm text-[#777493]">
@@ -172,11 +207,15 @@ function ProfileCenter() {
 
               <div className="rounded-2xl bg-[#1a1938] p-4 sm:p-5">
                 <h3 className="text-2xl font-semibold">
-                  0
+                  {canvasesQuery.isLoading
+                    ? "…"
+                    : canvasesQuery.isError
+                      ? "—"
+                      : thoughtSpacesCount}
                 </h3>
 
                 <p className="mt-1 text-sm text-[#777493]">
-                  Focus sessions
+                  Thought Spaces
                 </p>
               </div>
 
