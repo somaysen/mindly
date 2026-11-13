@@ -18,6 +18,7 @@ export interface Notification {
   _id?: string;
   title?: string;
   message?: string;
+  type?: string;
   read?: boolean;
   createdAt?: string;
   [key: string]: unknown;

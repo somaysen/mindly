@@ -3,10 +3,12 @@
 import { useMemo, useRef, useState } from "react";
 import { CalendarDays, Flag, Plus, Trash2, X } from "lucide-react";
 import { toast } from "react-toastify";
+
 import {
   useTaskDeleteById,
   useTaskUpdate,
 } from "@/features/tasks/hooks/useTesk";
+
 import { useGetProjects } from "@/features/projects/hooks/useProject";
 
 interface TaskModelTask {
@@ -32,15 +34,28 @@ interface TaskModelProps {
   onDeleted?: () => void;
 }
 
-const dateForInput = (value?: string | null) => {
+const dateForInput = (value?: string | null): string => {
   if (!value) return "";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
 
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 };
 
-function getProjectOptions(response: unknown, depth = 0): ProjectOption[] {
+function getProjectOptions(
+  response: unknown,
+  depth = 0
+): ProjectOption[] {
   if (depth > 5 || !response) return [];
 
   if (Array.isArray(response)) {
@@ -48,6 +63,7 @@ function getProjectOptions(response: unknown, depth = 0): ProjectOption[] {
       if (!item || typeof item !== "object") return [];
 
       const record = item as Record<string, unknown>;
+
       const id =
         record.id ??
         record.projectId ??
@@ -71,8 +87,15 @@ function getProjectOptions(response: unknown, depth = 0): ProjectOption[] {
 
   const record = response as Record<string, unknown>;
 
-  for (const key of ["data", "projects", "projectList", "items", "result"]) {
+  for (const key of [
+    "data",
+    "projects",
+    "projectList",
+    "items",
+    "result",
+  ]) {
     const projects = getProjectOptions(record[key], depth + 1);
+
     if (projects.length) return projects;
   }
 
@@ -82,7 +105,8 @@ function getProjectOptions(response: unknown, depth = 0): ProjectOption[] {
 const inputClass =
   "h-9 w-full rounded-lg border border-[#3b3a63] bg-[#1b1a3b] px-3 text-sm text-white outline-none transition focus:border-[#7375f4] disabled:opacity-60";
 
-const labelClass = "mb-1 block text-xs font-medium text-white/70";
+const labelClass =
+  "mb-1 block text-xs font-medium text-white/70";
 
 export default function TaskModel({
   task,
@@ -91,60 +115,102 @@ export default function TaskModel({
   onDeleted,
 }: TaskModelProps) {
   const initialProject =
-    typeof task?.project === "string" || typeof task?.project === "number"
+    typeof task.project === "string" ||
+    typeof task.project === "number"
       ? String(task.project)
-      : task?.project && typeof task.project === "object"
+      : task.project && typeof task.project === "object"
         ? String(
             (task.project as Record<string, unknown>).id ??
               (task.project as Record<string, unknown>).projectId ??
               (task.project as Record<string, unknown>).projectID ??
               (task.project as Record<string, unknown>).project_id ??
               (task.project as Record<string, unknown>)._id ??
-              "",
+              ""
           )
         : "";
+
+  // Task states
   const [taskName, setTaskName] = useState(task.taskName ?? "");
-  const [description, setDescription] = useState(task.description ?? "");
-  const [dueDate, setDueDate] = useState(dateForInput(task.dueDate));
-  const dueDateInputRef = useRef<HTMLInputElement>(null);
-  const [priority, setPriority] = useState(task.priority ?? "");
-  const [projectId, setProjectId] = useState(initialProject);
+  const [description, setDescription] = useState(
+    task.description ?? ""
+  );
+
+  const [dueDate, setDueDate] = useState(
+    dateForInput(task.dueDate)
+  );
+
+  // Due time state - FIXED
+  const [dueTime, setDueTime] = useState(
+    task.dueTime ?? ""
+  );
+
+  const [priority, setPriority] = useState(
+    task.priority ?? ""
+  );
+
+  const [projectId, setProjectId] = useState(
+    initialProject
+  );
+
   const [checklist, setChecklist] = useState<string[]>(
     Array.isArray(task.checklist)
       ? task.checklist.filter(
-          (item): item is string => typeof item === "string",
+          (item): item is string =>
+            typeof item === "string"
         )
-      : [],
+      : []
   );
-  const [newChecklistItem, setNewChecklistItem] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const { data: projectsData, isLoading: isProjectsLoading } = useGetProjects();
+  const [newChecklistItem, setNewChecklistItem] =
+    useState("");
+
+  const [confirmDelete, setConfirmDelete] =
+    useState(false);
+
+  const dueDateInputRef = useRef<HTMLInputElement>(null);
+
+  // Projects
+  const {
+    data: projectsData,
+    isLoading: isProjectsLoading,
+  } = useGetProjects();
 
   const projects = useMemo(
     () => getProjectOptions(projectsData),
-    [projectsData],
+    [projectsData]
   );
 
-  const { mutateAsync: updateTask, isPending: isUpdating } = useTaskUpdate();
+  // Mutations
+  const {
+    mutateAsync: updateTask,
+    isPending: isUpdating,
+  } = useTaskUpdate();
 
-  const { mutateAsync: deleteTask, isPending: isDeleting } =
-    useTaskDeleteById();
+  const {
+    mutateAsync: deleteTask,
+    isPending: isDeleting,
+  } = useTaskDeleteById();
 
   const isPending = isUpdating || isDeleting;
 
+  // Open native date picker
   const openDueDatePicker = () => {
     const input = dueDateInputRef.current;
+
     if (!input) return;
 
     try {
-      if (typeof input.showPicker === "function") input.showPicker();
-      else input.focus();
+      if (typeof input.showPicker === "function") {
+        input.showPicker();
+      } else {
+        input.focus();
+      }
     } catch {
       input.focus();
     }
   };
 
+  // UPDATE TASK - FIXED
   const handleUpdate = async () => {
     const name = taskName.trim();
 
@@ -153,52 +219,94 @@ export default function TaskModel({
       return;
     }
 
+    if (!task._id) {
+      toast.error("Task ID is missing.");
+      return;
+    }
+
     const formData = new FormData();
 
     formData.append("taskName", name);
     formData.append("description", description.trim());
-    // Empty optional values can fail backend validation (especially an empty
-    // project ID, which may be cast to a Mongo ObjectId).
-    if (dueDate) formData.append("dueDate", dueDate);
-    if (priority) formData.append("priority", priority);
-    if (projectId) formData.append("project", projectId);
-    formData.append("checklist", JSON.stringify(checklist));
+
+    // Include optional fields even when blank so the API can clear them.
+    formData.append("dueDate", dueDate);
+    formData.append("dueTime", dueTime);
+    formData.append("priority", priority);
+    formData.append("project", projectId);
+
+    // Checklist
+    formData.append(
+      "checklist",
+      JSON.stringify(checklist)
+    );
 
     try {
-      await updateTask({ taskId: task._id, data: formData });
-      toast.success("Task updated.");
+      await updateTask({
+        taskId: task._id,
+        data: formData,
+      });
+
+      toast.success("Task updated successfully!");
+
       onUpdated?.();
       onClose();
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error("Task update error:", error);
+
       toast.error(
-        error instanceof Error ? error.message : "Could not update task.",
+        error instanceof Error
+          ? error.message
+          : "Could not update task."
       );
     }
   };
 
+  // DELETE TASK
   const handleDelete = async () => {
+    if (!task._id) {
+      toast.error("Task ID is missing.");
+      return;
+    }
+
     try {
       await deleteTask(task._id);
-      toast.success("Task deleted.");
+
+      toast.success("Task deleted successfully!");
+
       onDeleted?.();
       onClose();
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error("Task delete error:", error);
+
       toast.error(
-        error instanceof Error ? error.message : "Could not delete task.",
+        error instanceof Error
+          ? error.message
+          : "Could not delete task."
       );
     }
   };
 
+  // ADD CHECKLIST ITEM
   const addChecklistItem = () => {
     const item = newChecklistItem.trim();
+
     if (!item) return;
 
     setChecklist((current) => [...current, item]);
     setNewChecklistItem("");
   };
 
+  // REMOVE CHECKLIST ITEM
+  const removeChecklistItem = (index: number) => {
+    setChecklist((current) =>
+      current.filter((_, itemIndex) => itemIndex !== index)
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4">
+
       {/* Backdrop */}
       <button
         type="button"
@@ -207,19 +315,24 @@ export default function TaskModel({
         className="absolute inset-0 cursor-default bg-[#080719]/75 backdrop-blur-[4px]"
       />
 
-      {/* Compact Modal */}
+      {/* Modal */}
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="task-model-title"
         className="relative z-10 flex max-h-[90dvh] w-full max-w-[460px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#252452] text-white shadow-2xl"
       >
+
         {/* Header */}
         <header className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
           <div>
-            <h2 id="task-model-title" className="text-base font-semibold">
+            <h2
+              id="task-model-title"
+              className="text-base font-semibold"
+            >
               Edit task
             </h2>
+
             <p className="mt-0.5 text-xs text-white/50">
               Update your task details
             </p>
@@ -236,11 +349,15 @@ export default function TaskModel({
           </button>
         </header>
 
-        {/* Scrollable Form */}
+        {/* Form */}
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
+
           {/* Task Name */}
           <div>
-            <label htmlFor="task-model-name" className={labelClass}>
+            <label
+              htmlFor="task-model-name"
+              className={labelClass}
+            >
               Task name
             </label>
 
@@ -248,7 +365,9 @@ export default function TaskModel({
               id="task-model-name"
               autoFocus
               value={taskName}
-              onChange={(event) => setTaskName(event.target.value)}
+              onChange={(event) =>
+                setTaskName(event.target.value)
+              }
               placeholder="What needs to be done?"
               disabled={isPending}
               className={inputClass}
@@ -257,7 +376,10 @@ export default function TaskModel({
 
           {/* Description */}
           <div>
-            <label htmlFor="task-model-description" className={labelClass}>
+            <label
+              htmlFor="task-model-description"
+              className={labelClass}
+            >
               Description
             </label>
 
@@ -265,56 +387,105 @@ export default function TaskModel({
               id="task-model-description"
               rows={2}
               value={description}
-              onChange={(event) => setDescription(event.target.value)}
+              onChange={(event) =>
+                setDescription(event.target.value)
+              }
               placeholder="Add details (optional)"
               disabled={isPending}
               className={`${inputClass} h-16 resize-none py-2`}
             />
           </div>
 
-          {/* Date & Time */}
-          <div>
+          {/* Due Date and Time */}
+          <div className="grid grid-cols-2 gap-3">
+
+            {/* Due Date */}
             <div>
-              <label htmlFor="task-model-due-date" className={labelClass}>Due date</label>
+              <label
+                htmlFor="task-model-due-date"
+                className={labelClass}
+              >
+                Due date
+              </label>
+
               <div className="relative">
                 <input
                   ref={dueDateInputRef}
                   id="task-model-due-date"
                   type="date"
                   value={dueDate}
-                  onChange={(event) => setDueDate(event.target.value)}
+                  onChange={(event) =>
+                    setDueDate(event.target.value)
+                  }
                   disabled={isPending}
-                  className={`${inputClass} cursor-pointer pl-9 pr-1 text-xs`}
+                  className={`${inputClass} cursor-pointer pl-2 pr-1 text-xs`}
                 />
-                <button type="button" aria-label="Choose due date" onClick={openDueDatePicker} disabled={isPending} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/50 transition hover:text-white disabled:opacity-50">
-                  <CalendarDays size={15} aria-hidden="true" />
+
+                <button
+                  type="button"
+                  aria-label="Choose due date"
+                  onClick={openDueDatePicker}
+                  disabled={isPending}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white"
+                >
+                  <CalendarDays size={15} />
                 </button>
               </div>
             </div>
 
+            {/* Due Time */}
+            <div>
+              <label
+                htmlFor="task-model-due-time"
+                className={labelClass}
+              >
+                Due time
+              </label>
+
+              <input
+                id="task-model-due-time"
+                type="time"
+                value={dueTime}
+                onChange={(event) =>
+                  setDueTime(event.target.value)
+                }
+                disabled={isPending}
+                className={`${inputClass} cursor-pointer`}
+              />
+            </div>
           </div>
 
           {/* Priority */}
           <div className="flex h-9 items-center gap-2 rounded-lg border border-[#3b3a63] bg-[#1b1a3b] px-3">
-            <Flag size={15} className="shrink-0 text-white/45" />
+            <Flag
+              size={15}
+              className="shrink-0 text-white/45"
+            />
 
-            <span className="text-xs text-white/65">Priority</span>
+            <span className="text-xs text-white/65">
+              Priority
+            </span>
 
             <select
               value={priority}
-              onChange={(event) => setPriority(event.target.value)}
+              onChange={(event) =>
+                setPriority(event.target.value)
+              }
               disabled={isPending}
               className="ml-auto max-w-[130px] bg-transparent text-sm capitalize text-white outline-none"
             >
               <option value="" className="bg-[#1b1a3b]">
                 None
               </option>
+
               <option value="low" className="bg-[#1b1a3b]">
                 Low
               </option>
+
               <option value="medium" className="bg-[#1b1a3b]">
                 Medium
               </option>
+
               <option value="high" className="bg-[#1b1a3b]">
                 High
               </option>
@@ -323,14 +494,19 @@ export default function TaskModel({
 
           {/* Project */}
           <div>
-            <label htmlFor="task-model-project" className={labelClass}>
+            <label
+              htmlFor="task-model-project"
+              className={labelClass}
+            >
               Link to project
             </label>
 
             <select
               id="task-model-project"
               value={projectId}
-              onChange={(event) => setProjectId(event.target.value)}
+              onChange={(event) =>
+                setProjectId(event.target.value)
+              }
               disabled={isProjectsLoading || isPending}
               className={inputClass}
             >
@@ -350,7 +526,9 @@ export default function TaskModel({
             </select>
 
             {isProjectsLoading && (
-              <p className="mt-1 text-xs text-white/45">Loading projects...</p>
+              <p className="mt-1 text-xs text-white/45">
+                Loading projects...
+              </p>
             )}
 
             {!isProjectsLoading && projects.length === 0 && (
@@ -362,7 +540,10 @@ export default function TaskModel({
 
           {/* Checklist */}
           <div>
-            <label htmlFor="task-model-checklist" className={labelClass}>
+            <label
+              htmlFor="task-model-checklist"
+              className={labelClass}
+            >
               Checklist
             </label>
 
@@ -387,9 +568,7 @@ export default function TaskModel({
                       aria-label={`Remove ${item}`}
                       disabled={isPending}
                       onClick={() =>
-                        setChecklist((current) =>
-                          current.filter((_, itemIndex) => itemIndex !== index),
-                        )
+                        removeChecklistItem(index)
                       }
                       className="shrink-0 rounded p-1 text-white/45 hover:bg-white/10 hover:text-white disabled:opacity-50"
                     >
@@ -404,7 +583,9 @@ export default function TaskModel({
               <input
                 id="task-model-checklist"
                 value={newChecklistItem}
-                onChange={(event) => setNewChecklistItem(event.target.value)}
+                onChange={(event) =>
+                  setNewChecklistItem(event.target.value)
+                }
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
                     event.preventDefault();
@@ -464,6 +645,7 @@ export default function TaskModel({
 
         {/* Footer */}
         <footer className="flex shrink-0 items-center justify-between gap-2 border-t border-white/10 bg-[#252452] px-4 py-3">
+
           <button
             type="button"
             onClick={() => setConfirmDelete(true)}

@@ -11,7 +11,12 @@ export function taskFormDataToPayload(formData: FormData): Record<string, unknow
 
   for (const [key, value] of formData.entries()) {
     if (typeof value !== "string") continue;
-    if (OPTIONAL_TASK_FIELDS.has(key) && !value.trim()) continue;
+    if (OPTIONAL_TASK_FIELDS.has(key) && !value.trim()) {
+      // Send null so updates can clear these values without sending an empty
+      // string (which is invalid for fields such as a Mongo project ID).
+      payload[key] = null;
+      continue;
+    }
 
     if (key === "checklist") {
       try {

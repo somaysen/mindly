@@ -27,6 +27,8 @@ export * from "./tasks/getCompletedTask";
 
 /* ==================== Notification =============== */
 export * from "./notification/createNotification"
+export * from "./notification/getNotifications";
+export * from "./notification/markNotificationRead";
 export * from "./notification/getNotificationSettings";
 export * from "./notification/updateNotificationSettings";
 
