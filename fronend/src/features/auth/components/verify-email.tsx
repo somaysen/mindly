@@ -43,7 +43,7 @@ export default function VerificationPage() {
    * Prevent duplicate API call
    * in React Strict Mode.
    */
-  const verificationStarted = useRef(false);
+  const verificationStartedForToken = useRef<string | null>(null);
 
   const {
     mutate: verify,
@@ -62,6 +62,7 @@ export default function VerificationPage() {
    */
   useEffect(() => {
     if (!token) {
+      verificationStartedForToken.current = null;
       setStatus(email ? "pending" : "error");
       setMessage(
         email
@@ -71,11 +72,11 @@ export default function VerificationPage() {
       return;
     }
 
-    if (verificationStarted.current) {
+    if (verificationStartedForToken.current === token) {
       return;
     }
 
-    verificationStarted.current = true;
+    verificationStartedForToken.current = token;
 
     verify(
       {

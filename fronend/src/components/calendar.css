@@ -229,6 +229,13 @@
     0 3px 8px rgba(79, 91, 255, 0.35);
 }
 
+/* Match the full-page calendar mini-calendar without changing the dashboard widget. */
+.calendar-route-mini .mindly-calendar-wrapper { background: #1b1b50; }
+.calendar-route-mini .mindly-calendar .rdp-month_caption,
+.calendar-route-mini .mindly-calendar .rdp-month_grid { background: #1b1b50; }
+.calendar-route-mini .mindly-calendar .rdp-weekday { color: #c9c8f0; }
+.calendar-route-mini .mindly-calendar .rdp-day_button { color: #ffffff; font-size: 18px; }
+
 .mindly-calendar .rdp-selected.mindly-has-task .rdp-day_button::after {
   background: #ffffff;
 }

@@ -20,7 +20,7 @@ function CalenderCenter() {
   return (
     <div className="flex min-h-full w-full flex-col gap-6 px-6 pb-6 text-white lg:flex-row lg:gap-8">
       {/* Secondary Sidebar (Mini-calendar, Filters) */}
-      <aside className="w-full shrink-0 lg:w-[260px]">
+      <aside className="w-full shrink-0 lg:w-[300px]">
         <LiftComponent selectedDate={selectedDate} onDateSelect={setSelectedDate} showTasks={showTasks} onShowTasksChange={setShowTasks} />
       </aside>
 

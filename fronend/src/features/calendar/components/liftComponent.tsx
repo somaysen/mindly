@@ -18,7 +18,7 @@ function LiftComponent({ selectedDate, onDateSelect, showTasks, onShowTasksChang
   useEffect(() => setMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)), [selectedDate.getFullYear(), selectedDate.getMonth()]);
   return (
     <aside className="w-full space-y-5">
-      <div className="overflow-hidden rounded-[22px] bg-[#1b1b50] p-3">
+      <div className="calendar-route-mini overflow-hidden rounded-[22px] bg-[#1b1b50] p-3">
         <DayPicker mode="single" selected={selectedDate} onSelect={(date) => date && onDateSelect(date)} month={month} onMonthChange={setMonth} showOutsideDays={false} weekStartsOn={1} className="mindly-calendar" components={{ Chevron: ({ orientation }) => orientation === "left" ? <ChevronLeft size={20} /> : <ChevronRight size={20} /> }} formatters={{ formatWeekdayName: (date) => ({ Mon: "M", Tue: "T", Wed: "W", Thu: "Th", Fri: "F", Sat: "S", Sun: "Su" }[date.toLocaleDateString("en-US", { weekday: "short" })] ?? "") }} />
       </div>
 

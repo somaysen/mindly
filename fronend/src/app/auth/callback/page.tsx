@@ -15,7 +15,12 @@ function OAuthCallback() {
       searchParams.get("accessToken") ||
       searchParams.get("access_token");
 
-    persistAuthToken(token);
+    if (!token?.trim()) {
+      router.replace("/login");
+      return;
+    }
+
+    persistAuthToken(token.trim());
 
     const next = searchParams.get("from") || "/";
     let destination = "/";

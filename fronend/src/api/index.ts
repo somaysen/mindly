@@ -60,3 +60,8 @@ export * from "./canvas/deleteCanvas";
 export * from "./canvas/getCanvasById";
 export * from "./canvas/getCanvases";
 export * from "./canvas/updateCanvas";
+
+/* =================== Thought AI =================== */
+
+export * from "./ThoughtAi/classifyTaskIdea";
+export * from "./ThoughtAi/createTaskIdeaPlan";

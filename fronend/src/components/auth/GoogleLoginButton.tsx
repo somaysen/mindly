@@ -64,6 +64,10 @@ export default function GoogleLoginButton() {
         result?.accessToken ??
         result?.access_token;
 
+      if (typeof token !== "string" || !token.trim()) {
+        throw new Error("Google sign-in did not return an access token.");
+      }
+
       const user =
         result?.data?.user ??
         result?.data?.data?.user ??
@@ -80,9 +84,7 @@ export default function GoogleLoginButton() {
         result?.id ??
         result?._id;
 
-      if (token) {
-        persistAuthToken(token);
-      }
+      persistAuthToken(token.trim());
 
       if (userId === undefined || userId === null || String(userId).trim() === "") {
         router.replace("/onboarding/username");

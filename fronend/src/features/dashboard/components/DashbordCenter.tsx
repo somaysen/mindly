@@ -2,19 +2,23 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { ChevronUp, Lightbulb, Mic, Paperclip } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 
-import { useTaskCreate, useTaskGet } from "@/features/tasks/hooks/useTesk";
+import { useTaskGet } from "@/features/tasks/hooks/useTesk";
 import { useUserInfo } from "@/features/dashboard/hooks/useDashboard";
 import type { DashboardView } from "./DashboradSidbar";
 
 import DashbordFocus from "./DashbordFocus";
 import DashbordRightbar from "./DashbordRightbar";
+import MindlyBox from "@/features/ThoughtBox/components/MindlyBox";
+import CreateTaskModal from "@/features/tasks/components/TaskCreteModel";
 
 const DashbordToday = dynamic(() => import("./DashbordToday"));
 const DashBoradUpcoming = dynamic(() => import("./DashBoradUpcoming"));
 const DeshboradCompleted = dynamic(() => import("./DeshboradCompleted"));
+const getTodayDate = () => {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+};
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -24,9 +28,7 @@ function getGreeting() {
 }
 
 function DashbordCenter({ activeView }: { activeView: DashboardView }) {
-  const queryClient = useQueryClient();
-  const [thought, setThought] = useState("");
-  const [isThoughtExpanded, setIsThoughtExpanded] = useState(true);
+  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [greeting, setGreeting] = useState("Hello");
 
   useEffect(() => {
@@ -46,17 +48,6 @@ function DashbordCenter({ activeView }: { activeView: DashboardView }) {
   const userName = userData?.data?.name ?? "User";
 
   // =====================================================
-  // CREATE TASK
-  // =====================================================
-  const {
-    mutate: createTask,
-    isPending: isCreatingTask,
-    isSuccess: isTaskCreated,
-    isError: isCreateError,
-    error: createError,
-  } = useTaskCreate();
-
-  // =====================================================
   // GET TASKS
   // =====================================================
   const {
@@ -70,28 +61,6 @@ function DashbordCenter({ activeView }: { activeView: DashboardView }) {
     () => (Array.isArray(tasksData?.data) ? tasksData.data : []),
     [tasksData],
   );
-
-  // =====================================================
-  // CREATE TASK
-  // =====================================================
-  const handleCreateTask = () => {
-    const value = thought.trim();
-    if (!value || isCreatingTask) return;
-
-    const formData = new FormData();
-    formData.append("taskName", value);
-    formData.append("description", value);
-    formData.append("priority", "medium");
-    formData.append("status", "todo");
-
-    createTask(formData, {
-      onSuccess: () => {
-        setThought("");
-        // Must match useTaskGet's queryKey exactly.
-        queryClient.invalidateQueries({ queryKey: ["getTasks"] });
-      },
-    });
-  };
 
   // =====================================================
   // UI
@@ -134,91 +103,25 @@ function DashbordCenter({ activeView }: { activeView: DashboardView }) {
         </div>
 
         {/* THOUGHT BOX */}
-        <div className="rounded-[18px] border border-[#48466f] bg-[#19183d] p-4 shadow-[0_18px_45px_rgba(5,4,25,0.18)] sm:p-5">
-          <div className="flex items-center gap-3">
-            <Lightbulb size={21} strokeWidth={1.8} className="text-white/80" />
-            <span className="font-[family-name:var(--font-bricolage-grotesque)] text-base font-medium sm:text-lg">
-              What&apos;s on your mind?
-            </span>
-            <button
-              type="button"
-              onClick={() => setIsThoughtExpanded((expanded) => !expanded)}
-              aria-label={
-                isThoughtExpanded ? "Collapse thought editor" : "Expand thought editor"
-              }
-              aria-expanded={isThoughtExpanded}
-              className="ml-auto rounded-full p-1 text-white/50 transition hover:bg-white/10 hover:text-white"
-            >
-              <ChevronUp
-                size={20}
-                className={`transition-transform ${isThoughtExpanded ? "" : "rotate-180"}`}
-              />
-            </button>
-          </div>
-
-          {isThoughtExpanded && (
-            <textarea
-              value={thought}
-              onChange={(e) => setThought(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleCreateTask();
-                }
-              }}
-              placeholder="e.g. Finish the landing page copy..."
-              rows={Math.min(5, Math.max(1, thought.split("\n").length))}
-              aria-label="Thought to organize"
-              className="mt-1 w-full resize-none bg-transparent text-sm italic text-white/70 placeholder:text-white/30 focus:outline-none"
-            />
-          )}
-
-          {isThoughtExpanded && (
-            <div className="mt-16 flex justify-end gap-2">
-              <button
-                type="button"
-                aria-label="Record a thought"
-                className="grid h-8 w-8 place-items-center rounded-full bg-[#555574] text-white/80 transition hover:bg-[#68688c]"
-              >
-                <Mic size={15} />
-              </button>
-
-              <button
-                type="button"
-                aria-label="Attach a file"
-                className="grid h-8 w-8 place-items-center rounded-full bg-[#555574] text-white/80 transition hover:bg-[#68688c]"
-              >
-                <Paperclip size={15} />
-              </button>
-
-              <button
-                type="button"
-                onClick={handleCreateTask}
-                disabled={isCreatingTask || !thought.trim()}
-                className="flex h-8 items-center gap-2 rounded-full bg-[#5965ed] px-4 text-xs font-medium transition hover:bg-[#6d78f4] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <Lightbulb size={14} />
-                {isCreatingTask ? "Saving..." : "Organize"}
-              </button>
-            </div>
-          )}
-        </div>
+        <MindlyBox />
 
         {/* TODAY'S FOCUS */}
         <DashbordFocus
           tasks={tasks}
           isTasksLoading={isTasksLoading}
           isTasksGetError={isTasksGetError}
-          handleCreateTask={handleCreateTask}
-          isCreatingTask={isCreatingTask}
-          isTaskCreated={isTaskCreated}
-          isCreateError={isCreateError}
-          createError={createError}
+          onAddTask={() => setIsCreateTaskOpen(true)}
         />
         </section>
       )}
 
       <DashbordRightbar />
+      {isCreateTaskOpen && (
+        <CreateTaskModal
+          dueDate={getTodayDate()}
+          onClose={() => setIsCreateTaskOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import {
   AlertCircle,
-  Check,
-  Loader2,
   Plus,
   Sparkles,
 } from "lucide-react";
@@ -25,11 +23,7 @@ interface DashbordFocusProps {
   tasks: Task[];
   isTasksLoading: boolean;
   isTasksGetError: boolean;
-  handleCreateTask: () => void;
-  isCreatingTask: boolean;
-  isTaskCreated: boolean;
-  isCreateError: boolean;
-  createError: unknown;
+  onAddTask: () => void;
 }
 
 const pad = (value: number) => String(value).padStart(2, "0");
@@ -44,11 +38,7 @@ function DashbordFocus({
   tasks,
   isTasksLoading,
   isTasksGetError,
-  handleCreateTask,
-  isCreatingTask,
-  isTaskCreated,
-  isCreateError,
-  createError,
+  onAddTask,
 }: DashbordFocusProps) {
   const [pinnedTasks, setPinnedTasks] = useState<string[]>([]);
   const [showAll, setShowAll] = useState(false);
@@ -231,42 +221,15 @@ function DashbordFocus({
 
             <button
               type="button"
-              onClick={handleCreateTask}
-              disabled={isCreatingTask}
+              onClick={onAddTask}
               className="mt-4 inline-flex h-9 items-center gap-2 rounded-full bg-[#6265ed] px-4 text-xs font-semibold text-white shadow-[0_8px_22px_rgba(98,101,237,0.2)] transition hover:bg-[#7375f4] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isCreatingTask ? (
-                <Loader2 size={15} className="animate-spin" />
-              ) : (
-                <Plus size={15} />
-              )}
-
-              {isCreatingTask ? "Creating task..." : "Create a task"}
+              <Plus size={15} />
+              Create a task
             </button>
           </div>
         )}
 
-      {/* Success Message */}
-      {isTaskCreated && !isCreateError && (
-        <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-emerald-300">
-          <Check size={14} />
-          Task created successfully.
-        </p>
-      )}
-
-      {/* Create Error */}
-      {isCreateError && (
-        <p
-          role="alert"
-          className="mt-3 flex items-center gap-1.5 text-xs font-medium text-rose-300"
-        >
-          <AlertCircle size={14} />
-
-          {createError instanceof Error
-            ? createError.message
-            : "Failed to create task."}
-        </p>
-      )}
     </section>
   );
 }
