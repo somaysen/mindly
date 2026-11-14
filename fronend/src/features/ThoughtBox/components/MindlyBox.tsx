@@ -22,7 +22,9 @@ function MindlyBox({
   setIsThoughtExpanded,
 }: MindlyBoxProps) {
   const [localThought, setLocalThought] = useState(thought ?? "");
-  const [localExpanded, setLocalExpanded] = useState(controlledExpanded ?? true);
+  const [localExpanded, setLocalExpanded] = useState(
+    controlledExpanded ?? true,
+  );
   const classifyTaskIdea = useClassifyTaskIdea();
   const createTaskIdeaPlan = useCreateTaskIdeaPlan();
   const [hasAiError, setHasAiError] = useState(false);
@@ -41,14 +43,25 @@ function MindlyBox({
 
   const submitHandler = async () => {
     const value = currentThought.trim();
+
     if (!value || isAnalyzing) return;
 
     setHasAiError(false);
-    const results = await Promise.allSettled([
-      classifyTaskIdea.mutateAsync({ text: value }),
-      createTaskIdeaPlan.mutateAsync({ text: value }),
-    ]);
-    setHasAiError(results.some((result) => result.status === "rejected"));
+
+    const wordCount = value.split(/\s+/).filter(Boolean).length;
+
+    try {
+      if (wordCount > 30) {
+        // More than 30 words: Generate a complete task plan
+        await createTaskIdeaPlan.mutateAsync({ text: value });
+      } else {
+        // 30 words or fewer: Classify the task idea
+        await classifyTaskIdea.mutateAsync({ text: value });
+      }
+      updateThought("");
+    } catch (error) {
+      setHasAiError(true);
+    }
   };
 
   return (
@@ -97,7 +110,10 @@ function MindlyBox({
               }
             }}
             placeholder="e.g. Finish the landing page copy..."
-            rows={Math.min(5, Math.max(1, currentThought.split("\n").length || 1))}
+            rows={Math.min(
+              5,
+              Math.max(1, currentThought.split("\n").length || 1),
+            )}
             aria-label="Thought to organize"
             className="mt-1 w-full resize-none bg-transparent text-sm italic text-white/70 placeholder:text-white/30 focus:outline-none"
           />
